@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>WitMotionConnect_MainWindow</class>
+ <widget class="QMainWindow" name="WitMotionConnect_MainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -25,14 +25,14 @@
   <property name="windowTitle">
    <string>WitMotion Connect</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="QWidget" name="WitMotionConnect_centralwidget">
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>360</x>
       <y>10</y>
       <width>351</width>
-      <height>171</height>
+      <height>221</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -108,25 +108,13 @@
            </property>
           </item>
          </widget>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="IMU_port_groupBox">
-         <property name="font">
-          <font>
-           <pointsize>10</pointsize>
-          </font>
-         </property>
-         <property name="title">
-          <string>Порт</string>
-         </property>
-         <widget class="QLineEdit" name="IMU_port_lineEdit">
+         <widget class="QGroupBox" name="IMU_port_groupBox">
           <property name="geometry">
            <rect>
-            <x>10</x>
-            <y>40</y>
-            <width>141</width>
-            <height>21</height>
+            <x>0</x>
+            <y>70</y>
+            <width>170</width>
+            <height>71</height>
            </rect>
           </property>
           <property name="font">
@@ -134,12 +122,68 @@
             <pointsize>10</pointsize>
            </font>
           </property>
-          <property name="text">
-           <string>/dev/ttyUSB0</string>
+          <property name="title">
+           <string>Порт</string>
           </property>
-          <property name="placeholderText">
-           <string>/dev/ttyUSB0</string>
+          <widget class="QLineEdit" name="IMU_port_lineEdit">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>40</y>
+             <width>141</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>/dev/ttyUSB0</string>
+           </property>
+           <property name="placeholderText">
+            <string>/dev/ttyUSB0</string>
+           </property>
+          </widget>
+         </widget>
+         <widget class="QGroupBox" name="IMU_type_groupBox">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>150</y>
+            <width>171</width>
+            <height>51</height>
+           </rect>
           </property>
+          <property name="title">
+           <string>Тип датчика</string>
+          </property>
+          <widget class="QComboBox" name="IMU_type_comboBox">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>20</y>
+             <width>125</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <item>
+            <property name="text">
+             <string>WitMotion</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Single MPU</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Double MPU</string>
+            </property>
+           </item>
+          </widget>
          </widget>
         </widget>
        </item>
@@ -161,7 +205,7 @@
           <x>10</x>
           <y>30</y>
           <width>161</width>
-          <height>135</height>
+          <height>188</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="IMU_control_verticalLayout">
@@ -248,13 +292,21 @@
          <pointsize>10</pointsize>
         </font>
        </property>
+       <property name="markdown">
+        <string>Выберите корректный baud rate, тип датчика, проверьте порт и нажмите
+&quot;Подключить датчик&quot;.  Перед закрытием ПО нажмите &quot;Отключить датчик&quot;.
+
+</string>
+       </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Cantarell';&quot;&gt;Выберите корректный baud rate, проверьте порт и нажмите &amp;quot;Подключить датчик&amp;quot;.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Cantarell';&quot;&gt;Перед закрытием ПО нажмите &amp;quot;Отключить датчик&amp;quot;.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Cantarell'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Выберите корректный baud rate, тип датчика, проверьте порт и нажмите &amp;quot;Подключить датчик&amp;quot;.  Перед закрытием ПО нажмите &amp;quot;Отключить датчик&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
@@ -267,17 +319,29 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>725</width>
-     <height>21</height>
+     <height>28</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu_settings">
+   <widget class="QMenu" name="menu_options">
     <property name="title">
-     <string>Настройки</string>
+     <string>Опции</string>
     </property>
+    <addaction name="decipher_action"/>
+    <addaction name="settings_action"/>
    </widget>
-   <addaction name="menu_settings"/>
+   <addaction name="menu_options"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="decipher_action">
+   <property name="text">
+    <string>Дешифратор</string>
+   </property>
+  </action>
+  <action name="settings_action">
+   <property name="text">
+    <string>Настройки</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

@@ -5,7 +5,7 @@ import pandas as pd
 from datetime import datetime
 
 
-class IMUDialog:
+class WitMotionDialog:
     def __init__(self):
         self.recording = False
         self.data_dict = {}
@@ -27,6 +27,18 @@ class IMUDialog:
         self.imu.close()
         print("Датчик отключен")
 
+    def start_recording(self):
+        print("Начата запись")
+        self.create_df()
+        self.recording = True
+
+    def stop_recording(self):
+        print("Запись остановлена")
+        self.recording = False
+        DF_savename = datetime.now().strftime("%Y%m%d_%H%M%S") + '.csv'
+        self.IMUdata.to_csv(DF_savename, sep='\t', index=False)
+
+# Following functions are called only locally
     def callback(self, msg):
         if type(msg) is witmotion.protocol.TimeMessage:
             ChipTime = self.imu.get_timestamp()
@@ -52,17 +64,6 @@ class IMUDialog:
 
             if self.recording is True:
                 self.IMUdata.loc[len(self.IMUdata)] = self.data_dict
-
-    def start_recording(self):
-        print("Начата запись")
-        self.create_df()
-        self.recording = True
-
-    def stop_recording(self):
-        print("Запись остановлена")
-        self.recording = False
-        DF_savename = datetime.now().strftime("%Y%m%d_%H%M%S") + '.csv'
-        self.IMUdata.to_csv(DF_savename, sep='\t', index=False)
 
     def create_df(self):
         self.IMUdata = pd.DataFrame(columns=['SystemTime', 'ChipTime', 'ax(g)', 'ay(g)', 'az(g)', 'wx(deg/s)', 'wy(deg/s)', 'wz(deg/s)'])
