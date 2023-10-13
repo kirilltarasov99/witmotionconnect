@@ -1,7 +1,7 @@
 import sys
 
 from PyQt5 import QtGui
-from PyQt5.QtWidgets import QApplication, QMainWindow, QDialog, QFileDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
 from App_GUI import Ui_WitMotionConnect_MainWindow
 from Decipher_GUI import Ui_decipher_MainWindow
 
@@ -14,7 +14,7 @@ class OutLog:
         """(edit, out=None, color=None) -> can write stdout, stderr to a
         QTextEdit.
         edit = QTextEdit
-        out = alternate stream ( can be the original sys.stdout )
+        out = alternate stream (can be the original sys.stdout)
         color = alternate color (i.e. color stderr a different color)
         """
         self.edit = edit
@@ -43,7 +43,8 @@ class WitMotionConnect:
         self._connectSignalsAndSlots()
 
     def request_IMU_connect(self):
-        self.IMU.connect(connectedHW_type=self._view.IMU_type_comboBox.currentText(), port=self._view.IMU_port_lineEdit.text(),
+        self.IMU.connect(connectedHW_type=self._view.IMU_type_comboBox.currentText(),
+                         port=self._view.IMU_port_lineEdit.text(),
                          baud_rate=self._view.IMU_baud_rate_comboBox.currentText())
 
     def openDecipher(self):
