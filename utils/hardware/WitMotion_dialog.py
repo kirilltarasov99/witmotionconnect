@@ -6,7 +6,8 @@ from datetime import datetime
 
 
 class WitMotionDialog:
-    def __init__(self):
+    def __init__(self, output):
+        self.output = output
         self.recording = False
         self.data_dict = {}
         self.imu = None
@@ -17,23 +18,23 @@ class WitMotionDialog:
         time.sleep(1)
         chiptime = self.imu.get_timestamp()
         if chiptime is None:
-            print("Выбранный baud rate некорректен, отключите датчик и повторите подключение")
+            self.output.append("Выбранный baud rate некорректен, отключите датчик и повторите подключение")
         else:
             self.recording = False
-            print("Датчик подключен")
+            self.output.append("Датчик подключен")
             self.imu.subscribe(self.callback)
 
     def disconnect(self):
         self.imu.close()
-        print("Датчик отключен")
+        self.output.append("Датчик отключен")
 
     def start_recording(self):
-        print("Начата запись")
+        self.output.append("Начата запись")
         self.create_df()
         self.recording = True
 
     def stop_recording(self):
-        print("Запись остановлена")
+        self.output.append("Запись остановлена")
         self.recording = False
         DF_savename = datetime.now().strftime("%Y%m%d_%H%M%S") + '.csv'
         self.IMUdata.to_csv(DF_savename, sep='\t', index=False)

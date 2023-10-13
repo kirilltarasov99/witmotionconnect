@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DecipherWidget</class>
+ <widget class="QWidget" name="DecipherWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>400</width>
+    <height>300</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Дешифратор</string>
+  </property>
+  <widget class="QWidget" name="verticalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>0</y>
+     <width>381</width>
+     <height>291</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QTextEdit" name="info_textEdit">
+      <property name="maximumSize">
+       <size>
+        <width>400</width>
+        <height>110</height>
+       </size>
+      </property>
+      <property name="textInteractionFlags">
+       <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="sensitivitygroupBox">
+      <property name="title">
+       <string>Чувствительность датчиков</string>
+      </property>
+      <widget class="QWidget" name="horizontalLayoutWidget_2">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>20</y>
+         <width>336</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QComboBox" name="gyrosense_comboBox">
+          <property name="placeholderText">
+           <string>Гироскоп</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>250 deg/s</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>500 deg/s</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>1000 deg/s</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>2000 deg/s</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="accelsense_comboBox">
+          <property name="currentText">
+           <string/>
+          </property>
+          <property name="placeholderText">
+           <string>Акселерометр</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>2g</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>4g</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>8g</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>16g</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="openfile_pushButton">
+        <property name="text">
+         <string>Выбрать файл</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="decipher_pushButton">
+        <property name="text">
+         <string>Дешифровать</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QComboBox" name="saveformat_comboBox">
+      <property name="placeholderText">
+       <string>Формат сохранения</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>csv</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>hdf</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

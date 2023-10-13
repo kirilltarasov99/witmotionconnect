@@ -1,55 +1,34 @@
 import sys
 
 from PyQt5 import QtGui
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QDialog
 from App_GUI import Ui_WitMotionConnect_MainWindow
-from Decipher_GUI import Ui_decipher_MainWindow
+from Decipher_GUI import Ui_DecipherWidget
 
 from utils.HW_Dialog import HW_Dialog
 from utils.Decipher import Decipher
 
 
-class OutLog:
-    def __init__(self, edit, out=None, color=None):
-        """(edit, out=None, color=None) -> can write stdout, stderr to a
-        QTextEdit.
-        edit = QTextEdit
-        out = alternate stream (can be the original sys.stdout)
-        color = alternate color (i.e. color stderr a different color)
-        """
-        self.edit = edit
-        self.out = None
-        self.color = color
-
-    def write(self, m):
-        if self.color:
-            tc = self.edit.textColor()
-            self.edit.setTextColor(self.color)
-
-        self.edit.moveCursor(QtGui.QTextCursor.End)
-        self.edit.insertPlainText(m)
-
-        if self.color:
-            self.edit.setTextColor(tc)
-
-        if self.out:
-            self.out.write(m)
-
-
 class WitMotionConnect:
     def __init__(self, view):
         self._view = view
+        self.DecipherWindow = None
         self.IMU = HW_Dialog()
         self._connectSignalsAndSlots()
 
     def request_IMU_connect(self):
-        self.IMU.connect(connectedHW_type=self._view.IMU_type_comboBox.currentText(),
+        self.IMU.connect(output=self._view.output_textEdit,
+                         connectedHW_type=self._view.IMU_type_comboBox.currentText(),
                          port=self._view.IMU_port_lineEdit.text(),
                          baud_rate=self._view.IMU_baud_rate_comboBox.currentText())
 
     def openDecipher(self):
-        DecipherAppWindow.show()
-        DecipherAppClass(view=DecipherAppWindow)
+        if self.DecipherWindow is None:
+            self.DecipherWindow = DecipherAppWidget()
+            DecipherAppClass(view=self.DecipherWindow)
+            self.DecipherWindow.show()
+            self.DecipherWindow.exec_()
+            self.DecipherWindow = None
 
     def _connectSignalsAndSlots(self):
         self._view.IMU_connect_button.clicked.connect(lambda: self.request_IMU_connect())
@@ -63,21 +42,21 @@ class DecipherAppClass:
     def __init__(self, view):
         self._view = view
         self.fileName = None
-        self.Decipher_obj = Decipher()
+        self.Decipher_obj = Decipher(output=self._view.info_textEdit)
         self._connectSignalsAndSlots()
 
     def showFileSelectDialog(self):
         FileSelectDialog = QFileDialog()
         self.fileName = QFileDialog.getOpenFileName(FileSelectDialog, 'Dialog Title', '/path/to/default/directory')
         if self.fileName[0] == '':
-            print('Файл не выбран')
+            self._view.info_textEdit.append('Файл не выбран')
         else:
-            print('Выбран файл ', self.fileName[0])
+            self._view.info_textEdit.append('Выбран файл ' + self.fileName[0])
 
     def func_decipher(self):
         self.Decipher_obj.open(file_name=self.fileName)
         self.Decipher_obj.decipher(acc_range=self._view.accelsense_comboBox.currentText(),
-                                   gyro_range=self._view.gyrosense_comboBox.currentText())
+                                   gyro_range=self._view.gyrosense_comboBox.currentText(),)
 
         self.Decipher_obj.save(file_name=self.fileName, table_format=self._view.saveformat_comboBox.currentText())
 
@@ -91,23 +70,16 @@ class WitMotionConnectMainWindow(QMainWindow, Ui_WitMotionConnect_MainWindow):
         super().__init__()
         self.setupUi(self)
 
-        sys.stdout = OutLog(self.output_textEdit, sys.stdout)
 
-
-class DecipherMainWindow(QMainWindow, Ui_decipher_MainWindow):
+class DecipherAppWidget(QDialog, Ui_DecipherWidget):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        sys.stdout = OutLog(self.info_textEdit, sys.stdout)
 
 
 if __name__ == "__main__":
     WitMotionConnectApp = QApplication(sys.argv)
     WitMotionConnectWindow = WitMotionConnectMainWindow()
-    DecipherApp = QApplication(sys.argv)
-    DecipherAppWindow = DecipherMainWindow()
-    WitMotionConnectWindow.show()
     WitMotionConnect(view=WitMotionConnectWindow)
-
-    DecipherAppWindow.close()
+    WitMotionConnectWindow.show()
     sys.exit(WitMotionConnectApp.exec())
