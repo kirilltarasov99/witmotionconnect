@@ -68,11 +68,17 @@ class DecipherAppClass:
     def showFileSelectDialog(self):
         FileSelectDialog = QFileDialog()
         self.fileName = QFileDialog.getOpenFileName(FileSelectDialog, 'Dialog Title', '/path/to/default/directory')
+        if self.fileName[0] == '':
+            print('Файл не выбран')
+        else:
+            print('Выбран файл ', self.fileName[0])
 
     def func_decipher(self):
         self.Decipher_obj.open(file_name=self.fileName)
-        self.Decipher_obj.decipher()
-        self.Decipher_obj.save(file_name=self.fileName, table_format='csv')
+        self.Decipher_obj.decipher(acc_range=self._view.accelsense_comboBox.currentText(),
+                                   gyro_range=self._view.gyrosense_comboBox.currentText())
+
+        self.Decipher_obj.save(file_name=self.fileName, table_format=self._view.saveformat_comboBox.currentText())
 
     def _connectSignalsAndSlots(self):
         self._view.openfile_pushButton.clicked.connect(lambda: self.showFileSelectDialog())
@@ -84,20 +90,21 @@ class WitMotionConnectMainWindow(QMainWindow, Ui_WitMotionConnect_MainWindow):
         super().__init__()
         self.setupUi(self)
 
-        # sys.stdout = OutLog(self.output_textEdit, sys.stdout)
+        sys.stdout = OutLog(self.output_textEdit, sys.stdout)
 
 
-class WitMotionConnectDecipher(QMainWindow, Ui_decipher_MainWindow):
+class DecipherMainWindow(QMainWindow, Ui_decipher_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        sys.stdout = OutLog(self.info_textEdit, sys.stdout)
 
 
 if __name__ == "__main__":
     WitMotionConnectApp = QApplication(sys.argv)
     WitMotionConnectWindow = WitMotionConnectMainWindow()
     DecipherApp = QApplication(sys.argv)
-    DecipherAppWindow = WitMotionConnectDecipher()
+    DecipherAppWindow = DecipherMainWindow()
     WitMotionConnectWindow.show()
     WitMotionConnect(view=WitMotionConnectWindow)
 
