@@ -46,7 +46,7 @@ class SingleMPUDialog:
                 break
             if self.recording is True:
                 self.datetime_list.append(datetime.now())
-                self.MPUdata.append(self.MPUInterface.read(12))
+                self.MPUdata.append(self.MPUInterface.read(18))
 
     def start_recording(self):
         self.recording = True

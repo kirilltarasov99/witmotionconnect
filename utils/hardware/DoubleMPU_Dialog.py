@@ -47,8 +47,8 @@ class DoubleMPUDialog:
                 break
             if self.recording is True:
                 self.datetime_list.append(datetime.now())
-                self.MPU1_data.append(self.MPUInterface.read(12))
-                self.MPU2_data.append(self.MPUInterface.read(12))
+                self.MPU1_data.append(self.MPUInterface.read(18))
+                self.MPU2_data.append(self.MPUInterface.read(18))
 
     def start_recording(self):
         self.recording = True
