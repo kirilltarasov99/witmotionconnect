@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-class Decipher():
+class Decipher:
     def __init__(self, output):
         self.output = output
         self.table = pd.DataFrame
@@ -23,6 +23,9 @@ class Decipher():
         self.mx_MPU2_list = []
         self.my_MPU2_list = []
         self.mz_MPU2_list = []
+        self.magBias = [30, 270, -100]
+        self.magCalibration = [1.16, 1.16, 1.21]
+        self.mRes = 10. * 1229. / 4096.
 
     def open(self, file_name):
         self.table = pd.read_hdf(file_name[0], key='data')
@@ -31,9 +34,9 @@ class Decipher():
         self.output.append('Дешифрование...')
         if 'MPU1_data' in self.table.columns:
             for i in range(len(self.table['MPU1_data'])):
-                ax = int.from_bytes(self.table['MPU1_data'][i][:2], byteorder='little', signed=True)
-                ay = int.from_bytes(self.table['MPU1_data'][i][2:4], byteorder='little', signed=True)
-                az = int.from_bytes(self.table['MPU1_data'][i][4:6], byteorder='little', signed=True)
+                ax = int.from_bytes(self.table['MPU1_data'][i][:2], byteorder='big', signed=True)
+                ay = int.from_bytes(self.table['MPU1_data'][i][2:4], byteorder='big', signed=True)
+                az = int.from_bytes(self.table['MPU1_data'][i][4:6], byteorder='big', signed=True)
                 if acc_range == '2g':
                     ax /= 16384
                     ay /= 16384
@@ -54,9 +57,9 @@ class Decipher():
                 self.ay_MPU1_list.append(ay)
                 self.az_MPU1_list.append(az)
 
-                gx = int.from_bytes(self.table['MPU1_data'][i][6:8], byteorder='little', signed=True)
-                gy = int.from_bytes(self.table['MPU1_data'][i][8:10], byteorder='little', signed=True)
-                gz = int.from_bytes(self.table['MPU1_data'][i][10:12], byteorder='little', signed=True)
+                gx = int.from_bytes(self.table['MPU1_data'][i][6:8], byteorder='big', signed=True)
+                gy = int.from_bytes(self.table['MPU1_data'][i][8:10], byteorder='big', signed=True)
+                gz = int.from_bytes(self.table['MPU1_data'][i][10:12], byteorder='big', signed=True)
                 if gyro_range == '250 deg/s':
                     gx /= 131
                     gy /= 131
@@ -82,9 +85,11 @@ class Decipher():
                     mx = int.from_bytes(self.table['MPU1_data'][i][12:14], byteorder='little', signed=True)
                     my = int.from_bytes(self.table['MPU1_data'][i][14:16], byteorder='little', signed=True)
                     mz = int.from_bytes(self.table['MPU1_data'][i][16:18], byteorder='little', signed=True)
-                    mx *= 0.3
-                    my *= 0.3
-                    mz *= 0.3
+
+                    mx = mx * self.mRes * self.magCalibration[0] - self.magBias[0]
+                    my = my * self.mRes * self.magCalibration[1] - self.magBias[1]
+                    mz = mz * self.mRes * self.magCalibration[2] - self.magBias[2]
+
                 else:
                     mx = 0
                     my = 0
@@ -147,6 +152,9 @@ class Decipher():
                     mx = int.from_bytes(self.table['MPU2_data'][i][12:14], byteorder='little', signed=True)
                     my = int.from_bytes(self.table['MPU2_data'][i][14:16], byteorder='little', signed=True)
                     mz = int.from_bytes(self.table['MPU2_data'][i][16:18], byteorder='little', signed=True)
+
+
+
                     mx *= 0.3
                     my *= 0.3
                     mz *= 0.3
