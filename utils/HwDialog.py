@@ -3,7 +3,7 @@ from utils.hardware.SingleMPU_Dialog import SingleMPUDialog
 from utils.hardware.DoubleMPU_Dialog import DoubleMPUDialog
 
 
-class HW_Dialog:
+class HwDialog:
     def __init__(self):
         self.HW_class = None
 

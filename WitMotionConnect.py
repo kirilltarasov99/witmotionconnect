@@ -1,19 +1,21 @@
 import sys
 
-from PyQt5 import QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QDialog
-from App_GUI import Ui_WitMotionConnect_MainWindow
-from Decipher_GUI import Ui_DecipherWidget
+from GUI.App_GUI import Ui_WitMotionConnect_MainWindow
+from GUI.Decipher_GUI import Ui_DecipherWidget
+from GUI.MagCalibrationWidget import Ui_MagCalibrationWidget
 
-from utils.HW_Dialog import HW_Dialog
+from utils.HwDialog import HwDialog
 from utils.Decipher import Decipher
+from utils.Mag_calibration import MagCal
 
 
 class WitMotionConnect:
     def __init__(self, view):
         self._view = view
         self.DecipherWindow = None
-        self.IMU = HW_Dialog()
+        self.MagCalWindow = None
+        self.IMU = HwDialog()
         self._connectSignalsAndSlots()
 
     def request_IMU_connect(self):
@@ -30,12 +32,34 @@ class WitMotionConnect:
             self.DecipherWindow.exec_()
             self.DecipherWindow = None
 
+    def openMagCal(self):
+        if self.MagCalWindow is None:
+            self.MagCalWindow = MagCalibrationAppWidget()
+            MagCalWidgetClass(view=self.MagCalWindow)
+            self.MagCalWindow.show()
+            self.MagCalWindow.exec_()
+            self.MagCalWindow = None
+
     def _connectSignalsAndSlots(self):
         self._view.IMU_connect_button.clicked.connect(lambda: self.request_IMU_connect())
         self._view.IMU_disconnect_button.clicked.connect(self.IMU.disconnect)
         self._view.IMU_recording_start_button.clicked.connect(self.IMU.start_recording)
         self._view.IMU_recording_stop_button.clicked.connect(self.IMU.stop_recording)
         self._view.decipher_action.triggered.connect(lambda: self.openDecipher())
+        self._view.magCal_action.triggered.connect(lambda: self.openMagCal())
+
+
+class MagCalWidgetClass:
+    def __init__(self, view):
+        self._view = view
+        self.MagCal_obj = MagCal(output=self._view.magCal_textEdit)
+        self._connectSignalsAndSlots()
+
+    def func_magCal(self):
+        self.MagCal_obj.calibrate(MPU=main_app.IMU.HW_class.MPUInterface)
+
+    def _connectSignalsAndSlots(self):
+        self._view.magCal_pushButton.clicked.connect(lambda: self.func_magCal())
 
 
 class DecipherAppClass:
@@ -56,7 +80,7 @@ class DecipherAppClass:
     def func_decipher(self):
         self.Decipher_obj.open(file_name=self.fileName)
         self.Decipher_obj.decipher(acc_range=self._view.accelsense_comboBox.currentText(),
-                                   gyro_range=self._view.gyrosense_comboBox.currentText(),)
+                                   gyro_range=self._view.gyrosense_comboBox.currentText())
 
         self.Decipher_obj.save(file_name=self.fileName, table_format=self._view.saveformat_comboBox.currentText())
 
@@ -77,9 +101,15 @@ class DecipherAppWidget(QDialog, Ui_DecipherWidget):
         self.setupUi(self)
 
 
+class MagCalibrationAppWidget(QDialog, Ui_MagCalibrationWidget):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+
+
 if __name__ == "__main__":
     WitMotionConnectApp = QApplication(sys.argv)
     WitMotionConnectWindow = WitMotionConnectMainWindow()
-    WitMotionConnect(view=WitMotionConnectWindow)
+    main_app = WitMotionConnect(view=WitMotionConnectWindow)
     WitMotionConnectWindow.show()
     sys.exit(WitMotionConnectApp.exec())

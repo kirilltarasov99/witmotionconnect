@@ -32,7 +32,6 @@ class SingleMPUDialog:
     def recorder_9DoF_fast(self):
         self.MPUInterface.reset_input_buffer()
         sleep(0.005)
-        self.output.append('Запись... режим 9DoF ~900 Hz')
         while self.MPUInterface.is_open is True:
             if self.pause_event.is_set():
                 self.MPUInterface.reset_input_buffer()
@@ -51,7 +50,7 @@ class SingleMPUDialog:
         if self.hasStarted is False:
             self.recorder_thread.start()
             self.hasStarted = True
-        self.output.append("Начата запись")
+        self.output.append("Начата запись... режим 9DoF ~900 Hz")
 
     def stop_recording(self):
         self.MPUInterface.write((1).to_bytes(1, byteorder="big"))

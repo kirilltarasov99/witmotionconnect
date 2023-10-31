@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>725</width>
-    <height>300</height>
+    <height>400</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>725</width>
-    <height>300</height>
+    <height>400</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>725</width>
-    <height>300</height>
+    <height>400</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -32,7 +32,7 @@
       <x>360</x>
       <y>10</y>
       <width>351</width>
-      <height>221</height>
+      <height>331</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -185,6 +185,31 @@
            </item>
           </widget>
          </widget>
+         <widget class="QComboBox" name="IMU_mode_comboBox">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>210</y>
+            <width>141</width>
+            <height>36</height>
+           </rect>
+          </property>
+          <item>
+           <property name="text">
+            <string>9DoF</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>9DoF initonly</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>6DoF</string>
+           </property>
+          </item>
+         </widget>
         </widget>
        </item>
       </layout>
@@ -269,7 +294,7 @@
       <x>10</x>
       <y>10</y>
       <width>331</width>
-      <height>231</height>
+      <height>331</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0">
@@ -328,6 +353,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
     <addaction name="decipher_action"/>
     <addaction name="settings_action"/>
+    <addaction name="magCal_action"/>
    </widget>
    <addaction name="menu_options"/>
   </widget>
@@ -340,6 +366,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
   <action name="settings_action">
    <property name="text">
     <string>Настройки</string>
+   </property>
+  </action>
+  <action name="magCal_action">
+   <property name="text">
+    <string>Калибровка магнетометра</string>
    </property>
   </action>
  </widget>

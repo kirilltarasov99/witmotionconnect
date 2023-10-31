@@ -178,9 +178,9 @@ class IMUFusion:
         return [yaw, pitch, roll]
 
     def save_quats_txt(self):
-        np.savetxt(self.file_name+'_quats.txt', self.quaternions)
+        np.savetxt(self.file_name[:-4]+'_quats.txt', self.quaternions)
 
     def save_YPR_txt(self):
         for quat in self.quaternions:
             self.YPR.append(self.quats_toYPR(quat))
-        np.savetxt(self.file_name+'_YPR.txt', self.YPR)
+        np.savetxt(self.file_name[:-4]+'_YPR.txt', self.YPR)
