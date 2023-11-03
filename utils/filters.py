@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 import math
+from pykalman import KalmanFilter
 
 
 class Madgwick:
@@ -10,7 +11,7 @@ class Madgwick:
         self.beta = np.sqrt(3/4) * math.pi * (40/180)
         self.zeta = np.sqrt(3/4) * math.pi * (0/180)
 
-    def update(self, data, deltat):
+    def get_quaternion(self, data, deltat):
         ax, ay, az, gx, gy, gz, mx, my, mz = data
         q1, q2, q3, q4 = self.q
 
@@ -117,6 +118,23 @@ class Madgwick:
         self.q[2] = q3 * norm
         self.q[3] = q4 * norm
 
+    def get_earth_acceleration(self, acceleration):
+        q1, q2, q3, q4 = self.q
+        ax, ay, az = acceleration
+        q1q1 = q1 * q1
+        q1q2 = q1 * q2
+        q1q3 = q1 * q3
+        q1q4 = q1 * q4
+        q2q3 = q2 * q3
+        q2q4 = q2 * q4
+        q3q4 = q3 * q4
+
+        earth_acceleration = [2 * ((q1q1 - 0.5 + q2 * q2) * ax + (q2q3 - q1q4) * ay + (q2q4 + q1q3) * az),
+                              2 * ((q2q3 + q1q4) * ax + (q1q1 - 0.5 + q3 * q3) * ay + (q3q4 - q1q2) * az),
+                              2 * ((q2q4 - q1q3) * ax + (q3q4 + q1q2) * ay + (q1q1 - 0.5 + q4 * q4) * az) - 1]
+
+        return earth_acceleration
+
 
 class IMUFusion:
     def __init__(self, algo, file_name):
@@ -134,6 +152,7 @@ class IMUFusion:
         self.magY = self.df['my_MPU1']
         self.magZ = self.df['mz_MPU1']
         self.quaternions = []
+        self.earth_acceleration = []
         self.YPR = []
 
     def parse_file(self):
@@ -161,10 +180,12 @@ class IMUFusion:
                 time_passed = 0.001
             deltat = time_passed / 10
             for j in range(10):
-                self.algo.update((self.accX[i], self.accY[i], self.accZ[i],
+                self.algo.get_quaternion((self.accX[i], self.accY[i], self.accZ[i],
                                   self.gyrX[i] * math.pi / 180, self.gyrY[i] * math.pi / 180, self.gyrZ[i] * math.pi / 180,
                                   self.magY[i], self.magX[i], self.magZ[i]), deltat)
+
             self.quaternions.append(self.algo.q.copy())
+            self.earth_acceleration.append(self.algo.get_earth_acceleration())
 
     @staticmethod
     def quats_toYPR(q):
@@ -183,4 +204,4 @@ class IMUFusion:
     def save_YPR_txt(self):
         for quat in self.quaternions:
             self.YPR.append(self.quats_toYPR(quat))
-        np.savetxt(self.file_name[:-4]+'_YPR.txt', self.YPR)
+        np.savetxt(self.file_name[:-4]+'_YPR.txt', self .YPR)
