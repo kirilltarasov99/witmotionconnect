@@ -192,11 +192,11 @@ class Decipher:
             return
 
         if table_format == 'hdf':
-            savename = file_name[0][:-3] + '_deciphered.h5'
-            presave_df.to_hdf(file_name[0][:-3] + '_deciphered.h5', key='data', index=False)
+            savename = 'data/' + file_name[0][-25:-3] + '_deciphered.h5'
+            presave_df.to_hdf(savename, key='data', index=False)
         elif table_format == 'csv':
-            savename = file_name[0][:-3] + '_deciphered.csv'
-            presave_df.to_csv(file_name[0][:-3] + '_deciphered.csv', index=False)
+            savename = 'data/' + file_name[0][-26:-4] + '_deciphered.csv'
+            presave_df.to_csv(savename, index=False)
         else:
             self.output.append('Неизвестный формат')
             return
