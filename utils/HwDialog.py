@@ -7,13 +7,13 @@ class HwDialog:
     def __init__(self):
         self.HW_class = None
 
-    def connect(self, QToutput, connectedHW_type, port, baud_rate):
+    def connect(self, QToutput, connectedHW_type, port, baud_rate, data_path):
         if connectedHW_type == 'WitMotion':
-            self.HW_class = WitMotionDialog(QToutput=QToutput)
+            self.HW_class = WitMotionDialog(QToutput=QToutput, savepath=data_path)
         elif connectedHW_type == 'Single MPU':
-            self.HW_class = SingleMPUDialog(QToutput=QToutput)
+            self.HW_class = SingleMPUDialog(QToutput=QToutput, savepath=data_path)
         elif connectedHW_type == 'Double MPU':
-            self.HW_class = DoubleMPUDialog(QToutput=QToutput)
+            self.HW_class = DoubleMPUDialog(QToutput=QToutput, savepath=data_path)
 
         if self.HW_class is not None:
             self.HW_class.connect(port=port, baud_rate=baud_rate)

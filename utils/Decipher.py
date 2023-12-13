@@ -33,9 +33,9 @@ class Decipher:
     def open(self, file_name):
         self.table = pd.read_hdf(file_name[0], key='data')
 
-    def decipher(self, acc_range, gyro_range):
+    def decipher(self, acc_range, gyro_range, params_path):
         self.output.append('Дешифрование...')
-        with open('../magcal_params', 'r') as file:
+        with open(params_path, 'r') as file:
             lines = file.readlines()
         if 'MPU1_data' in self.table.columns:
             if len(lines[2]) > 2:

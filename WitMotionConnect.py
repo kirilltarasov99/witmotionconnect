@@ -19,6 +19,7 @@ class WitMotionConnect:
         self.IMU = HwDialog()
         self._connectSignalsAndSlots()
         self.params_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'magcal_params')
+        self.data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/')
         if not os.path.isfile(self.params_path):
             self._view.output_textEdit.append("Калибровочные параметры магнетометра не найдены, проведите калибровку!")
             lines = ['MPU1\n', '\n', '\n', 'MPU2\n', '\n', '\n']
@@ -29,7 +30,8 @@ class WitMotionConnect:
         self.IMU.connect(QToutput=self._view.output_textEdit,
                          connectedHW_type=self._view.IMU_type_comboBox.currentText(),
                          port=self._view.IMU_port_lineEdit.text(),
-                         baud_rate=self._view.IMU_baud_rate_comboBox.currentText())
+                         baud_rate=self._view.IMU_baud_rate_comboBox.currentText(),
+                         data_path=main_app.data_path)
 
     def openDecipher(self):
         if self.DecipherWindow is None:
@@ -76,13 +78,13 @@ class DecipherAppClass:
         self.fileName = None
         self.Decipher_obj = Decipher(QToutput=self._view.info_textEdit)
         self._connectSignalsAndSlots()
-        self.path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/')
+        self.path = main_app.data_path
         if not os.path.isdir(self.path):
             os.makedirs(self.path)
 
     def showFileSelectDialog(self):
         FileSelectDialog = QFileDialog()
-        self.fileName = QFileDialog.getOpenFileName(FileSelectDialog, 'Dialog Title', '/path/to/default/directory')
+        self.fileName = QFileDialog.getOpenFileName(FileSelectDialog, 'Выбор файла', self.path)
         if self.fileName[0] == '':
             self._view.info_textEdit.append('Файл не выбран')
         else:
@@ -91,7 +93,8 @@ class DecipherAppClass:
     def func_decipher(self):
         self.Decipher_obj.open(file_name=self.fileName)
         self.Decipher_obj.decipher(acc_range=self._view.accelsense_comboBox.currentText(),
-                                   gyro_range=self._view.gyrosense_comboBox.currentText())
+                                   gyro_range=self._view.gyrosense_comboBox.currentText(),
+                                   params_path=main_app.params_path)
 
         self.Decipher_obj.save(file_name=self.fileName,
                                path=self.path,

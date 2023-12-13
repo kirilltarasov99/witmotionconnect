@@ -6,8 +6,9 @@ from datetime import datetime
 
 
 class WitMotionDialog:
-    def __init__(self, QToutput):
+    def __init__(self, QToutput, savepath):
         self.output = QToutput
+        self.savepath = savepath
         self.recording = False
         self.data_dict = {}
         self.imu = None

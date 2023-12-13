@@ -1,5 +1,6 @@
 import serial
 import pandas as pd
+import os
 
 from datetime import datetime
 from threading import Thread, Event
@@ -7,8 +8,9 @@ from time import sleep, perf_counter
 
 
 class DoubleMPUDialog:
-    def __init__(self, QToutput):
+    def __init__(self, QToutput, savepath):
         self.output = QToutput
+        self.savepath = savepath
         self.recording = False
         self.datetime_list = []
         self.MPUInterface = None
@@ -66,7 +68,7 @@ class DoubleMPUDialog:
         self.pause_event.set()
         self.recorder_thread.join()
         self.output.append("Запись остановлена")
-        DF_savename = 'Double_' + datetime.now().strftime("%Y%m%d_%H%M%S") + '.h5'
+        DF_savename = os.path.join(self.savepath, 'Double_' + datetime.now().strftime("%Y%m%d_%H%M%S") + '.h5')
         Data_df = pd.DataFrame({'SystemTime': self.datetime_list,
                                 'MPU1_data': self.MPU1_data,
                                 'MPU2_data': self.MPU2_data})

@@ -1,5 +1,6 @@
 import serial
 import pandas as pd
+import os
 
 from datetime import datetime
 from threading import Thread, Event
@@ -7,8 +8,9 @@ from time import sleep
 
 
 class SingleMPUDialog:
-    def __init__(self, QToutput):
+    def __init__(self, QToutput, savepath):
         self.output = QToutput
+        self.savepath = savepath
         self.recording = False
         self.datetime_list = []
         self.MPUInterface = None
@@ -58,7 +60,7 @@ class SingleMPUDialog:
         self.pause_event.set()
         self.recorder_thread.join()
         self.output.append("Запись остановлена")
-        DF_savename = 'Single_' + datetime.now().strftime("%Y%m%d_%H%M%S") + '.h5'
+        DF_savename = os.path.join(self.savepath, 'Single_' + datetime.now().strftime("%Y%m%d_%H%M%S") + '.h5')
         Data_df = pd.DataFrame({'SystemTime': self.datetime_list,
                                 'MPU1_data': self.MPUdata})
         Data_df.to_hdf(DF_savename, key='data', index=False)
