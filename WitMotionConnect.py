@@ -19,7 +19,7 @@ class WitMotionConnect:
         self._connectSignalsAndSlots()
 
     def request_IMU_connect(self):
-        self.IMU.connect(output=self._view.output_textEdit,
+        self.IMU.connect(QToutput=self._view.output_textEdit,
                          connectedHW_type=self._view.IMU_type_comboBox.currentText(),
                          port=self._view.IMU_port_lineEdit.text(),
                          baud_rate=self._view.IMU_baud_rate_comboBox.currentText())
@@ -52,7 +52,7 @@ class WitMotionConnect:
 class MagCalWidgetClass:
     def __init__(self, view):
         self._view = view
-        self.MagCal_obj = MagCal(output=self._view.magCal_textEdit)
+        self.MagCal_obj = MagCal(QToutput=self._view.magCal_textEdit)
         self._connectSignalsAndSlots()
 
     def func_magCal(self):
@@ -66,7 +66,7 @@ class DecipherAppClass:
     def __init__(self, view):
         self._view = view
         self.fileName = None
-        self.Decipher_obj = Decipher(output=self._view.info_textEdit)
+        self.Decipher_obj = Decipher(QToutput=self._view.info_textEdit)
         self._connectSignalsAndSlots()
 
     def showFileSelectDialog(self):

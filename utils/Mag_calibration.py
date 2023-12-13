@@ -3,8 +3,8 @@ from PyQt5 import QtTest
 
 
 class MagCal:
-    def __init__(self, output):
-        self.output = output
+    def __init__(self, QToutput):
+        self.output = QToutput
         self.magBias = [0, 0, 0]
 
     def calibrate(self, MPU):

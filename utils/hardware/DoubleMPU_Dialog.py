@@ -7,8 +7,8 @@ from time import sleep, perf_counter
 
 
 class DoubleMPUDialog:
-    def __init__(self, output):
-        self.output = output
+    def __init__(self, QToutput):
+        self.output = QToutput
         self.recording = False
         self.datetime_list = []
         self.MPUInterface = None

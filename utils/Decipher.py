@@ -2,8 +2,8 @@ import pandas as pd
 
 
 class Decipher:
-    def __init__(self, output):
-        self.output = output
+    def __init__(self, QToutput):
+        self.output = QToutput
         self.table = pd.DataFrame
         self.ax_MPU1_list = []
         self.ay_MPU1_list = []
