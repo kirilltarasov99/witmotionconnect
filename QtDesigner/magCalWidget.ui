@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>200</height>
+    <height>184</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Калибровка магнитометра</string>
   </property>
   <widget class="QTextEdit" name="magCal_textEdit">
    <property name="geometry">
@@ -37,18 +37,38 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
    </property>
   </widget>
-  <widget class="QPushButton" name="magCal_pushButton">
+  <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>14</x>
      <y>150</y>
      <width>381</width>
-     <height>36</height>
+     <height>31</height>
     </rect>
    </property>
-   <property name="text">
-    <string>Калибровка магнетометра</string>
-   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QPushButton" name="magCal_pushButton">
+      <property name="text">
+       <string>Начать</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QComboBox" name="IMUaddress_comboBox">
+      <item>
+       <property name="text">
+        <string>I2C1, 0x68</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>I2C1, 0x69</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>

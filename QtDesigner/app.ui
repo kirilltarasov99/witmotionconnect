@@ -170,17 +170,17 @@
            </property>
            <item>
             <property name="text">
-             <string>WitMotion</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
              <string>Single MPU</string>
             </property>
            </item>
            <item>
             <property name="text">
              <string>Double MPU</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>WitMotion</string>
             </property>
            </item>
           </widget>
@@ -344,7 +344,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <x>0</x>
      <y>0</y>
      <width>725</width>
-     <height>28</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_options">
