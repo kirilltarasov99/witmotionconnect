@@ -21,8 +21,11 @@ class HwDialog:
     def disconnect(self):
         self.HW_class.disconnect()
 
-    def start_recording(self):
-        self.HW_class.start_recording()
+    def start_recording(self, mode):
+        if self.HW_class is not WitMotionDialog:
+            self.HW_class.start_recording(mode)
+        else:
+            self.HW_class.start_recording()
 
     def stop_recording(self):
         self.HW_class.stop_recording()

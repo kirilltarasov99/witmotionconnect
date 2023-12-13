@@ -4,23 +4,23 @@ import os
 
 from datetime import datetime
 from threading import Thread, Event
-from time import sleep, perf_counter
+from time import sleep
 
 
 class DoubleMPUDialog:
     def __init__(self, QToutput, savepath):
         self.output = QToutput
         self.savepath = savepath
-        self.recording = False
-        self.datetime_list = []
+        self.mode = None
         self.MPUInterface = None
+        self.datetime_list = []
         self.MPU1_data = []
         self.MPU2_data = []
         self.pause_event = Event()
+        self.recorder_thread = None
 
     def connect(self, port, baud_rate):
         self.MPUInterface = serial.Serial(port=port, baudrate=baud_rate)
-        self.recording = False
         self.output.append("Датчик подключен")
 
     def disconnect(self):
@@ -28,42 +28,40 @@ class DoubleMPUDialog:
         self.output.append("Датчик отключен")
 
     def recorder(self):
-        if self.MPUInterface.is_open is True:
-            if self.recording is True:
+        self.MPUInterface.reset_input_buffer()
+        sleep(0.005)
+        while self.MPUInterface.is_open is True:
+            if self.pause_event.is_set():
                 self.MPUInterface.reset_input_buffer()
-                sleep(0.005)
-                self.MPUInterface.write((3).to_bytes(1, byteorder="big"))
-                self.output.append('Инициализация; режим 9DoF')
-                sleep(0.00045)
-                init_time_stop = perf_counter() + 1
-                while perf_counter() < init_time_stop:
+                break
+
+            match self.mode:
+                case '6DoF':
+                    self.datetime_list.append(datetime.now())
+                    self.MPU1_data.append(self.MPUInterface.read(12))
+                    self.MPU2_data.append(self.MPUInterface.read(12))
+                case '9DoF':
                     self.datetime_list.append(datetime.now())
                     self.MPU1_data.append(self.MPUInterface.read(18))
                     self.MPU2_data.append(self.MPUInterface.read(18))
 
-                self.MPUInterface.write((2).to_bytes(1, byteorder="big"))
-                self.output.append('Инициализация закончена, режим 6DoF')
-
-        while self.MPUInterface.is_open is True:
-            if self.pause_event.is_set():
-                break
-            if self.recording is True:
-                self.datetime_list.append(datetime.now())
-                self.MPU1_data.append(self.MPUInterface.read(18))
-                self.MPU2_data.append(self.MPUInterface.read(18))
-
-    def start_recording(self):
-        self.recording = True
+    def start_recording(self, mode):
+        self.mode = mode
         self.MPU1_data = []
         self.MPU2_data = []
         self.datetime_list = []
         self.pause_event.clear()
+        match self.mode:
+            case '6DoF':
+                self.output.append("Начата запись... режим 6DoF 1000 Hz")
+                self.MPUInterface.write((2).to_bytes(1, byteorder="big"))
+            case '9DoF':
+                self.output.append("Начата запись... режим 9DoF ~900 Hz")
+                self.MPUInterface.write((4).to_bytes(1, byteorder="big"))
         self.recorder_thread = Thread(target=self.recorder)
         self.recorder_thread.start()
-        self.output.append("Начата запись")
 
     def stop_recording(self):
-        self.recording = False
         self.MPUInterface.write((1).to_bytes(1, byteorder="big"))
         self.pause_event.set()
         self.recorder_thread.join()

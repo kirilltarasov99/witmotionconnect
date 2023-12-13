@@ -37,6 +37,9 @@ class WitMotionConnect:
                          baud_rate=self._view.IMU_baud_rate_comboBox.currentText(),
                          data_path=main_app.data_path)
 
+    def IMU_start_recording(self):
+        self.IMU.start_recording(mode=self._view.IMU_mode_comboBox.currentText())
+
     def openDecipher(self):
         if self.DecipherWindow is None:
             self.DecipherWindow = DecipherAppWidget()
@@ -56,7 +59,7 @@ class WitMotionConnect:
     def _connectSignalsAndSlots(self):
         self._view.IMU_connect_button.clicked.connect(lambda: self.request_IMU_connect())
         self._view.IMU_disconnect_button.clicked.connect(self.IMU.disconnect)
-        self._view.IMU_recording_start_button.clicked.connect(self.IMU.start_recording)
+        self._view.IMU_recording_start_button.clicked.connect(lambda: self.IMU_start_recording())
         self._view.IMU_recording_stop_button.clicked.connect(self.IMU.stop_recording)
         self._view.decipher_action.triggered.connect(lambda: self.openDecipher())
         self._view.magCal_action.triggered.connect(lambda: self.openMagCal())
