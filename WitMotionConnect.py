@@ -20,6 +20,10 @@ class WitMotionConnect:
         self._connectSignalsAndSlots()
         self.params_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'magcal_params')
         self.data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/')
+
+        if not os.path.isdir(self.data_path):
+            os.makedirs(self.data_path)
+
         if not os.path.isfile(self.params_path):
             self._view.output_textEdit.append("Калибровочные параметры магнетометра не найдены, проведите калибровку!")
             lines = ['MPU1\n', '\n', '\n', 'MPU2\n', '\n', '\n']
@@ -79,8 +83,6 @@ class DecipherAppClass:
         self.Decipher_obj = Decipher(QToutput=self._view.info_textEdit)
         self._connectSignalsAndSlots()
         self.path = main_app.data_path
-        if not os.path.isdir(self.path):
-            os.makedirs(self.path)
 
     def showFileSelectDialog(self):
         FileSelectDialog = QFileDialog()
