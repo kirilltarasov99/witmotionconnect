@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import re
 
 
 class Decipher:
@@ -24,7 +25,9 @@ class Decipher:
         self.mx_MPU2_list = []
         self.my_MPU2_list = []
         self.mz_MPU2_list = []
-        self.magBias = [30, 270, -100]
+
+        self.magBias_MPU1 = [30, 270, -100]
+        self.magBias_MPU2 = [30, 270, -100]
         self.magCalibration = [1.16, 1.16, 1.21]
         self.mRes = 10. * 1229. / 4096.
 
@@ -33,7 +36,12 @@ class Decipher:
 
     def decipher(self, acc_range, gyro_range):
         self.output.append('Дешифрование...')
+        with open('../magcal_params', 'r') as file:
+            lines = file.readlines()
         if 'MPU1_data' in self.table.columns:
+            if len(lines[2]) > 2:
+                self.magBias_MPU1 = [float(i)*10 for i in lines[2].strip("\n").split('     ')]
+
             for i in range(len(self.table['MPU1_data'])):
                 ax = int.from_bytes(self.table['MPU1_data'][i][:2], byteorder='big', signed=True)
                 ay = int.from_bytes(self.table['MPU1_data'][i][2:4], byteorder='big', signed=True)
@@ -87,9 +95,9 @@ class Decipher:
                     my = int.from_bytes(self.table['MPU1_data'][i][14:16], byteorder='little', signed=True)
                     mz = int.from_bytes(self.table['MPU1_data'][i][16:18], byteorder='little', signed=True)
 
-                    mx = mx * self.mRes * self.magCalibration[0] - self.magBias[0]
-                    my = my * self.mRes * self.magCalibration[1] - self.magBias[1]
-                    mz = mz * self.mRes * self.magCalibration[2] - self.magBias[2]
+                    mx = mx * self.mRes * self.magCalibration[0] - self.magBias_MPU1[0]
+                    my = my * self.mRes * self.magCalibration[1] - self.magBias_MPU1[1]
+                    mz = mz * self.mRes * self.magCalibration[2] - self.magBias_MPU1[2]
 
                 else:
                     mx = 0
@@ -101,6 +109,8 @@ class Decipher:
                 self.mz_MPU1_list.append(mz)
 
         elif 'MPU2_data' in self.table.columns:
+            if len(lines[5]) > 2:
+                self.magBias_MPU2 = [float(i) * 10 for i in lines[5].strip("\n").split('     ')]
             for i in range(len(self.table['MPU2_data'])):
                 ax = int.from_bytes(self.table['MPU2_data'][i][:2], byteorder='little', signed=True)
                 ay = int.from_bytes(self.table['MPU2_data'][i][2:4], byteorder='little', signed=True)
@@ -153,8 +163,6 @@ class Decipher:
                     mx = int.from_bytes(self.table['MPU2_data'][i][12:14], byteorder='little', signed=True)
                     my = int.from_bytes(self.table['MPU2_data'][i][14:16], byteorder='little', signed=True)
                     mz = int.from_bytes(self.table['MPU2_data'][i][16:18], byteorder='little', signed=True)
-
-
 
                     mx *= 0.3
                     my *= 0.3
