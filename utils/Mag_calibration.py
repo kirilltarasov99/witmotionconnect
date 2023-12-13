@@ -10,12 +10,12 @@ class MagCal:
     def calibrate(self, MPU, address):
         MPU.MPUInterface.reset_input_buffer()
         sleep(0.005)
-        if type(MPU) is 'SingleMPUDialog':
+        if type(MPU) == 'SingleMPUDialog':
             MPU.write((9).to_bytes(1, byteorder="big"))
-        elif type(MPU) is 'DoubleMPUDialog':
-            if address is 'I2C1, 0x68':
+        elif type(MPU) == 'DoubleMPUDialog':
+            if address == 'I2C1, 0x68':
                 MPU.write((9).to_bytes(1, byteorder="big"))
-            elif address is 'I2C1, 0x69':
+            elif address == 'I2C1, 0x69':
                 MPU.write((8).to_bytes(1, byteorder="big"))
 
         for i in range(4):
