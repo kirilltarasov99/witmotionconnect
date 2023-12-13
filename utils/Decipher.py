@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 
 
 class Decipher:
@@ -171,7 +172,7 @@ class Decipher:
             self.output.append('Неизвестный формат таблицы')
             return
 
-    def save(self, file_name, table_format):
+    def save(self, file_name, path, table_format):
         if 'MPU2_data' in self.table.columns:
             presave_df = pd.DataFrame({'SystemTime': self.table['SystemTime'],
                                        'ax_MPU1': self.ax_MPU1_list, 'ay_MPU1': self.ay_MPU1_list, 'az_MPU1': self.az_MPU1_list,
@@ -192,10 +193,10 @@ class Decipher:
             return
 
         if table_format == 'hdf':
-            savename = 'data/' + file_name[0][-25:-3] + '_deciphered.h5'
+            savename = os.path.join(path, file_name[0][-25:-3] + '_deciphered.h5')
             presave_df.to_hdf(savename, key='data', index=False)
         elif table_format == 'csv':
-            savename = 'data/' + file_name[0][-26:-4] + '_deciphered.csv'
+            savename = os.path.join(path, file_name[0][-25:-3] + '_deciphered.csv')
             presave_df.to_csv(savename, index=False)
         else:
             self.output.append('Неизвестный формат')

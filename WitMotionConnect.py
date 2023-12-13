@@ -1,4 +1,5 @@
 import sys
+import os
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QDialog
 from GUI.App_GUI import Ui_WitMotionConnect_MainWindow
@@ -68,6 +69,9 @@ class DecipherAppClass:
         self.fileName = None
         self.Decipher_obj = Decipher(QToutput=self._view.info_textEdit)
         self._connectSignalsAndSlots()
+        self.path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/')
+        if not os.path.isdir(self.path):
+            os.makedirs(self.path)
 
     def showFileSelectDialog(self):
         FileSelectDialog = QFileDialog()
@@ -82,7 +86,9 @@ class DecipherAppClass:
         self.Decipher_obj.decipher(acc_range=self._view.accelsense_comboBox.currentText(),
                                    gyro_range=self._view.gyrosense_comboBox.currentText())
 
-        self.Decipher_obj.save(file_name=self.fileName, table_format=self._view.saveformat_comboBox.currentText())
+        self.Decipher_obj.save(file_name=self.fileName,
+                               path=self.path,
+                               table_format=self._view.saveformat_comboBox.currentText())
 
     def _connectSignalsAndSlots(self):
         self._view.openfile_pushButton.clicked.connect(lambda: self.showFileSelectDialog())
