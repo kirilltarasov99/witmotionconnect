@@ -7,10 +7,17 @@ class MagCal:
         self.output = QToutput
         self.magBias = [0, 0, 0]
 
-    def calibrate(self, MPU):
-        MPU.reset_input_buffer()
+    def calibrate(self, MPU, address):
+        MPU.MPUInterface.reset_input_buffer()
         sleep(0.005)
-        MPU.write((9).to_bytes(1, byteorder="big"))
+        if type(MPU) is 'SingleMPUDialog':
+            MPU.write((9).to_bytes(1, byteorder="big"))
+        elif type(MPU) is 'DoubleMPUDialog':
+            if address is 'I2C1, 0x68':
+                MPU.write((9).to_bytes(1, byteorder="big"))
+            elif address is 'I2C1, 0x69':
+                MPU.write((8).to_bytes(1, byteorder="big"))
+
         for i in range(4):
             info = str(MPU.readline())
             self.output.append(info)

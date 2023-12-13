@@ -56,7 +56,7 @@ class MagCalWidgetClass:
         self._connectSignalsAndSlots()
 
     def func_magCal(self):
-        self.MagCal_obj.calibrate(MPU=main_app.IMU.HW_class.MPUInterface)
+        self.MagCal_obj.calibrate(MPU=main_app.IMU.HW_class, address=self._view.IMUaddress_comboBox.currentText())
 
     def _connectSignalsAndSlots(self):
         self._view.magCal_pushButton.clicked.connect(lambda: self.func_magCal())
