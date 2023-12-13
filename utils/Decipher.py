@@ -1,6 +1,5 @@
 import pandas as pd
 import os
-import re
 
 
 class Decipher:
