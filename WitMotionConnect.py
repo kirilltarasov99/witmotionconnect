@@ -18,6 +18,12 @@ class WitMotionConnect:
         self.MagCalWindow = None
         self.IMU = HwDialog()
         self._connectSignalsAndSlots()
+        self.params_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'magcal_params')
+        if not os.path.isfile(self.params_path):
+            self._view.output_textEdit.append("Калибровочные параметры магнетометра не найдены, проведите калибровку!")
+            lines = ['MPU1\n', '\n', '\n', 'MPU2\n', '\n', '\n']
+            with open(self.params_path, 'w') as file:
+                file.writelines(lines)
 
     def request_IMU_connect(self):
         self.IMU.connect(QToutput=self._view.output_textEdit,
@@ -57,7 +63,8 @@ class MagCalWidgetClass:
         self._connectSignalsAndSlots()
 
     def func_magCal(self):
-        self.MagCal_obj.calibrate(MPU=main_app.IMU.HW_class, address=self._view.IMUaddress_comboBox.currentText())
+        self.MagCal_obj.calibrate(MPU=main_app.IMU.HW_class, address=self._view.IMUaddress_comboBox.currentText(),
+                                  params_path=main_app.params_path)
 
     def _connectSignalsAndSlots(self):
         self._view.magCal_pushButton.clicked.connect(lambda: self.func_magCal())
