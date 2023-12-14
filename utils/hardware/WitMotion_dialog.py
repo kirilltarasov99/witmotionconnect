@@ -5,7 +5,7 @@ import pandas as pd
 from datetime import datetime
 
 
-class WitMotionDialog:
+class WitMotionDialog(object):
     def __init__(self, QToutput, savepath):
         self.output = QToutput
         self.savepath = savepath
@@ -19,23 +19,23 @@ class WitMotionDialog:
         time.sleep(1)
         chiptime = self.imu.get_timestamp()
         if chiptime is None:
-            self.output.append("Выбранный baud rate некорректен, отключите датчик и повторите подключение")
+            self.output.append('Выбранный baud rate некорректен, отключите датчик и повторите подключение')
         else:
             self.recording = False
-            self.output.append("Датчик подключен")
+            self.output.append('Датчик подключен')
             self.imu.subscribe(self.callback)
 
     def disconnect(self):
         self.imu.close()
-        self.output.append("Датчик отключен")
+        self.output.append('Датчик отключен')
 
     def start_recording(self):
-        self.output.append("Начата запись")
+        self.output.append('Начата запись')
         self.create_df()
         self.recording = True
 
     def stop_recording(self):
-        self.output.append("Запись остановлена")
+        self.output.append('Запись остановлена')
         self.recording = False
         DF_savename = datetime.now().strftime("%Y%m%d_%H%M%S") + '.csv'
         self.IMUdata.to_csv(DF_savename, sep='\t', index=False)

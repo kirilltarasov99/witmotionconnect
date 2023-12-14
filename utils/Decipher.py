@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 
 
-class Decipher:
+class Decipher(object):
     def __init__(self, QToutput):
         self.output = QToutput
         self.table = pd.DataFrame

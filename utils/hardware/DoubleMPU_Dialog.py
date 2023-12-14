@@ -7,7 +7,7 @@ from threading import Thread, Event
 from time import sleep
 
 
-class DoubleMPUDialog:
+class DoubleMPUDialog(object):
     def __init__(self, QToutput, savepath):
         self.output = QToutput
         self.savepath = savepath

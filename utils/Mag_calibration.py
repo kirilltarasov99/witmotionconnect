@@ -2,7 +2,7 @@ from time import sleep
 from PySide6 import QtTest
 
 
-class MagCal:
+class MagCal(object):
     def __init__(self, QToutput):
         self.output = QToutput
 

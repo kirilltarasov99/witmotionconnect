@@ -13,7 +13,7 @@ from PySide6.QtCore import QFile
 loader = QUiLoader()
 
 
-class WitMotionConnect:
+class WitMotionConnect(object):
     def __init__(self, view):
         self._view = view
         self.DecipherWindow = None
@@ -71,7 +71,7 @@ class WitMotionConnect:
         self._view.magCal_action.triggered.connect(lambda: self.openMagCal())
 
 
-class MagCalWidgetClass:
+class MagCalWidgetClass(object):
     def __init__(self, view):
         self._view = view
         self.MagCal_obj = MagCal(QToutput=self._view.magCal_textEdit)
@@ -85,7 +85,7 @@ class MagCalWidgetClass:
         self._view.magCal_pushButton.clicked.connect(lambda: self.func_magCal())
 
 
-class DecipherAppClass:
+class DecipherAppClass(object):
     def __init__(self, view):
         self._view = view
         self.fileName = None
