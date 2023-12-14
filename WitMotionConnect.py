@@ -1,6 +1,8 @@
 import sys
 import os
 
+from pathlib import PurePath
+
 from utils.HwDialog import HwDialog
 from utils.Decipher import Decipher
 from utils.Mag_calibration import MagCal
@@ -19,14 +21,14 @@ class WitMotionConnect:
         self.MagCalWindow = None
         self.IMU = HwDialog()
         self._connectSignalsAndSlots()
-        self.params_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'magcal_params')
-        self.data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/')
+        self.params_path = PurePath('./magcal_params')
+        self.data_path = PurePath('./data/')
 
         if not os.path.isdir(self.data_path):
             os.makedirs(self.data_path)
 
         if not os.path.isfile(self.params_path):
-            self._view.output_textEdit.append("Калибровочные параметры магнетометра не найдены, проведите калибровку!")
+            self._view.output_textEdit.append('Калибровочные параметры магнетометра не найдены, проведите калибровку!')
             lines = ['MPU1\n', '\n', '\n', 'MPU2\n', '\n', '\n']
             with open(self.params_path, 'w') as file:
                 file.writelines(lines)

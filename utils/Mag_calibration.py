@@ -1,5 +1,5 @@
 from time import sleep
-from PyQt5 import QtTest
+from PySide6 import QtTest
 
 
 class MagCal:
@@ -12,12 +12,12 @@ class MagCal:
         sleep(0.005)
         MPU_type = str(type(MPU))
         if MPU_type == "<class 'utils.hardware.SingleMPU_Dialog.SingleMPUDialog'>":
-            interface.write((9).to_bytes(1, byteorder="big"))
+            interface.write((9).to_bytes(1, byteorder='big'))
         elif MPU_type == "<class 'utils.hardware.DoubleMPU_Dialog.DoubleMPUDialog'>":
             if address == 'I2C1, 0x68':
-                interface.write((9).to_bytes(1, byteorder="big"))
+                interface.write((9).to_bytes(1, byteorder='big'))
             elif address == 'I2C1, 0x69':
-                interface.write((8).to_bytes(1, byteorder="big"))
+                interface.write((8).to_bytes(1, byteorder='big'))
 
         with open(params_path, 'r') as file:
             lines = file.readlines()
