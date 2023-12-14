@@ -1,5 +1,5 @@
 import pandas as pd
-import os
+from pathlib import Path
 
 
 class Decipher:
@@ -200,13 +200,13 @@ class Decipher:
             return
 
         if table_format == 'hdf':
-            savename = os.path.join(path, file_name[0][-25:-3] + '_deciphered.h5')
+            savename = Path(path, file_name[0][-25:-3] + '_deciphered.h5')
             presave_df.to_hdf(savename, key='data', index=False)
         elif table_format == 'csv':
-            savename = os.path.join(path, file_name[0][-25:-3] + '_deciphered.csv')
+            savename = Path(path, file_name[0][-25:-3] + '_deciphered.csv')
             presave_df.to_csv(savename, index=False)
         else:
             self.output.append('Неизвестный формат')
             return
 
-        self.output.append('Таблица сохранена: ' + savename)
+        self.output.append('Таблица сохранена: ' + str(savename))

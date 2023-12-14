@@ -95,7 +95,7 @@ class DecipherAppClass:
 
     def showFileSelectDialog(self):
         FileSelectDialog = QFileDialog()
-        self.fileName = QFileDialog.getOpenFileName(FileSelectDialog, 'Выбор файла', self.path)
+        self.fileName = QFileDialog.getOpenFileName(FileSelectDialog, 'Выбор файла', str(self.path))
         if self.fileName[0] == '':
             self._view.info_textEdit.append('Файл не выбран')
         else:
