@@ -1,8 +1,11 @@
+import threading
+
 import numpy as np
 import pandas as pd
 from datetime import datetime
 import math
 from pykalman import KalmanFilter
+from multiprocessing import Process, Pool
 
 
 class Madgwick:
@@ -136,21 +139,31 @@ class Madgwick:
         return earth_acceleration
 
 
+class BigKalman:
+    def __init__(self):
+        self.kf = KalmanFilter()
+
+    def update(self):
+
+
+
+
 class IMUFusion:
     def __init__(self, algo, file_name):
         self.algo = algo
         self.file_name = file_name
         self.df = self.parse_file()
         self.timestamps = self.get_timestamps()
-        self.accX = self.df['ax_MPU1']
-        self.accY = self.df['ay_MPU1']
-        self.accZ = self.df['az_MPU1']
-        self.gyrX = self.df['gx_MPU1']
-        self.gyrY = self.df['gy_MPU1']
-        self.gyrZ = self.df['gz_MPU1']
-        self.magX = self.df['mx_MPU1']
-        self.magY = self.df['my_MPU1']
-        self.magZ = self.df['mz_MPU1']
+        if type(self.algo) is Madgwick:
+            self.accX = self.df['ax_MPU1']
+            self.accY = self.df['ay_MPU1']
+            self.accZ = self.df['az_MPU1']
+            self.gyrX = self.df['gx_MPU1']
+            self.gyrY = self.df['gy_MPU1']
+            self.gyrZ = self.df['gz_MPU1']
+            self.magX = self.df['mx_MPU1']
+            self.magY = self.df['my_MPU1']
+            self.magZ = self.df['mz_MPU1']
         self.quaternions = []
         self.earth_acceleration = []
         self.YPR = []
@@ -185,7 +198,50 @@ class IMUFusion:
                                   self.magY[i], self.magX[i], self.magZ[i]), deltat)
 
             self.quaternions.append(self.algo.q.copy())
-            self.earth_acceleration.append(self.algo.get_earth_acceleration())
+            self.earth_acceleration.append(self.algo.get_earth_acceleration((self.accX[i], self.accY[i], self.accZ[i])))
+
+    def KalmanThread(self, data, output):
+        kf = KalmanFilter()
+        kf = kf.em(data)
+        output = kf.smooth(data)[0]
+
+    def KalmanAcc(self):
+        # timestamps_from0 = []
+        # for timestamp in self.timestamps:
+        #     timestamps_from0.append(timestamp - self.timestamps[0])
+        # print(len(timestamps_from0))
+        # acc = np.vstack((self.accX, self.accY, self.accZ)).T
+        # print(acc.shape)
+        smooth_accX = None
+        smooth_accY = None
+        smooth_accZ = None
+
+        data = [(self.accX, smooth_accX),
+                (self.accY, smooth_accY),
+                (self.accZ, smooth_accZ)]
+
+        pool = Pool(3)
+        pool.map(self.KalmanThread, data)
+
+
+        # t1 = threading.Thread(target=self.KalmanThread, args=(self.accX, smooth_accX))
+        # t2 = threading.Thread(target=self.KalmanThread, args=(self.accY, smooth_accY))
+        # t3 = threading.Thread(target=self.KalmanThread, args=(self.accZ, smooth_accZ))
+        #
+        # t1.join()
+        # t2.join()
+        # t3.join()
+
+        # kf = KalmanFilter()
+        # kf = kf.em(self.accX)
+        # smooth_accX = kf.smooth(self.accX)[0]
+        # kf = kf.em(self.accY)
+        # smooth_accY = kf.smooth(self.accY)[0]
+        # kf = kf.em(self.accZ)
+        # smooth_accZ = kf.smooth(self.accZ)[0]
+        smooth_acc = np.hstack((smooth_accX, smooth_accY, smooth_accZ))
+
+        return smooth_acc
 
     @staticmethod
     def quats_toYPR(q):
@@ -198,10 +254,13 @@ class IMUFusion:
         roll *= 180 / math.pi
         return [yaw, pitch, roll]
 
+    def save_kalman_acc(self, acc):
+        np.savetxt(self.file_name[:-4]+'_KalmanAcc.txt', acc)
+
     def save_quats_txt(self):
         np.savetxt(self.file_name[:-4]+'_quats.txt', self.quaternions)
 
     def save_YPR_txt(self):
         for quat in self.quaternions:
             self.YPR.append(self.quats_toYPR(quat))
-        np.savetxt(self.file_name[:-4]+'_YPR.txt', self .YPR)
+        np.savetxt(self.file_name[:-4]+'_YPR.txt', self.YPR)

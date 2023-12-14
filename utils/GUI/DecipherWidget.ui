@@ -10,6 +10,12 @@
     <height>300</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>400</width>
+    <height>300</height>
+   </size>
+  </property>
   <property name="maximumSize">
    <size>
     <width>400</width>
@@ -38,7 +44,7 @@
        </size>
       </property>
       <property name="textInteractionFlags">
-       <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+       <set>Qt::TextSelectableByMouse</set>
       </property>
      </widget>
     </item>
@@ -59,6 +65,9 @@
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
          <widget class="QComboBox" name="gyrosense_comboBox">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
           <property name="placeholderText">
            <string>Гироскоп</string>
           </property>
@@ -87,7 +96,10 @@
         <item>
          <widget class="QComboBox" name="accelsense_comboBox">
           <property name="currentText">
-           <string/>
+           <string>2g</string>
+          </property>
+          <property name="currentIndex">
+           <number>0</number>
           </property>
           <property name="placeholderText">
            <string>Акселерометр</string>
@@ -138,6 +150,9 @@
     </item>
     <item>
      <widget class="QComboBox" name="saveformat_comboBox">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
       <property name="placeholderText">
        <string>Формат сохранения</string>
       </property>

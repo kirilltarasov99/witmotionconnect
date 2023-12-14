@@ -1,14 +1,15 @@
 import sys
 import os
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QDialog
-from GUI.App_GUI import Ui_WitMotionConnect_MainWindow
-from GUI.Decipher_GUI import Ui_DecipherWidget
-from GUI.MagCalibrationWidget import Ui_MagCalibrationWidget
-
 from utils.HwDialog import HwDialog
 from utils.Decipher import Decipher
 from utils.Mag_calibration import MagCal
+
+from PySide6.QtWidgets import QApplication, QFileDialog
+from PySide6.QtUiTools import QUiLoader
+from PySide6.QtCore import QFile
+
+loader = QUiLoader()
 
 
 class WitMotionConnect:
@@ -42,18 +43,22 @@ class WitMotionConnect:
 
     def openDecipher(self):
         if self.DecipherWindow is None:
-            self.DecipherWindow = DecipherAppWidget()
+            decipher_ui_file = QFile('utils/GUI/DecipherWidget.ui')
+            decipher_ui_file.open(QFile.ReadOnly)
+            self.DecipherWindow = loader.load(decipher_ui_file)
+            decipher_ui_file.close()
             DecipherAppClass(view=self.DecipherWindow)
             self.DecipherWindow.show()
-            self.DecipherWindow.exec_()
             self.DecipherWindow = None
 
     def openMagCal(self):
         if self.MagCalWindow is None:
-            self.MagCalWindow = MagCalibrationAppWidget()
+            magcal_ui_file = QFile('utils/GUI/magCalWidget.ui')
+            magcal_ui_file.open(QFile.ReadOnly)
+            self.MagCalWindow = loader.load(magcal_ui_file)
+            magcal_ui_file.close()
             MagCalWidgetClass(view=self.MagCalWindow)
             self.MagCalWindow.show()
-            self.MagCalWindow.exec_()
             self.MagCalWindow = None
 
     def _connectSignalsAndSlots(self):
@@ -110,27 +115,12 @@ class DecipherAppClass:
         self._view.decipher_pushButton.clicked.connect(lambda: self.func_decipher())
 
 
-class WitMotionConnectMainWindow(QMainWindow, Ui_WitMotionConnect_MainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setupUi(self)
-
-
-class DecipherAppWidget(QDialog, Ui_DecipherWidget):
-    def __init__(self):
-        super().__init__()
-        self.setupUi(self)
-
-
-class MagCalibrationAppWidget(QDialog, Ui_MagCalibrationWidget):
-    def __init__(self):
-        super().__init__()
-        self.setupUi(self)
-
-
 if __name__ == "__main__":
     WitMotionConnectApp = QApplication(sys.argv)
-    WitMotionConnectWindow = WitMotionConnectMainWindow()
+    main_ui_file = QFile('utils/GUI/app.ui')
+    main_ui_file.open(QFile.ReadOnly)
+    WitMotionConnectWindow = loader.load(main_ui_file)
+    main_ui_file.close()
     main_app = WitMotionConnect(view=WitMotionConnectWindow)
     WitMotionConnectWindow.show()
     sys.exit(WitMotionConnectApp.exec())
