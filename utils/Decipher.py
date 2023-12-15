@@ -111,9 +111,9 @@ class Decipher(object):
             if len(lines[5]) > 2:
                 self.magBias_MPU2 = [float(i) * 10 for i in lines[5].strip("\n").split('     ')]
             for i in range(len(self.table['MPU2_data'])):
-                ax = int.from_bytes(self.table['MPU2_data'][i][:2], byteorder='little', signed=True)
-                ay = int.from_bytes(self.table['MPU2_data'][i][2:4], byteorder='little', signed=True)
-                az = int.from_bytes(self.table['MPU2_data'][i][4:6], byteorder='little', signed=True)
+                ax = int.from_bytes(self.table['MPU2_data'][i][:2], byteorder='big', signed=True)
+                ay = int.from_bytes(self.table['MPU2_data'][i][2:4], byteorder='big', signed=True)
+                az = int.from_bytes(self.table['MPU2_data'][i][4:6], byteorder='big', signed=True)
                 if acc_range == '2g':
                     ax /= 16384
                     ay /= 16384
@@ -134,9 +134,9 @@ class Decipher(object):
                 self.ay_MPU2_list.append(ay)
                 self.az_MPU2_list.append(az)
 
-                gx = int.from_bytes(self.table['MPU2_data'][i][6:8], byteorder='little', signed=True)
-                gy = int.from_bytes(self.table['MPU2_data'][i][8:10], byteorder='little', signed=True)
-                gz = int.from_bytes(self.table['MPU2_data'][i][10:12], byteorder='little', signed=True)
+                gx = int.from_bytes(self.table['MPU2_data'][i][6:8], byteorder='big', signed=True)
+                gy = int.from_bytes(self.table['MPU2_data'][i][8:10], byteorder='big', signed=True)
+                gz = int.from_bytes(self.table['MPU2_data'][i][10:12], byteorder='big', signed=True)
                 if gyro_range == '250 deg/s':
                     gx /= 131
                     gy /= 131
