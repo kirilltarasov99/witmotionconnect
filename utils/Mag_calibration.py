@@ -3,10 +3,28 @@ from PySide6 import QtTest
 
 
 class MagCal(object):
+    """
+                :NOTE:
+                    Class for magnetometer calibration function of the app.
+
+                :args:
+                    QToutput (QTextEdit): GUI object for output messages
+            """
+
     def __init__(self, QToutput):
         self.output = QToutput
 
     def calibrate(self, MPU, address, params_path):
+        """
+                    :NOTE:
+                        Performs magnetometer calibration on supported IMUs.
+
+                    :args:
+                        MPU (): IMU to use
+                        address (string): I2C address of MPU on microcontroller.
+                        params_path (pathlib.Path): path of magnetometer calibration parameters.
+                """
+
         interface = MPU.MPUInterface
         interface.reset_input_buffer()
         sleep(0.005)

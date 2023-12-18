@@ -6,6 +6,15 @@ from datetime import datetime
 
 
 class WitMotionDialog(object):
+    """
+                :NOTE:
+                    Class to use with WitMotion HWT605 IMU.
+
+                :args:
+                    QToutput (QTextEdit): GUI object for output messages
+                    savepath (pathlib.Path): path to data folder
+            """
+
     def __init__(self, QToutput, savepath):
         self.output = QToutput
         self.savepath = savepath
@@ -15,6 +24,15 @@ class WitMotionDialog(object):
         self.IMUdata = None
 
     def connect(self, port, baud_rate):
+        """
+                    :NOTE:
+                        Opens serial connection to IMU.
+
+                    :args:
+                        port (string): serial port address
+                        baud_rate (string): baud rate value
+                """
+
         self.imu = IMU(path=port, baudrate=baud_rate)
         time.sleep(1)
         chiptime = self.imu.get_timestamp()
@@ -26,15 +44,30 @@ class WitMotionDialog(object):
             self.imu.subscribe(self.callback)
 
     def disconnect(self):
+        """
+                    :NOTE:
+                        Closes serial connection to IMU.
+                """
+
         self.imu.close()
         self.output.append('Датчик отключен')
 
     def start_recording(self):
+        """
+                    :NOTE:
+                        Starts recording data.
+                """
+
         self.output.append('Начата запись')
-        self.create_df()
+        self.IMUdata = pd.DataFrame(columns=['SystemTime', 'ChipTime', 'ax(g)', 'ay(g)', 'az(g)', 'wx(deg/s)', 'wy(deg/s)', 'wz(deg/s)'])
         self.recording = True
 
     def stop_recording(self):
+        """
+                    :NOTE:
+                        Stops recording data and saves it to hdf table.
+                """
+
         self.output.append('Запись остановлена')
         self.recording = False
         DF_savename = datetime.now().strftime("%Y%m%d_%H%M%S") + '.csv'
@@ -42,6 +75,14 @@ class WitMotionDialog(object):
 
 # Following functions are called only locally
     def callback(self, msg):
+        """
+                    :NOTE:
+                        Records incoming data from IMU into dict buffer.
+
+                    :args:
+                        msg (mitmotion.protocol): incoming data
+                """
+
         if type(msg) is witmotion.protocol.TimeMessage:
             ChipTime = self.imu.get_timestamp()
             SystemTime = datetime.now()
@@ -66,6 +107,3 @@ class WitMotionDialog(object):
 
             if self.recording is True:
                 self.IMUdata.loc[len(self.IMUdata)] = self.data_dict
-
-    def create_df(self):
-        self.IMUdata = pd.DataFrame(columns=['SystemTime', 'ChipTime', 'ax(g)', 'ay(g)', 'az(g)', 'wx(deg/s)', 'wy(deg/s)', 'wz(deg/s)'])

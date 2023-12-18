@@ -3,6 +3,14 @@ from pathlib import Path
 
 
 class Decipher(object):
+    """
+                :NOTE:
+                    Class for Decipher function of the app.
+
+                :args:
+                    QToutput (QTextEdit): GUI object for output messages
+            """
+
     def __init__(self, QToutput):
         self.output = QToutput
         self.table = pd.DataFrame
@@ -31,6 +39,14 @@ class Decipher(object):
         self.mRes = 10. * 1229. / 4096.
 
     def open(self, file_name):
+        """
+                    :NOTE:
+                        Opens hdf table containing raw sensor values.
+
+                    :args:
+                        file_name (string): path to file
+                """
+
         self.table = pd.read_hdf(file_name[0], key='data')
 
     def decipher(self, acc_range, gyro_range, params_path):
@@ -202,6 +218,7 @@ class Decipher(object):
                         path (pathlib.Path): path to data folder
                         table_format (string): chosen save format
                 """
+
         if 'MPU2_data' in self.table.columns:
             presave_df = pd.DataFrame({'SystemTime': self.table['SystemTime'],
                                        'ax_MPU1': self.ax_MPU1_list, 'ay_MPU1': self.ay_MPU1_list, 'az_MPU1': self.az_MPU1_list,
