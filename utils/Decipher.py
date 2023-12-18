@@ -34,6 +34,16 @@ class Decipher(object):
         self.table = pd.read_hdf(file_name[0], key='data')
 
     def decipher(self, acc_range, gyro_range, params_path):
+        """
+                    :NOTE:
+                        Constant values for conversion:
+                        https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-9150-Datasheet.pdf
+                        (from p. 11, Sensitivity Scale Factor)
+
+                    :args:
+                        var (type): desc
+                """
+
         self.output.append('Дешифрование...')
         with open(params_path, 'r') as file:
             lines = file.readlines()
