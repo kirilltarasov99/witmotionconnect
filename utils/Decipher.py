@@ -36,12 +36,15 @@ class Decipher(object):
     def decipher(self, acc_range, gyro_range, params_path):
         """
                     :NOTE:
+                        Converts hdf table containing raw sensor values to readable format.
                         Constant values for conversion:
                         https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-9150-Datasheet.pdf
                         (from p. 11, Sensitivity Scale Factor)
 
                     :args:
-                        var (type): desc
+                        acc_range (string): accelerometer sensitivity
+                        gyro_range (string): gyroscope sensitivity
+                        params_path (pathlib.Path): path of magnetometer calibration file
                 """
 
         self.output.append('Дешифрование...')
@@ -190,6 +193,15 @@ class Decipher(object):
             return
 
     def save(self, file_name, path, table_format):
+        """
+                    :NOTE:
+                        Saves converted table into chosen format.
+
+                    :args:
+                        file_name (string): name of source table
+                        path (pathlib.Path): path to data folder
+                        table_format (string): chosen save format
+                """
         if 'MPU2_data' in self.table.columns:
             presave_df = pd.DataFrame({'SystemTime': self.table['SystemTime'],
                                        'ax_MPU1': self.ax_MPU1_list, 'ay_MPU1': self.ay_MPU1_list, 'az_MPU1': self.az_MPU1_list,
