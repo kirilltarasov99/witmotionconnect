@@ -136,7 +136,7 @@ class Decipher(object):
                 self.my_MPU1_list.append(my)
                 self.mz_MPU1_list.append(mz)
 
-        elif 'MPU2_data' in self.table.columns:
+        if 'MPU2_data' in self.table.columns:
             if len(lines[5]) > 2:
                 self.magBias_MPU2 = [float(i) * 10 for i in lines[5].strip("\n").split('     ')]
             for i in range(len(self.table['MPU2_data'])):
@@ -192,9 +192,9 @@ class Decipher(object):
                     my = int.from_bytes(self.table['MPU2_data'][i][14:16], byteorder='little', signed=True)
                     mz = int.from_bytes(self.table['MPU2_data'][i][16:18], byteorder='little', signed=True)
 
-                    mx *= 0.3
-                    my *= 0.3
-                    mz *= 0.3
+                    mx = mx * self.mRes * self.magCalibration[0] - self.magBias_MPU2[0]
+                    my = my * self.mRes * self.magCalibration[1] - self.magBias_MPU2[1]
+                    mz = mz * self.mRes * self.magCalibration[2] - self.magBias_MPU2[2]
                 else:
                     mx = 0
                     my = 0
