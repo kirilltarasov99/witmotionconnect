@@ -236,8 +236,10 @@ class Decipher(object):
 
         else:
             self.output.append('Неизвестный формат таблицы')
+            self.clean_lists()
             return
 
+        self.clean_lists()
         if table_format == 'hdf':
             savename = Path(path, file_name[0][-25:-3] + '_deciphered.h5')
             presave_df.to_hdf(savename, key='data', index=False)
@@ -249,3 +251,23 @@ class Decipher(object):
             return
 
         self.output.append('Таблица сохранена: ' + str(savename))
+
+    def clean_lists(self):
+        self.ax_MPU1_list = []
+        self.ay_MPU1_list = []
+        self.az_MPU1_list = []
+        self.gx_MPU1_list = []
+        self.gy_MPU1_list = []
+        self.gz_MPU1_list = []
+        self.mx_MPU1_list = []
+        self.my_MPU1_list = []
+        self.mz_MPU1_list = []
+        self.ax_MPU2_list = []
+        self.ay_MPU2_list = []
+        self.az_MPU2_list = []
+        self.gx_MPU2_list = []
+        self.gy_MPU2_list = []
+        self.gz_MPU2_list = []
+        self.mx_MPU2_list = []
+        self.my_MPU2_list = []
+        self.mz_MPU2_list = []
