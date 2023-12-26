@@ -102,12 +102,12 @@ class DecipherAppClass(object):
             self._view.info_textEdit.append('Выбран файл ' + self.fileName[0])
 
     def func_decipher(self):
-        self.Decipher_obj.open(file_name=self.fileName)
+        self.Decipher_obj.open(file_name=self.fileName[0])
         self.Decipher_obj.decipher(acc_range=self._view.accelsense_comboBox.currentText(),
                                    gyro_range=self._view.gyrosense_comboBox.currentText(),
                                    params_path=main_app.params_path)
 
-        self.Decipher_obj.save(file_name=self.fileName,
+        self.Decipher_obj.save(file_name=self.fileName[0],
                                path=self.path,
                                table_format=self._view.saveformat_comboBox.currentText())
 

@@ -9,7 +9,7 @@ class MagCal(object):
 
                 :args:
                     QToutput (QTextEdit): GUI object for output messages
-            """
+    """
 
     def __init__(self, QToutput):
         self.output = QToutput
@@ -23,7 +23,7 @@ class MagCal(object):
                         MPU (): IMU to use
                         address (string): I2C address of MPU on microcontroller.
                         params_path (pathlib.Path): path of magnetometer calibration parameters.
-                """
+        """
 
         interface = MPU.MPUInterface
         interface.reset_input_buffer()

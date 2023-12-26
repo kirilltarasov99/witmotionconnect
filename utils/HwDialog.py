@@ -9,7 +9,7 @@ class HwDialog(object):
                     Class which creates an IMU object.
                     Supports all three implemented types.
                     Serves as a connector between main app and hardware implementations.
-            """
+    """
 
     def __init__(self):
         self.HW_class = None
@@ -25,7 +25,7 @@ class HwDialog(object):
                         port (string): serial port address
                         baud_rate (string): baud rate
                         data_path (pathlib.Path): path to data folder
-                """
+        """
 
         if connectedHW_type == 'WitMotion':
             self.HW_class = WitMotionDialog(QToutput=QToutput, savepath=data_path)
@@ -41,7 +41,7 @@ class HwDialog(object):
         """
                     :NOTE:
                         Closes serial connection to IMU using function of stated class.
-                """
+        """
 
         self.HW_class.disconnect()
 
@@ -52,7 +52,7 @@ class HwDialog(object):
 
                     :args:
                         mode (string): recording mode
-                """
+        """
 
         if self.HW_class is not WitMotionDialog:
             self.HW_class.start_recording(mode)
@@ -63,6 +63,6 @@ class HwDialog(object):
         """
                     :NOTE:
                         Stops recording data and saves it using function of stated class.
-                """
+        """
 
         self.HW_class.stop_recording()

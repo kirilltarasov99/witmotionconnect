@@ -9,11 +9,19 @@ class Decipher(object):
 
                 :args:
                     QToutput (QTextEdit): GUI object for output messages
-            """
+    """
 
     def __init__(self, QToutput):
         self.output = QToutput
         self.table = pd.DataFrame
+        self.clean_lists()
+
+        self.magBias_MPU1 = [30, 270, -100]
+        self.magBias_MPU2 = [30, 270, -100]
+        self.magCalibration = [1.16, 1.16, 1.21]
+        self.mRes = 10. * 1229. / 4096.
+
+    def clean_lists(self):
         self.ax_MPU1_list = []
         self.ay_MPU1_list = []
         self.az_MPU1_list = []
@@ -33,11 +41,6 @@ class Decipher(object):
         self.my_MPU2_list = []
         self.mz_MPU2_list = []
 
-        self.magBias_MPU1 = [30, 270, -100]
-        self.magBias_MPU2 = [30, 270, -100]
-        self.magCalibration = [1.16, 1.16, 1.21]
-        self.mRes = 10. * 1229. / 4096.
-
     def open(self, file_name):
         """
                     :NOTE:
@@ -45,9 +48,9 @@ class Decipher(object):
 
                     :args:
                         file_name (string): path to file
-                """
+        """
 
-        self.table = pd.read_hdf(file_name[0], key='data')
+        self.table = pd.read_hdf(file_name, key='data')
 
     def decipher(self, acc_range, gyro_range, params_path):
         """
@@ -61,7 +64,7 @@ class Decipher(object):
                         acc_range (string): accelerometer sensitivity
                         gyro_range (string): gyroscope sensitivity
                         params_path (pathlib.Path): path of magnetometer calibration file
-                """
+        """
 
         self.output.append('Дешифрование...')
         with open(params_path, 'r') as file:
@@ -217,7 +220,7 @@ class Decipher(object):
                         file_name (string): name of source table
                         path (pathlib.Path): path to data folder
                         table_format (string): chosen save format
-                """
+        """
 
         if 'MPU2_data' in self.table.columns:
             presave_df = pd.DataFrame({'SystemTime': self.table['SystemTime'],
@@ -241,33 +244,13 @@ class Decipher(object):
 
         self.clean_lists()
         if table_format == 'hdf':
-            savename = Path(path, file_name[0][-25:-3] + '_deciphered.h5')
+            savename = Path(path, file_name[-25:-3] + '_deciphered.h5')
             presave_df.to_hdf(savename, key='data', index=False)
         elif table_format == 'csv':
-            savename = Path(path, file_name[0][-25:-3] + '_deciphered.csv')
+            savename = Path(path, file_name[-25:-3] + '_deciphered.csv')
             presave_df.to_csv(savename, index=False)
         else:
             self.output.append('Неизвестный формат')
             return
 
         self.output.append('Таблица сохранена: ' + str(savename))
-
-    def clean_lists(self):
-        self.ax_MPU1_list = []
-        self.ay_MPU1_list = []
-        self.az_MPU1_list = []
-        self.gx_MPU1_list = []
-        self.gy_MPU1_list = []
-        self.gz_MPU1_list = []
-        self.mx_MPU1_list = []
-        self.my_MPU1_list = []
-        self.mz_MPU1_list = []
-        self.ax_MPU2_list = []
-        self.ay_MPU2_list = []
-        self.az_MPU2_list = []
-        self.gx_MPU2_list = []
-        self.gy_MPU2_list = []
-        self.gz_MPU2_list = []
-        self.mx_MPU2_list = []
-        self.my_MPU2_list = []
-        self.mz_MPU2_list = []

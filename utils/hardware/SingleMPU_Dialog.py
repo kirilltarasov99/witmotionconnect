@@ -15,7 +15,7 @@ class SingleMPUDialog(object):
                 :args:
                     QToutput (QTextEdit): GUI object for output messages
                     savepath (pathlib.Path): path to data folder
-            """
+    """
 
     def __init__(self, QToutput, savepath):
         self.output = QToutput
@@ -35,7 +35,7 @@ class SingleMPUDialog(object):
                     :args:
                         port (string): serial port address
                         baud_rate (string): baud rate value
-                """
+        """
 
         self.MPUInterface = serial.Serial(port=port, baudrate=baud_rate)
         self.output.append('Датчик подключен')
@@ -44,7 +44,7 @@ class SingleMPUDialog(object):
         """
                     :NOTE:
                         Closes serial connection to IMU.
-                """
+        """
 
         self.MPUInterface.close()
         self.output.append('Датчик отключен')
@@ -53,7 +53,7 @@ class SingleMPUDialog(object):
         """
                     :NOTE:
                         Records incoming data from IMU into list buffer.
-                """
+        """
 
         self.MPUInterface.reset_input_buffer()
         sleep(0.005)
@@ -79,7 +79,7 @@ class SingleMPUDialog(object):
 
                     :args:
                         mode (string): recording mode
-                """
+        """
 
         self.mode = mode
         self.MPUdata = []
@@ -99,7 +99,7 @@ class SingleMPUDialog(object):
         """
                     :NOTE:
                         Stops recording data and saves it to hdf table.
-                """
+        """
 
         self.MPUInterface.write((1).to_bytes(1, byteorder='big'))
         self.pause_event.set()

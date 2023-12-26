@@ -13,7 +13,7 @@ class WitMotionDialog(object):
                 :args:
                     QToutput (QTextEdit): GUI object for output messages
                     savepath (pathlib.Path): path to data folder
-            """
+    """
 
     def __init__(self, QToutput, savepath):
         self.output = QToutput
@@ -31,7 +31,7 @@ class WitMotionDialog(object):
                     :args:
                         port (string): serial port address
                         baud_rate (string): baud rate value
-                """
+        """
 
         self.imu = IMU(path=port, baudrate=baud_rate)
         time.sleep(1)
@@ -47,7 +47,7 @@ class WitMotionDialog(object):
         """
                     :NOTE:
                         Closes serial connection to IMU.
-                """
+        """
 
         self.imu.close()
         self.output.append('Датчик отключен')
@@ -56,7 +56,7 @@ class WitMotionDialog(object):
         """
                     :NOTE:
                         Starts recording data.
-                """
+        """
 
         self.output.append('Начата запись')
         self.IMUdata = pd.DataFrame(columns=['SystemTime', 'ChipTime', 'ax(g)', 'ay(g)', 'az(g)', 'wx(deg/s)', 'wy(deg/s)', 'wz(deg/s)'])
@@ -66,7 +66,7 @@ class WitMotionDialog(object):
         """
                     :NOTE:
                         Stops recording data and saves it to hdf table.
-                """
+        """
 
         self.output.append('Запись остановлена')
         self.recording = False
@@ -81,7 +81,7 @@ class WitMotionDialog(object):
 
                     :args:
                         msg (mitmotion.protocol): incoming data
-                """
+        """
 
         if type(msg) is witmotion.protocol.TimeMessage:
             ChipTime = self.imu.get_timestamp()
