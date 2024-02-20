@@ -22,18 +22,23 @@ class WitMotionConnect(object):
         self.SettingsWindow = None
         self.IMU = HwDialog()
         self._connectSignalsAndSlots()
+
         self.app_path = Path()
-        self.params_path = Path(self.app_path, 'magcal_params')
-        self.vcap_params_path = Path(self.app_path, 'vcap_params')
+        self.settings_path = Path(self.app_path, 'settings/')
+        self.magcal_params_path = Path(self.settings_path, 'magcal_params')
+        self.vcap_params_path = Path(self.settings_path, 'vcap_params')
         self.data_path = Path(self.app_path, 'data/')
 
         if not self.data_path.is_dir():
             self.data_path.mkdir()
 
-        if not self.params_path.is_file():
+        if not self.settings_path.is_dir():
+            self.settings_path.mkdir()
+
+        if not self.magcal_params_path.is_file():
             self._view.output_textEdit.append('Калибровочные параметры магнетометра не найдены, проведите калибровку!')
             lines = ['MPU1\n', '\n', '\n', 'MPU2\n', '\n', '\n']
-            with open(self.params_path, 'w') as file:
+            with open(self.magcal_params_path, 'w') as file:
                 file.writelines(lines)
 
         if not self.vcap_params_path.is_file():
@@ -101,7 +106,7 @@ class MagCalWidgetClass(object):
 
     def func_magCal(self):
         self.MagCal_obj.calibrate(MPU=main_app.IMU.HW_class, address=self._view.IMUaddress_comboBox.currentText(),
-                                  params_path=main_app.params_path)
+                                  params_path=main_app.magcal_params_path)
 
     def _connectSignalsAndSlots(self):
         self._view.magCal_pushButton.clicked.connect(lambda: self.func_magCal())
@@ -140,7 +145,7 @@ class DecipherAppClass(object):
         self.Decipher_obj.open(file_name=self.fileName[0])
         self.Decipher_obj.decipher(acc_range=self._view.accelsense_comboBox.currentText(),
                                    gyro_range=self._view.gyrosense_comboBox.currentText(),
-                                   params_path=main_app.params_path)
+                                   params_path=main_app.magcal_params_path)
 
         self.Decipher_obj.save(file_name=self.fileName[0],
                                path=self.path,
