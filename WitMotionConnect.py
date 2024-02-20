@@ -21,6 +21,7 @@ class WitMotionConnect(object):
         self.IMU = HwDialog()
         self._connectSignalsAndSlots()
         self.params_path = Path('./magcal_params')
+        self.vcap_params_path = Path('./vcap_params')
         self.data_path = Path('./data/')
 
         if not self.data_path.is_dir():
@@ -32,12 +33,19 @@ class WitMotionConnect(object):
             with open(self.params_path, 'w') as file:
                 file.writelines(lines)
 
+        if not self.vcap_params_path.is_file():
+            self._view.output_textEdit.append('Создание дефолт параметров для рекордера')
+            lines = ['use\n', '1\n', 'address\n', '/dev/video2\n', 'res\n', '1920\t1080\n', 'fps\n', '60\n']
+            with open(self.vcap_params_path, 'w') as file:
+                file.writelines(lines)
+
     def request_IMU_connect(self):
         self.IMU.connect(QToutput=self._view.output_textEdit,
                          connectedHW_type=self._view.IMU_type_comboBox.currentText(),
                          port=self._view.IMU_port_lineEdit.text(),
                          baud_rate=self._view.IMU_baud_rate_comboBox.currentText(),
-                         data_path=main_app.data_path)
+                         data_path=main_app.data_path,
+                         vcap_params_path=self.vcap_params_path)
 
     def IMU_start_recording(self):
         self.IMU.start_recording(mode=self._view.IMU_mode_comboBox.currentText())

@@ -1,6 +1,7 @@
 from utils.hardware.WitMotion_dialog import WitMotionDialog
 from utils.hardware.SingleMPU_Dialog import SingleMPUDialog
 from utils.hardware.DoubleMPU_Dialog import DoubleMPUDialog
+from utils.hardware.VideoCap import VideoCapture
 
 
 class HwDialog(object):
@@ -13,8 +14,9 @@ class HwDialog(object):
 
     def __init__(self):
         self.HW_class = None
+        self.videocap = None
 
-    def connect(self, QToutput, connectedHW_type, port, baud_rate, data_path):
+    def connect(self, QToutput, connectedHW_type, port, baud_rate, data_path, vcap_params_path):
         """
                     :NOTE:
                         Creates an IMU object and connects the IMU.
@@ -25,7 +27,16 @@ class HwDialog(object):
                         port (string): serial port address
                         baud_rate (string): baud rate
                         data_path (pathlib.Path): path to data folder
+                        vcap_params_path (pathlib.Path): path to videocap params
         """
+        with open(vcap_params_path, 'r') as file:
+            lines = file.readlines()
+
+        if lines[1].strip("\n") == '1':
+            self.videocap = VideoCapture(QToutput=QToutput, savepath=data_path,
+                                         frameSize=lines[5].strip("\n").split('\t'),
+                                         fps=int(lines[7].strip("\n")))
+            self.videocap.connect(cam_address=lines[3].strip("\n"))
 
         if connectedHW_type == 'WitMotion':
             self.HW_class = WitMotionDialog(QToutput=QToutput, savepath=data_path)
@@ -44,6 +55,8 @@ class HwDialog(object):
         """
 
         self.HW_class.disconnect()
+        if self.videocap:
+            self.videocap.disconnect()
 
     def start_recording(self, mode):
         """
@@ -53,6 +66,8 @@ class HwDialog(object):
                     :args:
                         mode (string): recording mode
         """
+        if self.videocap:
+            self.videocap.start_recording()
 
         if self.HW_class is not WitMotionDialog:
             self.HW_class.start_recording(mode)
@@ -64,5 +79,8 @@ class HwDialog(object):
                     :NOTE:
                         Stops recording data and saves it using function of stated class.
         """
+
+        if self.videocap:
+            self.videocap.stop_recording()
 
         self.HW_class.stop_recording()
