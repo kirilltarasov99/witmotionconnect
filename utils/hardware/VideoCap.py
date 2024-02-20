@@ -6,6 +6,16 @@ from threading import Thread, Event
 
 
 class VideoCapture(object):
+    """
+                :NOTE:
+                    Class for communication with a V4L2 capture card.
+
+                :args:
+                    QToutput (QTextEdit): GUI object for output messages
+                    savepath (pathlib.Path): path to data folder
+                    frameSize (list): video resolution
+                    fps (string): fps of video
+    """
     def __init__(self, QToutput, savepath, frameSize, fps):
         self.cap = cv.VideoCapture
         self.output = QToutput
@@ -24,8 +34,7 @@ class VideoCapture(object):
                         Opens connection to capture card and creates VideoWriter.
 
                     :args:
-                        port (string): serial port address
-                        baud_rate (string): baud rate value
+                        cam_address (string): address of capture card
         """
         self.cap = cv.VideoCapture(cam_address)
         self.cap.set(cv.CAP_PROP_FRAME_WIDTH, self.frameSize[0])
@@ -81,4 +90,9 @@ class VideoCapture(object):
         self.output.append('Рекордер остановлен')
 
     def disconnect(self):
+        """
+                    :NOTE:
+                        Releases capture card from use in the app.
+        """
+
         self.cap.release()

@@ -4,7 +4,8 @@ class Settings(object):
                     Class for settings widget.
 
                 :args:
-                    QToutput (QTextEdit): GUI object for output messages
+                    params_path (pathlib.Path): path to videocap params
+                    view (QWidget): QT Widget object which is used for Settings window
     """
 
     def __init__(self, params_path, view):
@@ -27,6 +28,11 @@ class Settings(object):
             self._view.VCap_use_checkBox.setChecked(1)
 
     def save(self):
+        """
+                :NOTE:
+                    Saves settings into a text file.
+        """
+
         if self._view.VCap_use_checkBox.isChecked():
             self.params[1] = '1\n'
         else:

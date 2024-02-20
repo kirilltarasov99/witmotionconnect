@@ -7,7 +7,7 @@ from utils.hardware.VideoCap import VideoCapture
 class HwDialog(object):
     """
                 :NOTE:
-                    Class which creates an IMU object.
+                    Class which creates IMU and VideoCapture objects.
                     Supports all three implemented types.
                     Serves as a connector between main app and hardware implementations.
     """
@@ -19,7 +19,7 @@ class HwDialog(object):
     def connect(self, QToutput, connectedHW_type, port, baud_rate, data_path, vcap_params_path):
         """
                     :NOTE:
-                        Creates an IMU object and connects the IMU.
+                        Creates IMU and VideoCapture objects and connects the IMU.
 
                     :args:
                         QToutput (QTextEdit): GUI object for output messages
@@ -51,7 +51,7 @@ class HwDialog(object):
     def disconnect(self):
         """
                     :NOTE:
-                        Closes serial connection to IMU using function of stated class.
+                        Closes serial connection to IMU using function of stated class, and releases the capture card.
         """
 
         self.HW_class.disconnect()
