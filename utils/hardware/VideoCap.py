@@ -10,7 +10,6 @@ class VideoCapture(object):
         self.cap = cv.VideoCapture
         self.output = QToutput
         self.savepath = savepath
-        self.timelist = []
 
         self.fps = int(fps)
         self.frameSize = [eval(i) for i in frameSize]
@@ -53,7 +52,6 @@ class VideoCapture(object):
                 break
 
             ret, frame = self.cap.read()
-            self.timelist.append(self.cap.get(propId=cv.CAP_PROP_POS_MSEC))
             if not ret:
                 print("Can't receive frame (stream end?). Exiting ...")
                 break
@@ -64,7 +62,6 @@ class VideoCapture(object):
                     :NOTE:
                         Starts recording data.
         """
-        self.timelist = []
         vid_savename = PurePath(self.savepath, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')
         self.out = cv.VideoWriter(str(vid_savename), fourcc=cv.VideoWriter.fourcc(*'XVID'),
                                   fps=self.fps, frameSize=self.frameSize)
