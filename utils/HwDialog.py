@@ -34,7 +34,7 @@ class HwDialog(object):
 
         if lines[1].strip("\n") == '1':
             self.videocap = VideoCapture(QToutput=QToutput, savepath=data_path,
-                                         frameSize=lines[5].strip("\n").split('\t'),
+                                         frameSize=lines[5].strip("\n").split('x'),
                                          fps=int(lines[7].strip("\n")))
             self.videocap.connect(cam_address=lines[3].strip("\n"))
 

@@ -1,10 +1,11 @@
 import sys
 
-from pathlib import Path
+from pathlib import Path, PurePath
 
 from utils.HwDialog import HwDialog
 from utils.Decipher import Decipher
 from utils.Mag_calibration import MagCal
+from utils.Settings import Settings
 
 from PySide6.QtWidgets import QApplication, QFileDialog
 from PySide6.QtUiTools import QUiLoader
@@ -18,11 +19,13 @@ class WitMotionConnect(object):
         self._view = view
         self.DecipherWindow = None
         self.MagCalWindow = None
+        self.SettingsWindow = None
         self.IMU = HwDialog()
         self._connectSignalsAndSlots()
-        self.params_path = Path('./magcal_params')
-        self.vcap_params_path = Path('./vcap_params')
-        self.data_path = Path('./data/')
+        self.app_path = Path()
+        self.params_path = Path(self.app_path, 'magcal_params')
+        self.vcap_params_path = Path(self.app_path, 'vcap_params')
+        self.data_path = Path(self.app_path, 'data/')
 
         if not self.data_path.is_dir():
             self.data_path.mkdir()
@@ -35,7 +38,7 @@ class WitMotionConnect(object):
 
         if not self.vcap_params_path.is_file():
             self._view.output_textEdit.append('Создание дефолт параметров для рекордера')
-            lines = ['use\n', '1\n', 'address\n', '/dev/video2\n', 'res\n', '1920\t1080\n', 'fps\n', '60\n']
+            lines = ['use\n', '1\n', 'address\n', '/dev/video2\n', 'res\n', '1920x1080\n', 'fps\n', '60\n']
             with open(self.vcap_params_path, 'w') as file:
                 file.writelines(lines)
 
@@ -70,6 +73,16 @@ class WitMotionConnect(object):
             self.MagCalWindow.show()
             self.MagCalWindow = None
 
+    def openSettings(self):
+        if self.SettingsWindow is None:
+            settings_ui_file = QFile('utils/GUI/OptionsWidget.ui')
+            settings_ui_file.open(QFile.ReadOnly)
+            self.SettingsWindow = loader.load(settings_ui_file)
+            settings_ui_file.close()
+            SettingsWidgetClass(view=self.SettingsWindow)
+            self.SettingsWindow.show()
+            self.SettingsWindow = None
+
     def _connectSignalsAndSlots(self):
         self._view.IMU_connect_button.clicked.connect(lambda: self.request_IMU_connect())
         self._view.IMU_disconnect_button.clicked.connect(self.IMU.disconnect)
@@ -77,6 +90,7 @@ class WitMotionConnect(object):
         self._view.IMU_recording_stop_button.clicked.connect(self.IMU.stop_recording)
         self._view.decipher_action.triggered.connect(lambda: self.openDecipher())
         self._view.magCal_action.triggered.connect(lambda: self.openMagCal())
+        self._view.settings_action.triggered.connect(lambda: self.openSettings())
 
 
 class MagCalWidgetClass(object):
@@ -91,6 +105,19 @@ class MagCalWidgetClass(object):
 
     def _connectSignalsAndSlots(self):
         self._view.magCal_pushButton.clicked.connect(lambda: self.func_magCal())
+
+
+class SettingsWidgetClass(object):
+    def __init__(self, view):
+        self._view = view
+        self.Settings_obj = Settings(main_app.vcap_params_path, self._view)
+        self._connectSignalsAndSlots()
+
+    def save_settings(self):
+        self.Settings_obj.save()
+
+    def _connectSignalsAndSlots(self):
+        self._view.save_pushButton.clicked.connect(lambda: self.save_settings())
 
 
 class DecipherAppClass(object):

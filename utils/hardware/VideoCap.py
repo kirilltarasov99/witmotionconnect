@@ -53,7 +53,7 @@ class VideoCapture(object):
 
             ret, frame = self.cap.read()
             if not ret:
-                print("Can't receive frame (stream end?). Exiting ...")
+                print('Ошибка в получении кадра. Проверьте рекордер и начните сначала')
                 break
             self.out.write(frame)
 
