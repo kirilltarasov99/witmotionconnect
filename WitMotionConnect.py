@@ -1,6 +1,6 @@
 import sys
 
-from pathlib import Path, PurePath
+from pathlib import Path
 
 from utils.HwDialog import HwDialog
 from utils.Decipher import Decipher
