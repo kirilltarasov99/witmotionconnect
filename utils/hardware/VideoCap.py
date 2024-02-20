@@ -29,8 +29,8 @@ class VideoCapture(object):
                         baud_rate (string): baud rate value
         """
         self.cap = cv.VideoCapture(cam_address)
-        self.cap.set(cv.CAP_PROP_FRAME_WIDTH, int(self.frameSize[0]))
-        self.cap.set(cv.CAP_PROP_FRAME_HEIGHT, int(self.frameSize[1]))
+        self.cap.set(cv.CAP_PROP_FRAME_WIDTH, self.frameSize[0])
+        self.cap.set(cv.CAP_PROP_FRAME_HEIGHT, self.frameSize[1])
         self.cap.set(cv.CAP_PROP_FPS, self.fps)
 
         if self.cap.isOpened():
@@ -67,7 +67,7 @@ class VideoCapture(object):
         self.timelist = []
         vid_savename = PurePath(self.savepath, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')
         self.out = cv.VideoWriter(str(vid_savename), fourcc=cv.VideoWriter.fourcc(*'XVID'),
-                             fps=self.fps, frameSize=self.frameSize)
+                                  fps=self.fps, frameSize=self.frameSize)
         self.pause_event.clear()
         self.recorder_thread = Thread(target=self.recorder)
         self.recorder_thread.start()
