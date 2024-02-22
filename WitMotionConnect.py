@@ -1,4 +1,6 @@
 import sys
+import cv2
+import numpy as np
 
 from pathlib import Path
 
@@ -7,9 +9,10 @@ from utils.Decipher import Decipher
 from utils.Mag_calibration import MagCal
 from utils.Settings import Settings
 
-from PySide6.QtWidgets import QApplication, QFileDialog
+from PySide6.QtWidgets import QWidget, QApplication, QLabel, QFileDialog
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtCore import QFile
+from PySide6.QtCore import QFile, Slot, QThread, Signal, Qt
+from PySide6.QtGui import QPixmap, QImage
 
 loader = QUiLoader()
 
@@ -20,6 +23,7 @@ class WitMotionConnect(object):
         self.DecipherWindow = None
         self.MagCalWindow = None
         self.SettingsWindow = None
+        self.USFeedWindow = None
         self.IMU = HwDialog()
         self._connectSignalsAndSlots()
 
@@ -88,6 +92,11 @@ class WitMotionConnect(object):
             self.SettingsWindow.show()
             self.SettingsWindow = None
 
+    def openUSFeed(self):
+        if self.USFeedWindow is None:
+            self.USFeedWindow = VideoFeed()
+        self.USFeedWindow.show()
+
     def _connectSignalsAndSlots(self):
         self._view.IMU_connect_button.clicked.connect(lambda: self.request_IMU_connect())
         self._view.IMU_disconnect_button.clicked.connect(self.IMU.disconnect)
@@ -96,6 +105,62 @@ class WitMotionConnect(object):
         self._view.decipher_action.triggered.connect(lambda: self.openDecipher())
         self._view.magCal_action.triggered.connect(lambda: self.openMagCal())
         self._view.settings_action.triggered.connect(lambda: self.openSettings())
+        self._view.VideoFeed_pushButton.clicked.connect(lambda: self.openUSFeed())
+
+
+class VideoThread(QThread):
+    change_pixmap_signal = Signal(np.ndarray)
+
+    def __init__(self):
+        super().__init__()
+        self._run_flag = True
+
+    def run(self):
+        cap = main_app.IMU.videocap.cap
+        while self._run_flag:
+            ret, cv_img = cap.read()
+            if ret:
+                self.change_pixmap_signal.emit(cv_img)
+        cap.release()
+
+    def stop(self):
+        """Sets run flag to False and waits for thread to finish"""
+        self._run_flag = False
+        self.wait()
+
+
+class VideoFeed(QWidget):
+    def __init__(self):
+        super().__init__()
+        with open(main_app.vcap_params_path, 'r') as file:
+            self.display_width, self.display_height = [eval(i) for i in file.readlines()[9].strip('\n').split('x')]
+        self.setWindowTitle("УЗИ-сканирование")
+        self.setFixedSize(self.display_width, self.display_height)
+        self.image_label = QLabel(self)
+        self.image_label.resize(self.display_width, self.display_height)
+
+        self.thread = VideoThread()
+        self.thread.change_pixmap_signal.connect(self.update_image)
+        self.thread.start()
+
+    def closeEvent(self, event):
+        self.thread.stop()
+        event.accept()
+
+    @Slot(np.ndarray)
+    def update_image(self, cv_img):
+        """Updates the image_label with a new opencv image"""
+        qt_img = self.convert_cv_qt(cv_img)
+        self.image_label.setPixmap(qt_img)
+
+    def convert_cv_qt(self, cv_img):
+        """Convert from an opencv image to QPixmap"""
+        rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+        h, w, ch = rgb_image.shape
+        bytes_per_line = ch * w
+        convert_to_Qt_format = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
+        p = convert_to_Qt_format.scaled(self.display_width, self.display_height, Qt.AspectRatioMode.KeepAspectRatio)
+        return QPixmap.fromImage(p)
 
 
 class MagCalWidgetClass(object):

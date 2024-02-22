@@ -29,9 +29,9 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>360</x>
+      <x>350</x>
       <y>10</y>
-      <width>351</width>
+      <width>371</width>
       <height>331</height>
      </rect>
     </property>
@@ -215,76 +215,93 @@
       </layout>
      </item>
      <item>
-      <widget class="QGroupBox" name="IMU_control_buttons_groupBox">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="title">
-        <string>Управление датчиком</string>
-       </property>
-       <widget class="QWidget" name="verticalLayoutWidget">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>30</y>
-          <width>161</width>
-          <height>188</height>
-         </rect>
-        </property>
-        <layout class="QVBoxLayout" name="IMU_control_verticalLayout">
-         <item>
-          <widget class="QPushButton" name="IMU_connect_button">
-           <property name="font">
-            <font>
-             <pointsize>10</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Подключить датчик</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="IMU_disconnect_button">
-           <property name="font">
-            <font>
-             <pointsize>10</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Отключить датчик</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="IMU_recording_start_button">
-           <property name="font">
-            <font>
-             <pointsize>10</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Начать запись</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="IMU_recording_stop_button">
-           <property name="font">
-            <font>
-             <pointsize>10</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Остановить запись</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </widget>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QGroupBox" name="IMU_control_buttons_groupBox">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+          </font>
+         </property>
+         <property name="title">
+          <string>Управление датчиком</string>
+         </property>
+         <widget class="QWidget" name="verticalLayoutWidget">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>30</y>
+            <width>161</width>
+            <height>188</height>
+           </rect>
+          </property>
+          <layout class="QVBoxLayout" name="IMU_control_verticalLayout">
+           <item>
+            <widget class="QPushButton" name="IMU_connect_button">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Подключить датчик</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="IMU_disconnect_button">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Отключить датчик</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="IMU_recording_start_button">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Начать запись</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="IMU_recording_stop_button">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Остановить запись</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QPushButton" name="VideoFeed_pushButton">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>230</y>
+            <width>159</width>
+            <height>24</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Трансляция УЗИ</string>
+          </property>
+         </widget>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </widget>
