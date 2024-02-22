@@ -61,11 +61,11 @@
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="VCap_resolution_groupBox">
+     <widget class="QGroupBox" name="VCap_record_resolution_groupBox">
       <property name="title">
-       <string>Разрешение</string>
+       <string>Разрешение записи</string>
       </property>
-      <widget class="QLineEdit" name="VCap_resolution_lineEdit">
+      <widget class="QLineEdit" name="VCap_record_resolution_lineEdit">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -88,6 +88,23 @@
          <x>10</x>
          <y>30</y>
          <width>113</width>
+         <height>26</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="VCap_stream_resolution_groupBox">
+      <property name="title">
+       <string>Разрешение трансляции</string>
+      </property>
+      <widget class="QLineEdit" name="VCap_stream_resolution_lineEdit">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>161</width>
          <height>26</height>
         </rect>
        </property>

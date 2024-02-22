@@ -47,7 +47,8 @@ class WitMotionConnect(object):
 
         if not self.vcap_params_path.is_file():
             self._view.output_textEdit.append('Создание дефолт параметров для рекордера')
-            lines = ['use\n', '1\n', 'address\n', '/dev/video2\n', 'res\n', '1920x1080\n', 'fps\n', '60\n']
+            lines = ['use\n', '1\n', 'address\n', '/dev/video2\n', 'res\n', '1920x1080\n', 'fps\n', '60\n',
+                     'livefeed\n', '1280x720\n']
             with open(self.vcap_params_path, 'w') as file:
                 file.writelines(lines)
 

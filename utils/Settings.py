@@ -15,9 +15,10 @@ class Settings(object):
         with open(self.vcap_params_path, 'r') as file:
             self.params = file.readlines()
 
-        self._view.VCap_FPS_lineEdit.setText(self.params[7].strip('\n'))
-        self._view.VCap_resolution_lineEdit.setText(self.params[5].strip('\n'))
         self._view.VCap_address_lineEdit.setText(self.params[3].strip('\n'))
+        self._view.VCap_record_resolution_lineEdit.setText(self.params[5].strip('\n'))
+        self._view.VCap_FPS_lineEdit.setText(self.params[7].strip('\n'))
+        self._view.VCap_stream_resolution_lineEdit.setText(self.params[9].strip('\n'))
 
         if self.params[1].strip("\n") == '1':
             self.use = True
@@ -39,8 +40,9 @@ class Settings(object):
             self.params[1] = '0\n'
 
         self.params[3] = str(self._view.VCap_address_lineEdit.text() + '\n')
-        self.params[5] = str(self._view.VCap_resolution_lineEdit.text() + '\n')
+        self.params[5] = str(self._view.VCap_record_resolution_lineEdit.text() + '\n')
         self.params[7] = str(self._view.VCap_FPS_lineEdit.text() + '\n')
+        self.params[9] = str(self._view.VCap_stream_resolution_lineEdit.text() + '\n')
 
         with open(self.vcap_params_path, 'w') as file:
             file.writelines(self.params)
