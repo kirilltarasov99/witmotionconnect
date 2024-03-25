@@ -211,7 +211,8 @@ class DecipherAppClass(object):
         self.Decipher_obj.open(file_name=self.fileName[0])
         self.Decipher_obj.decipher(acc_range=self._view.accelsense_comboBox.currentText(),
                                    gyro_range=self._view.gyrosense_comboBox.currentText(),
-                                   params_path=main_app.magcal_params_path)
+                                   params_path=main_app.magcal_params_path,
+                                   calibration=self._view.calibrate_checkBox.isChecked())
 
         self.Decipher_obj.save(file_name=self.fileName[0],
                                path=self.path,

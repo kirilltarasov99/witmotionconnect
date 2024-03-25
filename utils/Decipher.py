@@ -16,6 +16,12 @@ class Decipher(object):
         self.table = pd.DataFrame
         self.clean_lists()
 
+        self.accelBias_MPU1 = [0.06, -0.02, 0.01]
+        self.accelBias_MPU2 = [0.01, -0.02, 0.03]
+
+        self.gyroBias_MPU1 = [-4.7, -1.39, 0.77]
+        self.gyroBias_MPU2 = [-0.05, -0.46, 0.01]
+
         self.magBias_MPU1 = [30, 270, -100]
         self.magBias_MPU2 = [30, 270, -100]
         self.magCalibration = [1.16, 1.16, 1.21]
@@ -52,7 +58,7 @@ class Decipher(object):
 
         self.table = pd.read_hdf(file_name, key='data')
 
-    def decipher(self, acc_range, gyro_range, params_path):
+    def decipher(self, acc_range, gyro_range, params_path, calibration):
         """
                     :NOTE:
                         Converts hdf table containing raw sensor values to readable format.
@@ -93,6 +99,12 @@ class Decipher(object):
                     ax /= 2048
                     ay /= 2048
                     az /= 2048
+
+                if calibration is True:
+                    ax -= self.accelBias_MPU1[0]
+                    ay -= self.accelBias_MPU1[1]
+                    az -= self.accelBias_MPU1[2]
+
                 self.ax_MPU1_list.append(ax)
                 self.ay_MPU1_list.append(ay)
                 self.az_MPU1_list.append(az)
@@ -116,6 +128,11 @@ class Decipher(object):
                     gx /= 16.4
                     gy /= 16.4
                     gz /= 16.4
+
+                if calibration is True:
+                    gx -= self.gyroBias_MPU1[0]
+                    gy -= self.gyroBias_MPU1[1]
+                    gz -= self.gyroBias_MPU1[2]
 
                 self.gx_MPU1_list.append(gx)
                 self.gy_MPU1_list.append(gy)
@@ -162,6 +179,12 @@ class Decipher(object):
                     ax /= 2048
                     ay /= 2048
                     az /= 2048
+
+                if calibration is True:
+                    ax -= self.accelBias_MPU2[0]
+                    ay -= self.accelBias_MPU2[1]
+                    az -= self.accelBias_MPU2[2]
+
                 self.ax_MPU2_list.append(ax)
                 self.ay_MPU2_list.append(ay)
                 self.az_MPU2_list.append(az)
@@ -185,6 +208,11 @@ class Decipher(object):
                     gx /= 16.4
                     gy /= 16.4
                     gz /= 16.4
+
+                if calibration is True:
+                    gx -= self.gyroBias_MPU2[0]
+                    gy -= self.gyroBias_MPU2[1]
+                    gz -= self.gyroBias_MPU2[2]
 
                 self.gx_MPU2_list.append(gx)
                 self.gy_MPU2_list.append(gy)
