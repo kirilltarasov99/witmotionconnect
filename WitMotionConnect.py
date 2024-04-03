@@ -1,6 +1,7 @@
 import sys
 import cv2
 import numpy as np
+import os
 
 from pathlib import Path
 
@@ -51,6 +52,11 @@ class WitMotionConnect(object):
                      'livefeed\n', '1280x720\n']
             with open(self.vcap_params_path, 'w') as file:
                 file.writelines(lines)
+
+        if os.name == 'nt':
+            self._view.IMU_port_lineEdit.setText('COM3')
+        else:
+            self._view.IMU_port_lineEdit.setText('/dev/ttyUSB0')
 
     def request_IMU_connect(self):
         self.IMU.connect(QToutput=self._view.output_textEdit,
