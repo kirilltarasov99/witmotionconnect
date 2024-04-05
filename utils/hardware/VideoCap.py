@@ -1,5 +1,7 @@
+import os
+if os.name == 'nt':
+    os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
 import cv2 as cv
-
 from pathlib import PurePath
 from datetime import datetime
 from threading import Thread, Event
@@ -36,7 +38,10 @@ class VideoCapture(object):
                     :args:
                         cam_address (string): address of capture card
         """
-        self.cap = cv.VideoCapture(cam_address)
+        if os.name == 'nt':
+            self.cap = cv.VideoCapture(int(cam_address), cv.CAP_DSHOW)
+        else:
+            self.cap = cv.VideoCapture(cam_address)
         self.cap.set(cv.CAP_PROP_FRAME_WIDTH, self.frameSize[0])
         self.cap.set(cv.CAP_PROP_FRAME_HEIGHT, self.frameSize[1])
         self.cap.set(cv.CAP_PROP_FPS, self.fps)
@@ -71,9 +76,14 @@ class VideoCapture(object):
                     :NOTE:
                         Starts recording data.
         """
-        vid_savename = PurePath(self.savepath, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')
-        self.out = cv.VideoWriter(str(vid_savename), fourcc=cv.VideoWriter.fourcc(*'XVID'),
-                                  fps=self.fps, frameSize=self.frameSize)
+        if os.name == 'nt':
+            vid_savename = PurePath(self.savepath, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.mp4')
+            self.out = cv.VideoWriter(str(vid_savename), fourcc=cv.VideoWriter.fourcc(*'mp4v'),
+                                      fps=self.fps, frameSize=self.frameSize)
+        else:
+            vid_savename = PurePath(self.savepath, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')
+            self.out = cv.VideoWriter(str(vid_savename), fourcc=cv.VideoWriter.fourcc(*'XVID'),
+                                      fps=self.fps, frameSize=self.frameSize)
         self.pause_event.clear()
         self.recorder_thread = Thread(target=self.recorder)
         self.recorder_thread.start()
