@@ -30,14 +30,18 @@
 В случае необходимости калибровки магнетометров, выберите в меню опций "Калибровка магнетометра" и следуйте инструкциям.
 
 ### Сборка пакета
-При сборке через pyinstaller необходимо добавить папку utils/GUI и tables как hidden-import:
+При сборке через pyinstaller необходимо добавить папку utils/GUI; tables и blosc2 как hidden-import:
 ```
 --add-data "utils/GUI:utils/GUI"
 ```
 ```
---hidden-import=tables
+--hidden-import=tables --hidden-import=blosc2 --collect-binaries=tables
 ```
 Помимо этого, добавить в пути к .ui файлам:
 ```
-sys._MEIPASS
+os.path.join(sys._MEIPASS, ui_file_path)
+```
+Пример команды для сборки:
+```
+pyinstaller --console --onedir --add-data "utils/GUI:utils/GUI" --hidden-import=tables --hidden-import=blosc2 --collect-binaries=tables WitMotionConnect.py
 ```
