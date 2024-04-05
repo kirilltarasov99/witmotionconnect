@@ -74,7 +74,7 @@ class HwDialog(object):
         else:
             self.HW_class.start_recording()
 
-    def stop_recording(self):
+    def stop_recording(self, savetype):
         """
                     :NOTE:
                         Stops recording data and saves it using function of stated class.
@@ -83,4 +83,4 @@ class HwDialog(object):
         if self.videocap:
             self.videocap.stop_recording()
 
-        self.HW_class.stop_recording()
+        self.HW_class.stop_recording(savetype)

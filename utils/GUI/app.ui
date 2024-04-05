@@ -219,6 +219,34 @@
            </property>
           </item>
          </widget>
+         <widget class="QComboBox" name="table_type_comboBox">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>270</y>
+            <width>141</width>
+            <height>36</height>
+           </rect>
+          </property>
+          <property name="currentIndex">
+           <number>2</number>
+          </property>
+          <item>
+           <property name="text">
+            <string>.h5</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>.csv</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>.npz</string>
+           </property>
+          </item>
+         </widget>
         </widget>
        </item>
       </layout>

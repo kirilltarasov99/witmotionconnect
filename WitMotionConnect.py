@@ -69,6 +69,9 @@ class WitMotionConnect(object):
     def IMU_start_recording(self):
         self.IMU.start_recording(mode=self._view.IMU_mode_comboBox.currentText())
 
+    def IMU_stop_recording(self):
+        self.IMU.stop_recording(savetype=self._view.table_type_comboBox.currentText())
+
     def openDecipher(self):
         if self.DecipherWindow is None:
             decipher_ui_file = QFile('utils/GUI/DecipherWidget.ui')
@@ -108,7 +111,7 @@ class WitMotionConnect(object):
         self._view.IMU_connect_button.clicked.connect(lambda: self.request_IMU_connect())
         self._view.IMU_disconnect_button.clicked.connect(self.IMU.disconnect)
         self._view.IMU_recording_start_button.clicked.connect(lambda: self.IMU_start_recording())
-        self._view.IMU_recording_stop_button.clicked.connect(self.IMU.stop_recording)
+        self._view.IMU_recording_stop_button.clicked.connect(lambda: self.IMU_stop_recording())
         self._view.decipher_action.triggered.connect(lambda: self.openDecipher())
         self._view.magCal_action.triggered.connect(lambda: self.openMagCal())
         self._view.settings_action.triggered.connect(lambda: self.openSettings())
