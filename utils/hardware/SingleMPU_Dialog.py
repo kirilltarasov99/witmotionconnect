@@ -105,8 +105,21 @@ class SingleMPUDialog(object):
         self.pause_event.set()
         self.recorder_thread.join()
         self.output.append('Запись остановлена')
-        DF_savename = PurePath(self.savepath, 'Single_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.h5')
-        Data_df = pd.DataFrame({'SystemTime': self.datetime_list,
-                                'MPU1_data': self.MPUdata})
-        Data_df.to_hdf(DF_savename, key='data', index=False)
+        match savetype:
+            case '.h5':
+                DF_savename = PurePath(self.savepath, 'Single_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.h5')
+                Data_df = pd.DataFrame({'SystemTime': self.datetime_list,
+                                        'MPU1_data': self.MPU1_data})
+                Data_df.to_hdf(DF_savename, key='data', index=False)
+
+            case '.csv':
+                DF_savename = PurePath(self.savepath, 'Single_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.csv')
+                Data_df = pd.DataFrame({'SystemTime': self.datetime_list,
+                                        'MPU1_data': self.MPU1_data})
+                Data_df.to_csv(DF_savename, index=False)
+
+            case '.npz':
+                DF_savename = PurePath(self.savepath, 'Single_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.npz')
+                np.savez(DF_savename, SystemTime=self.datetime_list, MPU1_data=self.MPU1_data)
+
         self.output.append('Данные сохранены')

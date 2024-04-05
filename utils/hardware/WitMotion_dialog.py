@@ -1,8 +1,10 @@
-from witmotion import IMU
 import time
 import witmotion.protocol
 import pandas as pd
+
+from witmotion import IMU
 from datetime import datetime
+from pathlib import PurePath
 
 
 class WitMotionDialog(object):
@@ -70,7 +72,7 @@ class WitMotionDialog(object):
 
         self.output.append('Запись остановлена')
         self.recording = False
-        DF_savename = datetime.now().strftime("%Y%m%d_%H%M%S") + '.csv'
+        DF_savename = PurePath(self.savepath, 'WitMotion_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.csv')
         self.IMUdata.to_csv(DF_savename, sep='\t', index=False)
 
 # Following functions are called only locally
