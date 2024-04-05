@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from pathlib import Path
 
@@ -13,7 +14,8 @@ class Decipher(object):
 
     def __init__(self, QToutput):
         self.output = QToutput
-        self.table = pd.DataFrame
+        self.savetype = ''
+        self.imutype = ''
         self.clean_lists()
 
         self.accelBias_MPU1 = [0.06, -0.02, 0.01]
@@ -47,6 +49,10 @@ class Decipher(object):
         self.my_MPU2_list = []
         self.mz_MPU2_list = []
 
+        self.time_data = np.ndarray
+        self.MPU1_bytes_data = np.ndarray
+        self.MPU2_bytes_data = None
+
     def open(self, file_name):
         """
                     :NOTE:
@@ -56,12 +62,42 @@ class Decipher(object):
                         file_name (string): path to file
         """
 
-        self.table = pd.read_hdf(file_name, key='data')
+        self.savetype = file_name[-3:]
+        match self.savetype:
+            case 'npz':
+                self.imutype = file_name[-26:-20]
+                data = np.load(file_name, allow_pickle=True)
+                self.time_data = data['SystemTime']
+                self.MPU1_bytes_data = data['MPU1_data']
+                if self.imutype == 'Double':
+                    self.MPU2_bytes_data = data['MPU2_data']
+
+            case '.h5':
+                self.imutype = file_name[-25:-19]
+                data = pd.read_hdf(file_name, key='data').values
+                print(type(data))
+                self.time_data = data[:, 0]
+                self.MPU1_bytes_data = data[:, 1]
+                if self.imutype == 'Double':
+                    self.MPU2_bytes_data = data[:, 2]
+
+            case 'csv':
+                self.imutype = file_name[-26:-20]
+                if self.imutype == 'WitMot':
+                    self.output.append('Записи с устройств WitMotion не требуется дешифровать')
+                    return
+
+                data = pd.read_csv(file_name, key='data').values
+                self.time_data = data[:, 0]
+                self.MPU1_bytes_data = data[:, 1]
+                if self.imutype == 'Double':
+                    self.MPU2_bytes_data = data[:, 2]
 
     def decipher(self, acc_range, gyro_range, params_path, calibration):
         """
                     :NOTE:
-                        Converts hdf table containing raw sensor values to readable format.
+                        Converts table containing raw sensor values to readable format.
+                        Supports hdf, csv, npz
                         Constant values for conversion:
                         https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-9150-Datasheet.pdf
                         (from p. 11, Sensitivity Scale Factor)
@@ -73,16 +109,19 @@ class Decipher(object):
         """
 
         self.output.append('Дешифрование...')
+        print(self.savetype)
+        print(self.imutype)
         with open(params_path, 'r') as file:
             lines = file.readlines()
-        if 'MPU1_data' in self.table.columns:
+
+        if self.MPU1_bytes_data.shape[0] > 0:
             if len(lines[2]) > 2:
                 self.magBias_MPU1 = [float(i)*10 for i in lines[2].strip("\n").split('     ')]
 
-            for i in range(len(self.table['MPU1_data'])):
-                ax = int.from_bytes(self.table['MPU1_data'][i][:2], byteorder='big', signed=True)
-                ay = int.from_bytes(self.table['MPU1_data'][i][2:4], byteorder='big', signed=True)
-                az = int.from_bytes(self.table['MPU1_data'][i][4:6], byteorder='big', signed=True)
+            for i in range(self.MPU1_bytes_data.shape[0]):
+                ax = int.from_bytes(self.MPU1_bytes_data[i][:2], byteorder='big', signed=True)
+                ay = int.from_bytes(self.MPU1_bytes_data[i][2:4], byteorder='big', signed=True)
+                az = int.from_bytes(self.MPU1_bytes_data[i][4:6], byteorder='big', signed=True)
                 if acc_range == '2g':
                     ax /= 16384
                     ay /= 16384
@@ -109,9 +148,9 @@ class Decipher(object):
                 self.ay_MPU1_list.append(ay)
                 self.az_MPU1_list.append(az)
 
-                gx = int.from_bytes(self.table['MPU1_data'][i][6:8], byteorder='big', signed=True)
-                gy = int.from_bytes(self.table['MPU1_data'][i][8:10], byteorder='big', signed=True)
-                gz = int.from_bytes(self.table['MPU1_data'][i][10:12], byteorder='big', signed=True)
+                gx = int.from_bytes(self.MPU1_bytes_data[i][6:8], byteorder='big', signed=True)
+                gy = int.from_bytes(self.MPU1_bytes_data[i][8:10], byteorder='big', signed=True)
+                gz = int.from_bytes(self.MPU1_bytes_data[i][10:12], byteorder='big', signed=True)
                 if gyro_range == '250 deg/s':
                     gx /= 131
                     gy /= 131
@@ -138,10 +177,10 @@ class Decipher(object):
                 self.gy_MPU1_list.append(gy)
                 self.gz_MPU1_list.append(gz)
 
-                if len(self.table['MPU1_data'][i]) == 18:
-                    mx = int.from_bytes(self.table['MPU1_data'][i][12:14], byteorder='little', signed=True)
-                    my = int.from_bytes(self.table['MPU1_data'][i][14:16], byteorder='little', signed=True)
-                    mz = int.from_bytes(self.table['MPU1_data'][i][16:18], byteorder='little', signed=True)
+                if len(self.MPU1_bytes_data[i]) == 18:
+                    mx = int.from_bytes(self.MPU1_bytes_data[i][12:14], byteorder='little', signed=True)
+                    my = int.from_bytes(self.MPU1_bytes_data[i][14:16], byteorder='little', signed=True)
+                    mz = int.from_bytes(self.MPU1_bytes_data[i][16:18], byteorder='little', signed=True)
 
                     mx = mx * self.mRes * self.magCalibration[0] - self.magBias_MPU1[0]
                     my = my * self.mRes * self.magCalibration[1] - self.magBias_MPU1[1]
@@ -156,13 +195,13 @@ class Decipher(object):
                 self.my_MPU1_list.append(my)
                 self.mz_MPU1_list.append(mz)
 
-        if 'MPU2_data' in self.table.columns:
+        if self.MPU2_bytes_data.shape[0] > 0:
             if len(lines[5]) > 2:
                 self.magBias_MPU2 = [float(i) * 10 for i in lines[5].strip("\n").split('     ')]
-            for i in range(len(self.table['MPU2_data'])):
-                ax = int.from_bytes(self.table['MPU2_data'][i][:2], byteorder='big', signed=True)
-                ay = int.from_bytes(self.table['MPU2_data'][i][2:4], byteorder='big', signed=True)
-                az = int.from_bytes(self.table['MPU2_data'][i][4:6], byteorder='big', signed=True)
+            for i in range(self.MPU2_bytes_data.shape[0]):
+                ax = int.from_bytes(self.MPU2_bytes_data[i][:2], byteorder='big', signed=True)
+                ay = int.from_bytes(self.MPU2_bytes_data[i][2:4], byteorder='big', signed=True)
+                az = int.from_bytes(self.MPU2_bytes_data[i][4:6], byteorder='big', signed=True)
                 if acc_range == '2g':
                     ax /= 16384
                     ay /= 16384
@@ -189,9 +228,9 @@ class Decipher(object):
                 self.ay_MPU2_list.append(ay)
                 self.az_MPU2_list.append(az)
 
-                gx = int.from_bytes(self.table['MPU2_data'][i][6:8], byteorder='big', signed=True)
-                gy = int.from_bytes(self.table['MPU2_data'][i][8:10], byteorder='big', signed=True)
-                gz = int.from_bytes(self.table['MPU2_data'][i][10:12], byteorder='big', signed=True)
+                gx = int.from_bytes(self.MPU2_bytes_data[i][6:8], byteorder='big', signed=True)
+                gy = int.from_bytes(self.MPU2_bytes_data[i][8:10], byteorder='big', signed=True)
+                gz = int.from_bytes(self.MPU2_bytes_data[i][10:12], byteorder='big', signed=True)
                 if gyro_range == '250 deg/s':
                     gx /= 131
                     gy /= 131
@@ -218,10 +257,10 @@ class Decipher(object):
                 self.gy_MPU2_list.append(gy)
                 self.gz_MPU2_list.append(gz)
 
-                if len(self.table['MPU2_data'][i]) == 18:
-                    mx = int.from_bytes(self.table['MPU2_data'][i][12:14], byteorder='little', signed=True)
-                    my = int.from_bytes(self.table['MPU2_data'][i][14:16], byteorder='little', signed=True)
-                    mz = int.from_bytes(self.table['MPU2_data'][i][16:18], byteorder='little', signed=True)
+                if len(self.MPU2_bytes_data[i]) == 18:
+                    mx = int.from_bytes(self.MPU2_bytes_data[i][12:14], byteorder='little', signed=True)
+                    my = int.from_bytes(self.MPU2_bytes_data[i][14:16], byteorder='little', signed=True)
+                    mz = int.from_bytes(self.MPU2_bytes_data[i][16:18], byteorder='little', signed=True)
 
                     mx = mx * self.mRes * self.magCalibration[0] - self.magBias_MPU2[0]
                     my = my * self.mRes * self.magCalibration[1] - self.magBias_MPU2[1]
@@ -250,8 +289,8 @@ class Decipher(object):
                         table_format (string): chosen save format
         """
 
-        if 'MPU2_data' in self.table.columns:
-            presave_df = pd.DataFrame({'SystemTime': self.table['SystemTime'],
+        if self.imutype == 'Double':
+            presave_df = pd.DataFrame({'SystemTime': self.time_data,
                                        'ax_MPU1': self.ax_MPU1_list, 'ay_MPU1': self.ay_MPU1_list, 'az_MPU1': self.az_MPU1_list,
                                        'gx_MPU1': self.gx_MPU1_list, 'gy_MPU1': self.gy_MPU1_list, 'gz_MPU1': self.gz_MPU1_list,
                                        'mx_MPU1': self.mx_MPU1_list, 'my_MPU1': self.my_MPU1_list, 'mz_MPU1': self.mz_MPU1_list,
@@ -259,8 +298,8 @@ class Decipher(object):
                                        'gx_MPU2': self.gx_MPU2_list, 'gy_MPU2': self.gy_MPU2_list, 'gz_MPU2': self.gz_MPU2_list,
                                        'mx_MPU2': self.mx_MPU2_list, 'my_MPU2': self.my_MPU2_list, 'mz_MPU2': self.mz_MPU2_list})
 
-        elif 'MPU1_data' in self.table.columns:
-            presave_df = pd.DataFrame({'SystemTime': self.table['SystemTime'],
+        elif self.imutype == 'Single':
+            presave_df = pd.DataFrame({'SystemTime': self.time_data,
                                        'ax_MPU1': self.ax_MPU1_list, 'ay_MPU1': self.ay_MPU1_list, 'az_MPU1': self.az_MPU1_list,
                                        'gx_MPU1': self.gx_MPU1_list, 'gy_MPU1': self.gy_MPU1_list, 'gz_MPU1': self.gz_MPU1_list,
                                        'mx_MPU1': self.mx_MPU1_list, 'my_MPU1': self.my_MPU1_list, 'mz_MPU1': self.mz_MPU1_list})
@@ -272,10 +311,17 @@ class Decipher(object):
 
         self.clean_lists()
         if table_format == 'hdf':
-            savename = Path(path, file_name[-25:-3] + '_deciphered.h5')
+            if self.savetype == '.h5':
+                savename = Path(path, file_name[-25:-3] + '_deciphered.h5')
+            else:
+                savename = Path(path, file_name[-26:-4] + '_deciphered.h5')
             presave_df.to_hdf(savename, key='data', index=False)
+
         elif table_format == 'csv':
-            savename = Path(path, file_name[-25:-3] + '_deciphered.csv')
+            if self.savetype == '.h5':
+                savename = Path(path, file_name[-25:-3] + '_deciphered.csv')
+            else:
+                savename = Path(path, file_name[-26:-4] + '_deciphered.csv')
             presave_df.to_csv(savename, index=False)
         else:
             self.output.append('Неизвестный формат')
