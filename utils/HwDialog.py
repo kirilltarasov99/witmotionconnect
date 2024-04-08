@@ -29,6 +29,7 @@ class HwDialog(object):
                         data_path (pathlib.Path): path to data folder
                         vcap_params_path (pathlib.Path): path to videocap params
         """
+
         with open(vcap_params_path, 'r') as file:
             lines = file.readlines()
 
@@ -65,7 +66,9 @@ class HwDialog(object):
 
                     :args:
                         mode (string): recording mode
+                        start_recorder (bool): whether to start recorder or not; if not, use recorder in main app
         """
+
         if self.videocap and start_recorder:
             self.videocap.start_recording()
 
@@ -78,6 +81,10 @@ class HwDialog(object):
         """
                     :NOTE:
                         Stops recording data and saves it using function of stated class.
+
+                    :args:
+                        savetype (string): name of data type to use when saving
+                        stop_recorder (bool): whether to stop recorder or not; if not, use recorder in main app
         """
 
         if self.videocap and stop_recorder:

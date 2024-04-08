@@ -32,6 +32,11 @@ class VideoCapture(object):
         self.out = cv.VideoWriter
     
     def create_videowriter(self):
+        """
+                    :NOTE:
+                        Creates VideoWriter.
+        """
+
         if os.name == 'nt':
             return cv.VideoWriter(str(PurePath(self.savepath, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
                                   fourcc=cv.VideoWriter.fourcc(*'mp4v'),
