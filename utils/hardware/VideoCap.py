@@ -36,12 +36,12 @@ class VideoCapture(object):
             return cv.VideoWriter(str(PurePath(self.savepath, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
                                   fourcc=cv.VideoWriter.fourcc(*'mp4v'),
                                   fps=self.cap.get(cv.CAP_PROP_FPS),
-                                  frameSize=self.frameSize)
+                                  frameSize=[int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT))])
         else:
             return cv.VideoWriter(str(PurePath(self.savepath, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
                                   fourcc=cv.VideoWriter.fourcc(*'XVID'),
                                   fps=self.cap.get(cv.CAP_PROP_FPS),
-                                  frameSize=self.frameSize)
+                                  frameSize=[int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT))])
 
     def connect(self, cam_address):
         """
