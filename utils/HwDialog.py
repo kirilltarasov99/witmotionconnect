@@ -58,7 +58,7 @@ class HwDialog(object):
         if self.videocap:
             self.videocap.disconnect()
 
-    def start_recording(self, mode):
+    def start_recording(self, mode, start_recorder):
         """
                     :NOTE:
                         Starts recording data using function of stated class.
@@ -66,7 +66,7 @@ class HwDialog(object):
                     :args:
                         mode (string): recording mode
         """
-        if self.videocap:
+        if self.videocap and start_recorder:
             self.videocap.start_recording()
 
         if self.HW_class is not WitMotionDialog:
@@ -74,13 +74,13 @@ class HwDialog(object):
         else:
             self.HW_class.start_recording()
 
-    def stop_recording(self, savetype):
+    def stop_recording(self, savetype, stop_recorder):
         """
                     :NOTE:
                         Stops recording data and saves it using function of stated class.
         """
 
-        if self.videocap:
+        if self.videocap and stop_recorder:
             self.videocap.stop_recording()
 
         self.HW_class.stop_recording(savetype)

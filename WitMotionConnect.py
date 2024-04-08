@@ -3,7 +3,8 @@ import cv2
 import numpy as np
 import os
 
-from pathlib import Path
+from pathlib import Path, PurePath
+from datetime import datetime
 
 from utils.HwDialog import HwDialog
 from utils.Decipher import Decipher
@@ -33,6 +34,9 @@ class WitMotionConnect(object):
         self.magcal_params_path = Path(self.settings_path, 'magcal_params')
         self.vcap_params_path = Path(self.settings_path, 'vcap_params')
         self.data_path = Path(self.app_path, 'data/')
+
+        self.VideoWriter = None
+        self.ext_recorder = False
 
         if not self.data_path.is_dir():
             self.data_path.mkdir()
@@ -71,10 +75,32 @@ class WitMotionConnect(object):
                          vcap_params_path=self.vcap_params_path)
 
     def IMU_start_recording(self):
-        self.IMU.start_recording(mode=self._view.IMU_mode_comboBox.currentText())
+        if self.USFeedWindow:
+            self.ext_recorder = False
+            self.IMU.start_recording(mode=self._view.IMU_mode_comboBox.currentText(), start_recorder=self.ext_recorder)
+            if os.name == 'nt':
+                vid_savename = PurePath(main_app.data_path, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.mp4')
+                self.VideoWriter = cv2.VideoWriter(str(vid_savename), fourcc=cv2.VideoWriter.fourcc(*'mp4v'),
+                                          fps=self.IMU.videocap.cap.get(cv2.CAP_PROP_FPS), frameSize=self.IMU.videocap.frameSize)
+            else:
+                vid_savename = PurePath(main_app.data_path, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')
+                self.VideoWriter = cv2.VideoWriter(str(vid_savename), fourcc=cv2.VideoWriter.fourcc(*'XVID'),
+                                          fps=self.IMU.videocap.cap.get(cv2.CAP_PROP_FPS), frameSize=self.IMU.videocap.frameSize)
+
+        else:
+            self.ext_recorder = True
+            self.IMU.start_recording(mode=self._view.IMU_mode_comboBox.currentText(), start_recorder=self.ext_recorder)
 
     def IMU_stop_recording(self):
-        self.IMU.stop_recording(savetype=self._view.table_type_comboBox.currentText())
+        if self.VideoWriter:
+            self.IMU.stop_recording(savetype=self._view.table_type_comboBox.currentText(), stop_recorder=self.ext_recorder)
+            self.VideoWriter.release()
+            self.VideoWriter = None
+            self._view.output_textEdit.append('Рекордер остановлен')
+        
+        else:
+            self.IMU.stop_recording(savetype=self._view.table_type_comboBox.currentText(), stop_recorder=self.ext_recorder)
+        self.ext_recorder = False
 
     def openDecipher(self):
         if self.DecipherWindow is None:
@@ -107,6 +133,9 @@ class WitMotionConnect(object):
             self.SettingsWindow = None
 
     def openUSFeed(self):
+        if self.ext_recorder:
+            self._view.output_textEdit.append('Нельзя открыть трансляцию во время активной записи')
+            return
         if self.USFeedWindow is None:
             self.USFeedWindow = VideoFeed()
         self.USFeedWindow.show()
@@ -135,11 +164,13 @@ class VideoThread(QThread):
             ret, cv_img = cap.read()
             if ret:
                 self.change_pixmap_signal.emit(cv_img)
-        cap.release()
+                if main_app.VideoWriter:
+                    main_app.VideoWriter.write(cv_img)
 
     def stop(self):
         """Sets run flag to False and waits for thread to finish"""
         self._run_flag = False
+        main_app.VideoWriter = None
         self.wait()
 
 
@@ -159,6 +190,7 @@ class VideoFeed(QWidget):
 
     def closeEvent(self, event):
         self.thread.stop()
+        main_app.USFeedWindow = None
         event.accept()
 
     @Slot(np.ndarray)
