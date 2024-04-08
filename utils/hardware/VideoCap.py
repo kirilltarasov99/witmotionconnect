@@ -79,11 +79,11 @@ class VideoCapture(object):
         if os.name == 'nt':
             vid_savename = PurePath(self.savepath, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.mp4')
             self.out = cv.VideoWriter(str(vid_savename), fourcc=cv.VideoWriter.fourcc(*'mp4v'),
-                                      fps=self.fps, frameSize=self.frameSize)
+                                      fps=self.cap.get(cv.CAP_PROP_FPS), frameSize=self.frameSize)
         else:
             vid_savename = PurePath(self.savepath, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')
             self.out = cv.VideoWriter(str(vid_savename), fourcc=cv.VideoWriter.fourcc(*'XVID'),
-                                      fps=self.fps, frameSize=self.frameSize)
+                                      fps=self.cap.get(cv.CAP_PROP_FPS), frameSize=self.frameSize)
         self.pause_event.clear()
         self.recorder_thread = Thread(target=self.recorder)
         self.recorder_thread.start()
