@@ -10,7 +10,7 @@ from threading import Thread, Event
 class VideoCapture(object):
     """
                 :NOTE:
-                    Class for communication with a V4L2 capture card.
+                    Class for communication with a capture card.
 
                 :args:
                     QToutput (QTextEdit): GUI object for output messages
@@ -18,6 +18,7 @@ class VideoCapture(object):
                     frameSize (list): video resolution
                     fps (string): fps of video
     """
+
     def __init__(self, QToutput, savepath, frameSize, fps):
         self.cap = cv.VideoCapture
         self.output = QToutput
@@ -29,6 +30,18 @@ class VideoCapture(object):
         self.recorder_thread = None
         self.pause_event = Event()
         self.out = cv.VideoWriter
+    
+    def create_videowriter(self):
+        if os.name == 'nt':
+            return cv.VideoWriter(str(PurePath(self.savepath, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
+                                  fourcc=cv.VideoWriter.fourcc(*'mp4v'),
+                                  fps=self.cap.get(cv.CAP_PROP_FPS),
+                                  frameSize=self.frameSize)
+        else:
+            return cv.VideoWriter(str(PurePath(self.savepath, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
+                                  fourcc=cv.VideoWriter.fourcc(*'XVID'),
+                                  fps=self.cap.get(cv.CAP_PROP_FPS),
+                                  frameSize=self.frameSize)
 
     def connect(self, cam_address):
         """
@@ -38,6 +51,7 @@ class VideoCapture(object):
                     :args:
                         cam_address (string): address of capture card
         """
+
         if os.name == 'nt':
             self.cap = cv.VideoCapture(int(cam_address), cv.CAP_DSHOW)
         else:
@@ -76,14 +90,8 @@ class VideoCapture(object):
                     :NOTE:
                         Starts recording data.
         """
-        if os.name == 'nt':
-            vid_savename = PurePath(self.savepath, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.mp4')
-            self.out = cv.VideoWriter(str(vid_savename), fourcc=cv.VideoWriter.fourcc(*'mp4v'),
-                                      fps=self.cap.get(cv.CAP_PROP_FPS), frameSize=self.frameSize)
-        else:
-            vid_savename = PurePath(self.savepath, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')
-            self.out = cv.VideoWriter(str(vid_savename), fourcc=cv.VideoWriter.fourcc(*'XVID'),
-                                      fps=self.cap.get(cv.CAP_PROP_FPS), frameSize=self.frameSize)
+
+        self.out = self.create_videowriter()
         self.pause_event.clear()
         self.recorder_thread = Thread(target=self.recorder)
         self.recorder_thread.start()

@@ -3,9 +3,7 @@ import cv2
 import numpy as np
 import os
 
-from pathlib import Path, PurePath
-from datetime import datetime
-
+from pathlib import Path
 from utils.HwDialog import HwDialog
 from utils.Decipher import Decipher
 from utils.Mag_calibration import MagCal
@@ -78,14 +76,7 @@ class WitMotionConnect(object):
         if self.USFeedWindow:
             self.ext_recorder = False
             self.IMU.start_recording(mode=self._view.IMU_mode_comboBox.currentText(), start_recorder=self.ext_recorder)
-            if os.name == 'nt':
-                vid_savename = PurePath(main_app.data_path, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.mp4')
-                self.VideoWriter = cv2.VideoWriter(str(vid_savename), fourcc=cv2.VideoWriter.fourcc(*'mp4v'),
-                                          fps=self.IMU.videocap.cap.get(cv2.CAP_PROP_FPS), frameSize=self.IMU.videocap.frameSize)
-            else:
-                vid_savename = PurePath(main_app.data_path, 'Video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')
-                self.VideoWriter = cv2.VideoWriter(str(vid_savename), fourcc=cv2.VideoWriter.fourcc(*'XVID'),
-                                          fps=self.IMU.videocap.cap.get(cv2.CAP_PROP_FPS), frameSize=self.IMU.videocap.frameSize)
+            self.VideoWriter = self.IMU.videocap.create_videowriter()
 
         else:
             self.ext_recorder = True
@@ -136,6 +127,7 @@ class WitMotionConnect(object):
         if self.ext_recorder:
             self._view.output_textEdit.append('Нельзя открыть трансляцию во время активной записи')
             return
+
         if self.USFeedWindow is None:
             self.USFeedWindow = VideoFeed()
         self.USFeedWindow.show()
