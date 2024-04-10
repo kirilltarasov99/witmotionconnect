@@ -35,6 +35,7 @@ class WitMotionConnect(object):
 
         self.VideoWriter = None
         self.ext_recorder = False
+        self.ins_recorder = False
 
         if not self.data_path.is_dir():
             self.data_path.mkdir()
@@ -74,9 +75,10 @@ class WitMotionConnect(object):
 
     def IMU_start_recording(self):
         if self.USFeedWindow:
+            self.VideoWriter = self.IMU.videocap.create_videowriter()
             self.ext_recorder = False
             self.IMU.start_recording(mode=self._view.IMU_mode_comboBox.currentText(), start_recorder=self.ext_recorder)
-            self.VideoWriter = self.IMU.videocap.create_videowriter()
+            self.ins_recorder = True
 
         else:
             self.ext_recorder = True
@@ -84,9 +86,10 @@ class WitMotionConnect(object):
 
     def IMU_stop_recording(self):
         if self.VideoWriter:
+            self.ins_recorder = False
             self.IMU.stop_recording(savetype=self._view.table_type_comboBox.currentText(), stop_recorder=self.ext_recorder)
-            self.VideoWriter.release()
-            self.VideoWriter = None
+            main_app.VideoWriter.release()
+            main_app.VideoWriter = None
             self._view.output_textEdit.append('Рекордер остановлен')
         
         else:
@@ -156,13 +159,12 @@ class VideoThread(QThread):
             ret, cv_img = cap.read()
             if ret:
                 self.change_pixmap_signal.emit(cv_img)
-                if main_app.VideoWriter:
+                if main_app.ins_recorder:
                     main_app.VideoWriter.write(cv_img)
 
     def stop(self):
         """Sets run flag to False and waits for thread to finish"""
         self._run_flag = False
-        main_app.VideoWriter = None
         self.wait()
 
 
