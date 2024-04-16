@@ -1,5 +1,6 @@
 import serial
 import pandas as pd
+import numpy as np
 
 from pathlib import PurePath
 from datetime import datetime
@@ -64,11 +65,9 @@ class SingleMPUDialog(object):
 
             match self.mode:
                 case '6DoF':
-                    sleep(0.00045)
                     self.datetime_list.append(datetime.now())
                     self.MPUdata.append(self.MPUInterface.read(12))
                 case '9DoF':
-                    sleep(0.00045)
                     self.datetime_list.append(datetime.now())
                     self.MPUdata.append(self.MPUInterface.read(18))
 
