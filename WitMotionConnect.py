@@ -288,7 +288,7 @@ class MagCalWidgetClass(object):
 class SettingsWidgetClass(object):
     def __init__(self, view):
         self._view = view
-        self.Settings_obj = Settings(main_app.vcap_params_path, self._view)
+        self.Settings_obj = Settings(self._view, main_app.vcap_params_path, main_app.camera_params_path)
         self._connectSignalsAndSlots()
 
     def save_settings(self):
