@@ -18,12 +18,21 @@ class HwDialog(object):
         self.videocap = None
         self.camera = None
     
-    def connectIMU(self, QToutput, connectedHW_type, port, baud_rate, data_path):
+    def connectIMU(self, QToutput, IMU_params_path, data_path):
+        with open(IMU_params_path,'r') as f:
+            lines = f.readlines()
+        
+        address = lines[3].strip('\n')
+        baud_rate = int(lines[5].strip('\n'))
+        connectedHW_type = lines[7].strip('\n')
+        self.IMUmode = lines[9].strip('\n')
+        self.savetype = lines[11].strip('\n')
+
         imu_types = {'WitMotion': WitMotionDialog, 'Single MPU': SingleMPUDialog, 'Double MPU': DoubleMPUDialog}
         if connectedHW_type in imu_types:
             self.HW_class = imu_types[connectedHW_type](QToutput=QToutput, savepath=data_path)
         if self.HW_class is not None:
-            self.HW_class.connect(port=port, baud_rate=baud_rate)
+            self.HW_class.connect(port=address, baud_rate=baud_rate)
 
     def connectVideoCap(self, QToutput, data_path, vcap_params_path):
         with open(vcap_params_path,  'r') as file:
@@ -55,7 +64,7 @@ class HwDialog(object):
                                        fps=int(lines[7].strip("\n")))
             self.camera.connect(cam_address=lines[3].strip("\n"))
             
-    def MultipleConnect(self, QToutput, connectedHW_type, port, baud_rate, data_path, vcap_params_path, camera_params_path):
+    def MultipleConnect(self, QToutput, IMU_params_path, data_path, vcap_params_path, camera_params_path):
         """
                     :NOTE:
                         Creates IMU and VideoCapture objects and connects the IMU.
@@ -69,8 +78,7 @@ class HwDialog(object):
                         vcap_params_path (pathlib.Path): path to videocap params
         """
 
-        self.connectIMU(QToutput=QToutput, connectedHW_type=connectedHW_type, 
-                        port=port, baud_rate=baud_rate, data_path=data_path)
+        self.connectIMU(QToutput=QToutput, IMU_params_path=IMU_params_path, data_path=data_path)
         self.connectVideoCap(QToutput=QToutput, data_path=data_path, camera_params_path=vcap_params_path)
         self.connectCamera(QToutput=QToutput, data_path=data_path, camera_params_path=camera_params_path)
 
@@ -89,7 +97,7 @@ class HwDialog(object):
         if self.camera:
             self.camera.disconnect()
 
-    def start_recording(self, mode, start_recorder):
+    def start_recording(self, start_recorder):
         """
                     :NOTE:
                         Starts recording data using function of stated class.
@@ -103,11 +111,11 @@ class HwDialog(object):
             self.videocap.start_recording()
 
         if self.HW_class is not WitMotionDialog:
-            self.HW_class.start_recording(mode)
+            self.HW_class.start_recording(self.mode)
         else:
             self.HW_class.start_recording()
 
-    def stop_recording(self, savetype, stop_recorder):
+    def stop_recording(self, stop_recorder):
         """
                     :NOTE:
                         Stops recording data and saves it using function of stated class.
@@ -120,4 +128,4 @@ class HwDialog(object):
         if self.videocap and stop_recorder:
             self.videocap.stop_recording()
 
-        self.HW_class.stop_recording(savetype)
+        self.HW_class.stop_recording(self.savetype)

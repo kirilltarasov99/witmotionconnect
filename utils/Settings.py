@@ -8,9 +8,10 @@ class Settings(object):
                     view (QWidget): QT Widget object which is used for Settings window
     """
 
-    def __init__(self, view, recorder_params_path, camera_params_path):
+    def __init__(self, view, recorder_params_path, camera_params_path, IMU_params_path):
         self.vcap_params_path = recorder_params_path
         self.camera_params_path = camera_params_path
+        self.IMU_params_path = IMU_params_path
         self._view = view
 
         with open(self.vcap_params_path, 'r') as file:
@@ -28,6 +29,15 @@ class Settings(object):
         self._view.Camera_record_resolution_lineEdit.setText(self.params_camera[5].strip('\n'))
         self._view.Camera_FPS_lineEdit.setText(self.params_camera[7].strip('\n'))
         self._view.Camera_stream_resolution_lineEdit.setText(self.params_camera[9].strip('\n'))
+
+        with open(IMU_params_path, 'r') as file:
+            self.params_imu = file.readlines()
+        
+        self._view.IMU_address_lineEdit.setText(self.params_imu[3].strip('\n'))
+        self._view.IMU_baud_rate_comboBox.setCurrentText(self.params_imu[5].strip('\n'))
+        self._view.IMU_type_comboBox.setCurrentText(self.params_imu[7].strip('\n'))
+        self._view.IMU_mode_comboBox.setCurrentText(self.params_imu[9].strip('\n'))
+        self._view.table_type_comboBox.setCurrentText(self.params_imu[11].strip('\n'))
         
         if self.params_recorder[1].strip("\n") == '1':
             self.use_recorder = True
@@ -38,12 +48,20 @@ class Settings(object):
             self.use_camera = True
         else:
             self.use_camera = False
-        
+
+        if self.params_imu[1].strip("\n") == '1':
+            self.use_imu = True
+        else:
+            self.use_imu = False
+
         if self.use_recorder:
             self._view.VCap_use_checkBox.setChecked(1)
 
         if self.use_camera:
             self._view.Camera_use_checkBox.setChecked(1)
+        
+        if self.use_imu:
+            self._view.IMU_use_checkBox.setChecked(1)
 
     def save(self):
         """

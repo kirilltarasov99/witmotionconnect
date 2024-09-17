@@ -33,6 +33,7 @@ class WitMotionConnect(object):
         self.magcal_params_path = Path(self.settings_path, 'magcal_params')
         self.vcap_params_path = Path(self.settings_path, 'vcap_params')
         self.camera_params_path = Path(self.settings_path, 'camera_params')
+        self.IMU_params_path = Path(self.settings_path, 'IMU_params')
         self.data_path = Path(self.app_path, 'data/')
 
         self.RecorderVideoWriter = None
@@ -76,19 +77,24 @@ class WitMotionConnect(object):
                          'livefeed\n',  '640x480\n']
             with open(self.camera_params_path,  'w') as file:
                 file.writelines(lines)
-
-        if os.name == 'nt':
-            self._view.IMU_port_lineEdit.setText('COM3')
-        else:
-            self._view.IMU_port_lineEdit.setText('/dev/ttyUSB0')
+        
+        if not self.IMU_params_path.is_file():
+            self._view.output_textEdit.append('Создание дефолт параметров для IMU')
+            if os.name == 'nt':
+                lines = ['use\n', '1\n', 'address\n', 'COM3\n', 'baudrate\n', '460800\n',
+                         'type\n', 'Double MPU\n', 'mode\n', '6DoF\n', 'tabletype\n', '.npz\n']
+            else:
+                lines = ['use\n', '1\n', 'address\n', '/dev/ttyUSB0\n',  'baudrate\n', '460800\n',
+                         'type\n',  'Double MPU\n',  'mode\n',  '6DoF\n',  'tabletype\n', '.npz\n']
+            
+            with open(self.IMU_params_path,  'w') as file:
+                file.writelines(lines)
 
     def request_IMU_connect(self):
         self.hardware.MultipleConnect(QToutput=self._view.output_textEdit,
-                                 connectedHW_type=self._view.IMU_type_comboBox.currentText(),
-                                 port=self._view.IMU_port_lineEdit.text(),
-                                 baud_rate=self._view.IMU_baud_rate_comboBox.currentText(),
-                                 data_path=main_app.data_path,
-                                 vcap_params_path=self.vcap_params_path)
+                                      IMU_params_path=self.IMU_params_path,
+                                      data_path=main_app.data_path,
+                                      vcap_params_path=self.vcap_params_path)
 
     def IMU_start_recording(self):
         if self.USFeedWindow:
@@ -104,13 +110,13 @@ class WitMotionConnect(object):
     def IMU_stop_recording(self):
         if self.RecorderVideoWriter:
             self.ins_recorder = False
-            self.hardware.stop_recording(savetype=self._view.table_type_comboBox.currentText(), stop_recorder=self.ext_recorder)
+            self.hardware.stop_recording(stop_recorder=self.ext_recorder)
             main_app.RecorderVideoWriter.release()
             main_app.RecorderVideoWriter = None
             self._view.output_textEdit.append('Рекордер остановлен')
         
         else:
-            self.hardware.stop_recording(savetype=self._view.table_type_comboBox.currentText(), stop_recorder=self.ext_recorder)
+            self.hardware.stop_recording(stop_recorder=self.ext_recorder)
         self.ext_recorder = False
 
     def openDecipher(self):
@@ -311,7 +317,7 @@ class MagCalWidgetClass(object):
 class SettingsWidgetClass(object):
     def __init__(self, view):
         self._view = view
-        self.Settings_obj = Settings(self._view, main_app.vcap_params_path, main_app.camera_params_path)
+        self.Settings_obj = Settings(self._view, main_app.vcap_params_path, main_app.camera_params_path, main_app.IMU_params_path)
         self._connectSignalsAndSlots()
 
     def save_settings(self):
