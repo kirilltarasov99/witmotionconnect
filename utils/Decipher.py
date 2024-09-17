@@ -75,7 +75,6 @@ class Decipher(object):
             case '.h5':
                 self.imutype = file_name[-25:-19]
                 data = pd.read_hdf(file_name, key='data').values
-                print(type(data))
                 self.time_data = data[:, 0]
                 self.MPU1_bytes_data = data[:, 1]
                 if self.imutype == 'Double':
@@ -109,8 +108,6 @@ class Decipher(object):
         """
 
         self.output.append('Дешифрование...')
-        print(self.savetype)
-        print(self.imutype)
         with open(params_path, 'r') as file:
             lines = file.readlines()
 
@@ -195,88 +192,89 @@ class Decipher(object):
                 self.my_MPU1_list.append(my)
                 self.mz_MPU1_list.append(mz)
 
-        if self.MPU2_bytes_data.shape[0] > 0:
-            if len(lines[5]) > 2:
-                self.magBias_MPU2 = [float(i) * 10 for i in lines[5].strip("\n").split('     ')]
-            for i in range(self.MPU2_bytes_data.shape[0]):
-                ax = int.from_bytes(self.MPU2_bytes_data[i][:2], byteorder='big', signed=True)
-                ay = int.from_bytes(self.MPU2_bytes_data[i][2:4], byteorder='big', signed=True)
-                az = int.from_bytes(self.MPU2_bytes_data[i][4:6], byteorder='big', signed=True)
-                if acc_range == '2g':
-                    ax /= 16384
-                    ay /= 16384
-                    az /= 16384
-                elif acc_range == '4g':
-                    ax /= 8192
-                    ay /= 8192
-                    az /= 8192
-                elif acc_range == '8g':
-                    ax /= 4096
-                    ay /= 4096
-                    az /= 4096
-                elif acc_range == '16g':
-                    ax /= 2048
-                    ay /= 2048
-                    az /= 2048
+        if self.imutype == 'Double':
+            if self.MPU2_bytes_data.shape[0] > 0:
+                if len(lines[5]) > 2:
+                    self.magBias_MPU2 = [float(i) * 10 for i in lines[5].strip("\n").split('     ')]
+                for i in range(self.MPU2_bytes_data.shape[0]):
+                    ax = int.from_bytes(self.MPU2_bytes_data[i][:2], byteorder='big', signed=True)
+                    ay = int.from_bytes(self.MPU2_bytes_data[i][2:4], byteorder='big', signed=True)
+                    az = int.from_bytes(self.MPU2_bytes_data[i][4:6], byteorder='big', signed=True)
+                    if acc_range == '2g':
+                        ax /= 16384
+                        ay /= 16384
+                        az /= 16384
+                    elif acc_range == '4g':
+                        ax /= 8192
+                        ay /= 8192
+                        az /= 8192
+                    elif acc_range == '8g':
+                        ax /= 4096
+                        ay /= 4096
+                        az /= 4096
+                    elif acc_range == '16g':
+                        ax /= 2048
+                        ay /= 2048
+                        az /= 2048
 
-                if calibration is True:
-                    ax -= self.accelBias_MPU2[0]
-                    ay -= self.accelBias_MPU2[1]
-                    az -= self.accelBias_MPU2[2]
+                    if calibration is True:
+                        ax -= self.accelBias_MPU2[0]
+                        ay -= self.accelBias_MPU2[1]
+                        az -= self.accelBias_MPU2[2]
 
-                self.ax_MPU2_list.append(ax)
-                self.ay_MPU2_list.append(ay)
-                self.az_MPU2_list.append(az)
+                    self.ax_MPU2_list.append(ax)
+                    self.ay_MPU2_list.append(ay)
+                    self.az_MPU2_list.append(az)
 
-                gx = int.from_bytes(self.MPU2_bytes_data[i][6:8], byteorder='big', signed=True)
-                gy = int.from_bytes(self.MPU2_bytes_data[i][8:10], byteorder='big', signed=True)
-                gz = int.from_bytes(self.MPU2_bytes_data[i][10:12], byteorder='big', signed=True)
-                if gyro_range == '250 deg/s':
-                    gx /= 131
-                    gy /= 131
-                    gz /= 131
-                elif gyro_range == '500 deg/s':
-                    gx /= 65.5
-                    gy /= 65.5
-                    gz /= 65.5
-                elif gyro_range == '1000 deg/s':
-                    gx /= 32.8
-                    gy /= 32.8
-                    gz /= 32.8
-                elif gyro_range == '2000 deg/s':
-                    gx /= 16.4
-                    gy /= 16.4
-                    gz /= 16.4
+                    gx = int.from_bytes(self.MPU2_bytes_data[i][6:8], byteorder='big', signed=True)
+                    gy = int.from_bytes(self.MPU2_bytes_data[i][8:10], byteorder='big', signed=True)
+                    gz = int.from_bytes(self.MPU2_bytes_data[i][10:12], byteorder='big', signed=True)
+                    if gyro_range == '250 deg/s':
+                        gx /= 131
+                        gy /= 131
+                        gz /= 131
+                    elif gyro_range == '500 deg/s':
+                        gx /= 65.5
+                        gy /= 65.5
+                        gz /= 65.5
+                    elif gyro_range == '1000 deg/s':
+                        gx /= 32.8
+                        gy /= 32.8
+                        gz /= 32.8
+                    elif gyro_range == '2000 deg/s':
+                        gx /= 16.4
+                        gy /= 16.4
+                        gz /= 16.4
 
-                if calibration is True:
-                    gx -= self.gyroBias_MPU2[0]
-                    gy -= self.gyroBias_MPU2[1]
-                    gz -= self.gyroBias_MPU2[2]
+                    if calibration is True:
+                        gx -= self.gyroBias_MPU2[0]
+                        gy -= self.gyroBias_MPU2[1]
+                        gz -= self.gyroBias_MPU2[2]
 
-                self.gx_MPU2_list.append(gx)
-                self.gy_MPU2_list.append(gy)
-                self.gz_MPU2_list.append(gz)
+                    self.gx_MPU2_list.append(gx)
+                    self.gy_MPU2_list.append(gy)
+                    self.gz_MPU2_list.append(gz)
 
-                if len(self.MPU2_bytes_data[i]) == 18:
-                    mx = int.from_bytes(self.MPU2_bytes_data[i][12:14], byteorder='little', signed=True)
-                    my = int.from_bytes(self.MPU2_bytes_data[i][14:16], byteorder='little', signed=True)
-                    mz = int.from_bytes(self.MPU2_bytes_data[i][16:18], byteorder='little', signed=True)
+                    if len(self.MPU2_bytes_data[i]) == 18:
+                        mx = int.from_bytes(self.MPU2_bytes_data[i][12:14], byteorder='little', signed=True)
+                        my = int.from_bytes(self.MPU2_bytes_data[i][14:16], byteorder='little', signed=True)
+                        mz = int.from_bytes(self.MPU2_bytes_data[i][16:18], byteorder='little', signed=True)
 
-                    mx = mx * self.mRes * self.magCalibration[0] - self.magBias_MPU2[0]
-                    my = my * self.mRes * self.magCalibration[1] - self.magBias_MPU2[1]
-                    mz = mz * self.mRes * self.magCalibration[2] - self.magBias_MPU2[2]
-                else:
-                    mx = 0
-                    my = 0
-                    mz = 0
+                        mx = mx * self.mRes * self.magCalibration[0] - self.magBias_MPU2[0]
+                        my = my * self.mRes * self.magCalibration[1] - self.magBias_MPU2[1]
+                        mz = mz * self.mRes * self.magCalibration[2] - self.magBias_MPU2[2]
+                    else:
+                        mx = 0
+                        my = 0
+                        mz = 0
 
-                self.mx_MPU2_list.append(mx)
-                self.my_MPU2_list.append(my)
-                self.mz_MPU2_list.append(mz)
+                    self.mx_MPU2_list.append(mx)
+                    self.my_MPU2_list.append(my)
+                    self.mz_MPU2_list.append(mz)
 
-        else:
-            self.output.append('Неизвестный формат таблицы')
-            return
+            else:
+                self.output.append('Неизвестный формат таблицы')
+                return
 
     def save(self, file_name, path, table_format):
         """

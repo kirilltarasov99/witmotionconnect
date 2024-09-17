@@ -94,7 +94,7 @@ class SingleMPUDialog(object):
         self.recorder_thread = Thread(target=self.recorder)
         self.recorder_thread.start()
 
-    def stop_recording(self):
+    def stop_recording(self, savetype):
         """
                     :NOTE:
                         Stops recording data and saves it to hdf table.
@@ -108,17 +108,17 @@ class SingleMPUDialog(object):
             case '.h5':
                 DF_savename = PurePath(self.savepath, 'Single_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.h5')
                 Data_df = pd.DataFrame({'SystemTime': self.datetime_list,
-                                        'MPU1_data': self.MPU1_data})
+                                        'MPU1_data': self.MPUdata})
                 Data_df.to_hdf(DF_savename, key='data', index=False)
 
             case '.csv':
                 DF_savename = PurePath(self.savepath, 'Single_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.csv')
                 Data_df = pd.DataFrame({'SystemTime': self.datetime_list,
-                                        'MPU1_data': self.MPU1_data})
+                                        'MPU1_data': self.MPUdata})
                 Data_df.to_csv(DF_savename, index=False)
 
             case '.npz':
                 DF_savename = PurePath(self.savepath, 'Single_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.npz')
-                np.savez(DF_savename, SystemTime=self.datetime_list, MPU1_data=self.MPU1_data)
+                np.savez(DF_savename, SystemTime=self.datetime_list, MPU1_data=self.MPUdata)
 
         self.output.append('Данные сохранены')
