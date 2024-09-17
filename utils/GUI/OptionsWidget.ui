@@ -214,7 +214,7 @@
        <property name="title">
         <string>Разрешение трансляции</string>
        </property>
-       <widget class="QLineEdit" name="Camera_stream_resoltuion_lineEdit_2">
+       <widget class="QLineEdit" name="Camera_stream_resolution_lineEdit">
         <property name="geometry">
          <rect>
           <x>10</x>

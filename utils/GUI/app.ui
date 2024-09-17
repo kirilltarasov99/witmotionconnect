@@ -316,7 +316,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="VideoFeed_pushButton">
+            <widget class="QPushButton" name="USVideoFeed_button">
              <property name="text">
               <string>Трансляция УЗИ</string>
              </property>
@@ -404,7 +404,16 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <addaction name="settings_action"/>
     <addaction name="magCal_action"/>
    </widget>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Отладка</string>
+    </property>
+    <addaction name="debug_cameraconnect_action"/>
+    <addaction name="debug_vcap_connect_action"/>
+    <addaction name="debug_IMUconnect_action"/>
+   </widget>
    <addaction name="menu_options"/>
+   <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="decipher_action">
@@ -420,6 +429,21 @@ li.checked::marker { content: &quot;\2612&quot;; }
   <action name="magCal_action">
    <property name="text">
     <string>Калибровка магнетометра</string>
+   </property>
+  </action>
+  <action name="debug_cameraconnect_action">
+   <property name="text">
+    <string>Подключить только камеру</string>
+   </property>
+  </action>
+  <action name="debug_vcap_connect_action">
+   <property name="text">
+    <string>Подключить только рекордер</string>
+   </property>
+  </action>
+  <action name="debug_IMUconnect_action">
+   <property name="text">
+    <string>Подключить только IMU</string>
    </property>
   </action>
  </widget>

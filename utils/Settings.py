@@ -10,6 +10,7 @@ class Settings(object):
 
     def __init__(self, view, recorder_params_path, camera_params_path):
         self.vcap_params_path = recorder_params_path
+        self.camera_params_path = camera_params_path
         self._view = view
 
         with open(self.vcap_params_path, 'r') as file:

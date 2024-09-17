@@ -24,7 +24,8 @@ class WitMotionConnect(object):
         self.MagCalWindow = None
         self.SettingsWindow = None
         self.USFeedWindow = None
-        self.IMU = HwDialog()
+        self.CameraFeedWindow = None
+        self.hardware = HwDialog()   
         self._connectSignalsAndSlots()
 
         self.app_path = Path()
@@ -82,34 +83,34 @@ class WitMotionConnect(object):
             self._view.IMU_port_lineEdit.setText('/dev/ttyUSB0')
 
     def request_IMU_connect(self):
-        self.IMU.connect(QToutput=self._view.output_textEdit,
-                         connectedHW_type=self._view.IMU_type_comboBox.currentText(),
-                         port=self._view.IMU_port_lineEdit.text(),
-                         baud_rate=self._view.IMU_baud_rate_comboBox.currentText(),
-                         data_path=main_app.data_path,
-                         vcap_params_path=self.vcap_params_path)
+        self.hardware.MultipleConnect(QToutput=self._view.output_textEdit,
+                                 connectedHW_type=self._view.IMU_type_comboBox.currentText(),
+                                 port=self._view.IMU_port_lineEdit.text(),
+                                 baud_rate=self._view.IMU_baud_rate_comboBox.currentText(),
+                                 data_path=main_app.data_path,
+                                 vcap_params_path=self.vcap_params_path)
 
     def IMU_start_recording(self):
         if self.USFeedWindow:
-            self.RecorderVideoWriter = self.IMU.videocap.create_videowriter()
+            self.RecorderVideoWriter = self.hardware.videocap.create_videowriter()
             self.ext_recorder = False
-            self.IMU.start_recording(mode=self._view.IMU_mode_comboBox.currentText(), start_recorder=self.ext_recorder)
+            self.hardware.start_recording(mode=self._view.IMU_mode_comboBox.currentText(), start_recorder=self.ext_recorder)
             self.ins_recorder = True
 
         else:
             self.ext_recorder = True
-            self.IMU.start_recording(mode=self._view.IMU_mode_comboBox.currentText(), start_recorder=self.ext_recorder)
+            self.hardware.start_recording(mode=self._view.IMU_mode_comboBox.currentText(), start_recorder=self.ext_recorder)
 
     def IMU_stop_recording(self):
         if self.RecorderVideoWriter:
             self.ins_recorder = False
-            self.IMU.stop_recording(savetype=self._view.table_type_comboBox.currentText(), stop_recorder=self.ext_recorder)
+            self.hardware.stop_recording(savetype=self._view.table_type_comboBox.currentText(), stop_recorder=self.ext_recorder)
             main_app.RecorderVideoWriter.release()
             main_app.RecorderVideoWriter = None
             self._view.output_textEdit.append('Рекордер остановлен')
         
         else:
-            self.IMU.stop_recording(savetype=self._view.table_type_comboBox.currentText(), stop_recorder=self.ext_recorder)
+            self.hardware.stop_recording(savetype=self._view.table_type_comboBox.currentText(), stop_recorder=self.ext_recorder)
         self.ext_recorder = False
 
     def openDecipher(self):
@@ -150,16 +151,33 @@ class WitMotionConnect(object):
         if self.USFeedWindow is None:
             self.USFeedWindow = USVideoFeed()
         self.USFeedWindow.show()
+    
+    def openCameraFeed(self):
+        if self.ext_camera:
+            self._view.output_textEdit.append('Нельзя открыть трансляцию во время активной записи')
+            return
+        
+        if self.CameraFeedWindow is None:
+            self.CameraFeedWindow = CameraVideoFeed()
+        self.CameraFeedWindow.show()
+
+    # debugging methods
+    def debug_connectCamera(self):
+        self.hardware.connectCamera(QToutput=self._view.output_textEdit, data_path=self.data_path,
+                                    camera_params_path=self.camera_params_path)
 
     def _connectSignalsAndSlots(self):
         self._view.IMU_connect_button.clicked.connect(lambda: self.request_IMU_connect())
-        self._view.IMU_disconnect_button.clicked.connect(self.IMU.disconnect)
+        self._view.IMU_disconnect_button.clicked.connect(self.hardware.disconnect)
         self._view.IMU_recording_start_button.clicked.connect(lambda: self.IMU_start_recording())
         self._view.IMU_recording_stop_button.clicked.connect(lambda: self.IMU_stop_recording())
         self._view.decipher_action.triggered.connect(lambda: self.openDecipher())
         self._view.magCal_action.triggered.connect(lambda: self.openMagCal())
         self._view.settings_action.triggered.connect(lambda: self.openSettings())
-        self._view.VideoFeed_pushButton.clicked.connect(lambda: self.openUSFeed())
+        self._view.USVideoFeed_button.clicked.connect(lambda: self.openUSFeed())
+        self._view.CameraFeed_button.clicked.connect(lambda: self.openCameraFeed())
+        # debug     
+        self._view.debug_cameraconnect_action.triggered.connect(lambda: self.debug_connectCamera())
 
 
 class USVideoThread(QThread):       
@@ -170,7 +188,7 @@ class USVideoThread(QThread):
         self._run_flag = True
 
     def run(self):
-        cap = main_app.IMU.videocap.cap
+        cap = main_app.hardware.videocap.cap
         while self._run_flag:
             ret, cv_img = cap.read()
             if ret:
@@ -192,7 +210,7 @@ class CameraThread(QThread):
         self._run_flag = True
     
     def run(self):
-        cap = main_app.IMU.cameracap.cap
+        cap = main_app.hardware.camera.cap
         while self._run_flag:
             ret, cv_img = cap.read()
             if ret:
@@ -252,23 +270,28 @@ class CameraVideoFeed(QWidget):
         self.image_label.resize(self.display_width, self.display_height)
 
         self.thread = CameraThread()
-        self.thread.changePixmap.connect(self.updateImage)
+        self.thread.change_pixmap_signal.connect(self.updateImage)
         self.thread.start()
 
-        @Slot(np.ndarray)
-        def updateImage(self, cv_img):
-            """Updates the image_label with a new opencv image"""
-            qt_img = self.convert_cv_qt(cv_img)
-            self.image_label.setPixmap(qt_img)
-        
-        def convert_cv_qt(self, cv_img):
-            """Convert from an opencv image to QPixmap"""
-            rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
-            h, w, ch = rgb_image.shape
-            bytes_per_line = ch * w
-            convert_to_Qt_format = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
-            p = convert_to_Qt_format.scaled(self.display_width, self.display_height, Qt.AspectRatioMode.KeepAspectRatio)
-            return QPixmap.fromImage(p)
+    def closeEvent(self, event):
+        self.thread.stop()
+        main_app.CameraFeedWindow = None
+        event.accept()
+
+    @Slot(np.ndarray)
+    def updateImage(self, cv_img):
+        """Updates the image_label with a new opencv image"""
+        qt_img = self.convert_cv_qt(cv_img)
+        self.image_label.setPixmap(qt_img)
+    
+    def convert_cv_qt(self, cv_img):
+        """Convert from an opencv image to QPixmap"""
+        rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+        h, w, ch = rgb_image.shape
+        bytes_per_line = ch * w
+        convert_to_Qt_format = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
+        p = convert_to_Qt_format.scaled(self.display_width, self.display_height, Qt.AspectRatioMode.KeepAspectRatio)
+        return QPixmap.fromImage(p)
 
 
 class MagCalWidgetClass(object):
@@ -278,7 +301,7 @@ class MagCalWidgetClass(object):
         self._connectSignalsAndSlots()
 
     def func_magCal(self):
-        self.MagCal_obj.calibrate(MPU=main_app.IMU.HW_class, address=self._view.IMUaddress_comboBox.currentText(),
+        self.MagCal_obj.calibrate(MPU=main_app.hardware.HW_class, address=self._view.IMUaddress_comboBox.currentText(),
                                   params_path=main_app.magcal_params_path)
 
     def _connectSignalsAndSlots(self):
