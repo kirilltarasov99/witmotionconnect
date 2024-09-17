@@ -31,11 +31,16 @@ class WitMotionConnect(object):
         self.settings_path = Path(self.app_path, 'settings/')
         self.magcal_params_path = Path(self.settings_path, 'magcal_params')
         self.vcap_params_path = Path(self.settings_path, 'vcap_params')
+        self.camera_params_path = Path(self.settings_path, 'camera_params')
         self.data_path = Path(self.app_path, 'data/')
 
-        self.VideoWriter = None
+        self.RecorderVideoWriter = None
         self.ext_recorder = False
         self.ins_recorder = False
+
+        self.CameraVideoWriter = None
+        self.ext_camera = False
+        self.ins_camera = False
 
         if not self.data_path.is_dir():
             self.data_path.mkdir()
@@ -59,6 +64,17 @@ class WitMotionConnect(object):
                          'livefeed\n', '1280x720\n']
             with open(self.vcap_params_path, 'w') as file:
                 file.writelines(lines)
+        
+        if not self.camera_params_path.is_file():
+            self._view.output_textEdit.append('Создание дефолт параметров для камеры')
+            if os.name == 'nt':
+                lines = ['use\n', '1\n', 'address\n', '0\n', 'res\n', '640x480\n', 'fps\n', '15\n',
+                         'livefeed\n', '640x480\n']
+            else:
+                lines = ['use\n', '1\n', 'address\n', '/dev/video0\n', 'res\n', '640x480\n', 'fps\n', '15\n',
+                         'livefeed\n',  '640x480\n']
+            with open(self.camera_params_path,  'w') as file:
+                file.writelines(lines)
 
         if os.name == 'nt':
             self._view.IMU_port_lineEdit.setText('COM3')
@@ -75,7 +91,7 @@ class WitMotionConnect(object):
 
     def IMU_start_recording(self):
         if self.USFeedWindow:
-            self.VideoWriter = self.IMU.videocap.create_videowriter()
+            self.RecorderVideoWriter = self.IMU.videocap.create_videowriter()
             self.ext_recorder = False
             self.IMU.start_recording(mode=self._view.IMU_mode_comboBox.currentText(), start_recorder=self.ext_recorder)
             self.ins_recorder = True
@@ -85,11 +101,11 @@ class WitMotionConnect(object):
             self.IMU.start_recording(mode=self._view.IMU_mode_comboBox.currentText(), start_recorder=self.ext_recorder)
 
     def IMU_stop_recording(self):
-        if self.VideoWriter:
+        if self.RecorderVideoWriter:
             self.ins_recorder = False
             self.IMU.stop_recording(savetype=self._view.table_type_comboBox.currentText(), stop_recorder=self.ext_recorder)
-            main_app.VideoWriter.release()
-            main_app.VideoWriter = None
+            main_app.RecorderVideoWriter.release()
+            main_app.RecorderVideoWriter = None
             self._view.output_textEdit.append('Рекордер остановлен')
         
         else:
@@ -132,7 +148,7 @@ class WitMotionConnect(object):
             return
 
         if self.USFeedWindow is None:
-            self.USFeedWindow = VideoFeed()
+            self.USFeedWindow = USVideoFeed()
         self.USFeedWindow.show()
 
     def _connectSignalsAndSlots(self):
@@ -146,7 +162,7 @@ class WitMotionConnect(object):
         self._view.VideoFeed_pushButton.clicked.connect(lambda: self.openUSFeed())
 
 
-class VideoThread(QThread):
+class USVideoThread(QThread):       
     change_pixmap_signal = Signal(np.ndarray)
 
     def __init__(self):
@@ -160,7 +176,7 @@ class VideoThread(QThread):
             if ret:
                 self.change_pixmap_signal.emit(cv_img)
                 if main_app.ins_recorder:
-                    main_app.VideoWriter.write(cv_img)
+                    main_app.RecorderVideoWriter.write(cv_img)
 
     def stop(self):
         """Sets run flag to False and waits for thread to finish"""
@@ -168,7 +184,29 @@ class VideoThread(QThread):
         self.wait()
 
 
-class VideoFeed(QWidget):
+class CameraThread(QThread):
+    change_pixmap_signal = Signal(np.ndarray)
+
+    def __init__(self):
+        super().__init__()
+        self._run_flag = True
+    
+    def run(self):
+        cap = main_app.IMU.cameracap.cap
+        while self._run_flag:
+            ret, cv_img = cap.read()
+            if ret:
+                self.change_pixmap_signal.emit(cv_img)
+                if main_app.ins_recorder:
+                    main_app.VideoWriter.write(cv_img)
+    
+    def stop(self):
+        """Sets run flag to False and waits for thread to finish"""
+        self._run_flag = False
+        self.wait()
+
+
+class USVideoFeed(QWidget):
     def __init__(self):
         super().__init__()
         with open(main_app.vcap_params_path, 'r') as file:
@@ -178,7 +216,7 @@ class VideoFeed(QWidget):
         self.image_label = QLabel(self)
         self.image_label.resize(self.display_width, self.display_height)
 
-        self.thread = VideoThread()
+        self.thread = USVideoThread()
         self.thread.change_pixmap_signal.connect(self.update_image)
         self.thread.start()
 
@@ -201,6 +239,36 @@ class VideoFeed(QWidget):
         convert_to_Qt_format = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
         p = convert_to_Qt_format.scaled(self.display_width, self.display_height, Qt.AspectRatioMode.KeepAspectRatio)
         return QPixmap.fromImage(p)
+    
+
+class CameraVideoFeed(QWidget):
+    def __init__(self, parent = None):
+        super().__init__(parent)
+        with open(main_app.camera_params_path, 'r') as f:
+            self.display_width, self.display_height  = [eval(i) for i in f.readlines()[9].strip('\n').split('x')]
+
+        self.setWindowTitle("Камера для трекинга")
+        self.image_label = QLabel(self)
+        self.image_label.resize(self.display_width, self.display_height)
+
+        self.thread = CameraThread()
+        self.thread.changePixmap.connect(self.updateImage)
+        self.thread.start()
+
+        @Slot(np.ndarray)
+        def updateImage(self, cv_img):
+            """Updates the image_label with a new opencv image"""
+            qt_img = self.convert_cv_qt(cv_img)
+            self.image_label.setPixmap(qt_img)
+        
+        def convert_cv_qt(self, cv_img):
+            """Convert from an opencv image to QPixmap"""
+            rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+            h, w, ch = rgb_image.shape
+            bytes_per_line = ch * w
+            convert_to_Qt_format = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
+            p = convert_to_Qt_format.scaled(self.display_width, self.display_height, Qt.AspectRatioMode.KeepAspectRatio)
+            return QPixmap.fromImage(p)
 
 
 class MagCalWidgetClass(object):

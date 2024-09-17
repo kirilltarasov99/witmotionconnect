@@ -7,17 +7,17 @@ from datetime import datetime
 from threading import Thread, Event
 
 
-class VideoCapture(object):
+class CameraCapture(object):
     """
                 :NOTE:
-                    Class for communication with a capture card.
+                    Class for communication with a camera device via OpenCV and GUI output messages.
 
                 :args:
                     QToutput (QTextEdit): GUI object for output messages
                     savepath (pathlib.Path): path to data folder
                     frameSize (list): video resolution
                     fps (string): fps of video
-    """
+    """             
 
     def __init__(self, QToutput, savepath, frameSize, fps):
         self.cap = cv.VideoCapture
@@ -38,12 +38,12 @@ class VideoCapture(object):
         """
 
         if os.name == 'nt':
-            return cv.VideoWriter(str(PurePath(self.savepath, 'USVideo_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
+            return cv.VideoWriter(str(PurePath(self.savepath, 'CameraVideo_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
                                   fourcc=cv.VideoWriter.fourcc(*'mp4v'),
                                   fps=self.cap.get(cv.CAP_PROP_FPS),
                                   frameSize=[int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT))])
         else:
-            return cv.VideoWriter(str(PurePath(self.savepath, 'USVideo_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
+            return cv.VideoWriter(str(PurePath(self.savepath, 'CameraVideo_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
                                   fourcc=cv.VideoWriter.fourcc(*'XVID'),
                                   fps=self.cap.get(cv.CAP_PROP_FPS),
                                   frameSize=[int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT))])
@@ -51,10 +51,10 @@ class VideoCapture(object):
     def connect(self, cam_address):
         """
                     :NOTE:
-                        Opens connection to capture card and creates VideoWriter.
+                        Opens connection to camera and creates VideoWriter.
 
                     :args:
-                        cam_address (string): address of capture card
+                        cam_address (string): address of camera
         """
 
         if os.name == 'nt':
@@ -66,18 +66,18 @@ class VideoCapture(object):
         self.cap.set(cv.CAP_PROP_FPS, self.fps)
 
         if self.cap.isOpened():
-            self.output.append('Рекордер подключен')
+            self.output.append('Камера подключена')
             self.output.append('Разрешение: ' + str(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)) +
                                'x' + str(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)))
             self.output.append('FPS: ' + str(self.cap.get(cv.CAP_PROP_FPS)))
 
         else:
-            self.output.append('Проблема при подключении рекордера')
+            self.output.append('Проблема при подключении камеры')
 
     def recorder(self):
         """
                     :NOTE:
-                        Records frames from capture card into a video file.
+                        Records frames from camera into a video file.
         """
 
         while self.cap.isOpened():
@@ -86,7 +86,7 @@ class VideoCapture(object):
 
             ret, frame = self.cap.read()
             if not ret:
-                print('Ошибка в получении кадра. Проверьте рекордер и начните сначала')
+                print('Ошибка в получении кадра. Проверьте камеру и начните сначала')
                 break
             self.out.write(frame)
 
@@ -110,12 +110,12 @@ class VideoCapture(object):
         self.pause_event.set()
         self.recorder_thread.join()
         self.out.release()
-        self.output.append('Рекордер остановлен')
+        self.output.append('Камера остановлена')
 
     def disconnect(self):
         """
                     :NOTE:
-                        Releases capture card from use in the app.
+                        Releases camera from use in the app.
         """
 
         self.cap.release()
