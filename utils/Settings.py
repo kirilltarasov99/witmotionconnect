@@ -69,9 +69,9 @@ class Settings(object):
             self.params_camera[1] = '0\n'
         
         self.params_camera[3] = str(self._view.Camera_address_lineEdit.text() + '\n')
-        self.params_camera[5] = str(self._view.Camera_resolution_lineEdit.text() + '\n')
+        self.params_camera[5] = str(self._view.Camera_record_resolution_lineEdit.text() + '\n')
         self.params_camera[7] = str(self._view.Camera_FPS_lineEdit.text() + '\n')
         self.params_camera[9] = str(self._view.Camera_stream_resolution_lineEdit.text() + '\n')
-                            
+
         with open(self.camera_params_path, 'w') as file:
             file.writelines(self.params_camera)
