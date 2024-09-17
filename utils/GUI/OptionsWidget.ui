@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>314</height>
+    <width>480</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,102 +16,218 @@
   <widget class="QPushButton" name="save_pushButton">
    <property name="geometry">
     <rect>
-     <x>310</x>
-     <y>10</y>
-     <width>87</width>
-     <height>26</height>
+     <x>200</x>
+     <y>370</y>
+     <width>85</width>
+     <height>25</height>
     </rect>
    </property>
    <property name="text">
     <string>Сохранить</string>
    </property>
   </widget>
-  <widget class="QWidget" name="verticalLayoutWidget">
+  <widget class="QGroupBox" name="VCap_groupBox">
    <property name="geometry">
     <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>201</width>
-     <height>311</height>
+     <x>10</x>
+     <y>10</y>
+     <width>220</width>
+     <height>350</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <widget class="QCheckBox" name="VCap_use_checkBox">
-      <property name="text">
-       <string>Использовать рекордер</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="VCap_address_groupBox">
-      <property name="title">
-       <string>Адрес устройства</string>
-      </property>
-      <widget class="QLineEdit" name="VCap_address_lineEdit">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>30</y>
-         <width>161</width>
-         <height>26</height>
-        </rect>
+   <property name="title">
+    <string>Настройки рекордера</string>
+   </property>
+   <widget class="QWidget" name="verticalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>201</width>
+      <height>301</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QCheckBox" name="VCap_use_checkBox">
+       <property name="text">
+        <string>Использовать рекордер</string>
        </property>
       </widget>
-     </widget>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="VCap_record_resolution_groupBox">
-      <property name="title">
-       <string>Разрешение записи</string>
-      </property>
-      <widget class="QLineEdit" name="VCap_record_resolution_lineEdit">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>30</y>
-         <width>161</width>
-         <height>26</height>
-        </rect>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="VCap_address_groupBox">
+       <property name="title">
+        <string>Адрес устройства</string>
+       </property>
+       <widget class="QLineEdit" name="VCap_address_lineEdit">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>180</width>
+          <height>25</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="VCap_record_resolution_groupBox">
+       <property name="title">
+        <string>Разрешение записи</string>
+       </property>
+       <widget class="QLineEdit" name="VCap_record_resolution_lineEdit">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>180</width>
+          <height>25</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="VCap_FPS_groupBox">
+       <property name="title">
+        <string>FPS</string>
+       </property>
+       <widget class="QLineEdit" name="VCap_FPS_lineEdit">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>180</width>
+          <height>25</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="VCap_stream_resolution_groupBox">
+       <property name="title">
+        <string>Разрешение трансляции</string>
+       </property>
+       <widget class="QLineEdit" name="VCap_stream_resolution_lineEdit">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>180</width>
+          <height>25</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="Camera_groupBox">
+   <property name="geometry">
+    <rect>
+     <x>250</x>
+     <y>10</y>
+     <width>220</width>
+     <height>350</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Настройки камеры</string>
+   </property>
+   <widget class="QWidget" name="verticalLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>201</width>
+      <height>301</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QCheckBox" name="Camera_use_checkBox">
+       <property name="text">
+        <string>Использовать камеру</string>
        </property>
       </widget>
-     </widget>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="VCap_FPS_groupBox">
-      <property name="title">
-       <string>FPS</string>
-      </property>
-      <widget class="QLineEdit" name="VCap_FPS_lineEdit">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>30</y>
-         <width>113</width>
-         <height>26</height>
-        </rect>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="Camera_address_groupBox">
+       <property name="title">
+        <string>Адрес устройства</string>
        </property>
+       <widget class="QLineEdit" name="Camera_address_lineEdit">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>180</width>
+          <height>25</height>
+         </rect>
+        </property>
+       </widget>
       </widget>
-     </widget>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="VCap_stream_resolution_groupBox">
-      <property name="title">
-       <string>Разрешение трансляции</string>
-      </property>
-      <widget class="QLineEdit" name="VCap_stream_resolution_lineEdit">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>30</y>
-         <width>161</width>
-         <height>26</height>
-        </rect>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="Camera_record_resolution_groupBox">
+       <property name="title">
+        <string>Разрешение записи</string>
        </property>
+       <widget class="QLineEdit" name="Camera_record_resolution_lineEdit">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>180</width>
+          <height>25</height>
+         </rect>
+        </property>
+       </widget>
       </widget>
-     </widget>
-    </item>
-   </layout>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="Camera_FPS_groupBox">
+       <property name="title">
+        <string>FPS</string>
+       </property>
+       <widget class="QLineEdit" name="Camera_FPS_lineEdit">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>180</width>
+          <height>25</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="Camera_stream_resolution_groupBox">
+       <property name="title">
+        <string>Разрешение трансляции</string>
+       </property>
+       <widget class="QLineEdit" name="Camera_stream_resoltuion_lineEdit_2">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>185</width>
+          <height>25</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
   </widget>
  </widget>
  <resources/>
