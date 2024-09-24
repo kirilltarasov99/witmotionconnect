@@ -1,6 +1,7 @@
 import time
 import witmotion.protocol
 import pandas as pd
+import numpy as np
 
 from witmotion import IMU
 from datetime import datetime
@@ -64,7 +65,7 @@ class WitMotionDialog(object):
         self.IMUdata = pd.DataFrame(columns=['SystemTime', 'ChipTime', 'ax(g)', 'ay(g)', 'az(g)', 'wx(deg/s)', 'wy(deg/s)', 'wz(deg/s)'])
         self.recording = True
 
-    def stop_recording(self):
+    def stop_recording(self, savetype):
         """
                     :NOTE:
                         Stops recording data and saves it to hdf table.
@@ -72,8 +73,24 @@ class WitMotionDialog(object):
 
         self.output.append('Запись остановлена')
         self.recording = False
-        DF_savename = PurePath(self.savepath, 'WitMotion_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.csv')
-        self.IMUdata.to_csv(DF_savename, sep='\t', index=False)
+        match savetype:
+            case '.h5':
+                DF_savename = PurePath(self.savepath, 'WitMotion_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.h5')
+                Data_df = pd.DataFrame({'SystemTime': self.datetime_list,
+                                        'MPU1_data': self.MPU1_data,
+                                        'MPU2_data': self.MPU2_data})
+                Data_df.to_hdf(DF_savename, key='data', index=False)
+
+            case '.csv':
+                DF_savename = PurePath(self.savepath, 'WitMotion_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.csv')
+                Data_df = pd.DataFrame({'SystemTime': self.datetime_list,
+                                        'MPU1_data': self.MPU1_data,
+                                        'MPU2_data': self.MPU2_data})
+                Data_df.to_csv(DF_savename, index=False)
+
+            case '.npz':
+                DF_savename = PurePath(self.savepath, 'WitMotion_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.npz')
+                np.savez(DF_savename, SystemTime=self.datetime_list, MPU1_data=self.MPU1_data, MPU2_data=self.MPU2_data)
 
 # Following functions are called only locally
     def callback(self, msg):
