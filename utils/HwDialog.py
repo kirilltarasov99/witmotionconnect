@@ -79,7 +79,7 @@ class HwDialog(object):
         """
 
         self.connectIMU(QToutput=QToutput, IMU_params_path=IMU_params_path, data_path=data_path)
-        self.connectVideoCap(QToutput=QToutput, data_path=data_path, camera_params_path=vcap_params_path)
+        self.connectVideoCap(QToutput=QToutput, data_path=data_path, vcap_params_path=vcap_params_path)
         self.connectCamera(QToutput=QToutput, data_path=data_path, camera_params_path=camera_params_path)
 
     def disconnect(self):

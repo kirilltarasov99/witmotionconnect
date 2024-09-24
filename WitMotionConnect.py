@@ -94,7 +94,8 @@ class WitMotionConnect(object):
         self.hardware.MultipleConnect(QToutput=self._view.output_textEdit,
                                       IMU_params_path=self.IMU_params_path,
                                       data_path=main_app.data_path,
-                                      vcap_params_path=self.vcap_params_path)
+                                      vcap_params_path=self.vcap_params_path,
+                                      camera_params_path=self.camera_params_path)
 
     def IMU_start_recording(self):
         if self.USFeedWindow:
