@@ -98,22 +98,6 @@ class WitMotionConnect(object):
                                       camera_params_path=self.camera_params_path)
 
     def IMU_start_recording(self):
-        # if self.USFeedWindow:
-        #     self.RecorderVideoWriter = self.hardware.videocap.create_videowriter()
-        #     self.ext_recorder = False
-        #     # self.hardware.start_recording(start_recorder=self.ext_recorder)
-        #     self.ins_recorder = True
-        # else:
-        #     self.ext_recorder = True
-        
-        # if self.CameraFeedWindow:
-        #     self.CameraVideoWriter = self.hardware.camera.create_videowriter()
-        #     self.ext_camera = False
-        #     self.ins_camera = True
-        # else:
-        #     self.ext_camera = True
-        
-        # self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
         if self.USFeedWindow and self.CameraFeedWindow:
             self.RecorderVideoWriter = self.hardware.videocap.create_videowriter()
             self.ext_recorder = False
