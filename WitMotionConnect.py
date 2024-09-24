@@ -280,7 +280,15 @@ class CameraThread(QThread):
     def stop(self):
         """Sets run flag to False and waits for thread to finish"""
         self._run_flag = False
-        self.wait()view
+        self.wait()
+
+
+class USVideoFeed(QWidget):
+    def __init__(self):
+        super().__init__()
+        with open(main_app.vcap_params_path, 'r') as file:
+            self.display_width, self.display_height = [eval(i) for i in file.readlines()[9].strip('\n').split('x')]
+        self.setWindowTitle("УЗИ-сканирование")
         self.setFixedSize(self.display_width, self.display_height)
         self.image_label = QLabel(self)
         self.image_label.resize(self.display_width, self.display_height)
