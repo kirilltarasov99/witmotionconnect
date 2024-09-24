@@ -14,7 +14,7 @@ class MagCal(object):
     def __init__(self, QToutput):
         self.output = QToutput
 
-    def calibrate(self, MPU, address, params_path):
+    def calibrate(self, MPU, IMU_params_path, params_path):
         """
                     :NOTE:
                         Performs magnetometer calibration on supported IMUs.
@@ -27,6 +27,10 @@ class MagCal(object):
 
         interface = MPU.MPUInterface
         interface.reset_input_buffer()
+        with open(IMU_params_path,'r') as f:
+            lines = f.readlines()
+        
+        address = lines[3].strip('\n')
         sleep(0.005)
         MPU_type = str(type(MPU))
         if MPU_type == "<class 'utils.hardware.SingleMPU_Dialog.SingleMPUDialog'>":
