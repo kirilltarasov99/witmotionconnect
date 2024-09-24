@@ -109,8 +109,9 @@ class HwDialog(object):
 
         if self.videocap and start_recorder:
             self.videocap.start_recording()
-        
-        print(self.connectedHW_type)
+
+        if self.camera:
+            self.camera.start_recording()
 
         if self.connectedHW_type != 'WitMotion':
             self.HW_class.start_recording(self.IMUmode)
@@ -129,5 +130,8 @@ class HwDialog(object):
 
         if self.videocap and stop_recorder:
             self.videocap.stop_recording()
+
+        if self.camera:
+            self.camera.stop_recording()
 
         self.HW_class.stop_recording(self.savetype)

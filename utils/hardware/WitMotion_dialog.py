@@ -76,21 +76,15 @@ class WitMotionDialog(object):
         match savetype:
             case '.h5':
                 DF_savename = PurePath(self.savepath, 'WitMotion_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.h5')
-                Data_df = pd.DataFrame({'SystemTime': self.datetime_list,
-                                        'MPU1_data': self.MPU1_data,
-                                        'MPU2_data': self.MPU2_data})
-                Data_df.to_hdf(DF_savename, key='data', index=False)
+                self.IMUdata.to_hdf(DF_savename, key='data', index=False)
 
             case '.csv':
                 DF_savename = PurePath(self.savepath, 'WitMotion_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.csv')
-                Data_df = pd.DataFrame({'SystemTime': self.datetime_list,
-                                        'MPU1_data': self.MPU1_data,
-                                        'MPU2_data': self.MPU2_data})
-                Data_df.to_csv(DF_savename, index=False)
+                self.IMUdata.to_csv(DF_savename, index=False)
 
             case '.npz':
                 DF_savename = PurePath(self.savepath, 'WitMotion_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.npz')
-                np.savez(DF_savename, SystemTime=self.datetime_list, MPU1_data=self.MPU1_data, MPU2_data=self.MPU2_data)
+                np.savez(DF_savename, df=self.IMUdata.to_dict())
 
 # Following functions are called only locally
     def callback(self, msg):
