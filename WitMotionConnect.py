@@ -98,27 +98,79 @@ class WitMotionConnect(object):
                                       camera_params_path=self.camera_params_path)
 
     def IMU_start_recording(self):
-        if self.USFeedWindow:
+        # if self.USFeedWindow:
+        #     self.RecorderVideoWriter = self.hardware.videocap.create_videowriter()
+        #     self.ext_recorder = False
+        #     # self.hardware.start_recording(start_recorder=self.ext_recorder)
+        #     self.ins_recorder = True
+        # else:
+        #     self.ext_recorder = True
+        
+        # if self.CameraFeedWindow:
+        #     self.CameraVideoWriter = self.hardware.camera.create_videowriter()
+        #     self.ext_camera = False
+        #     self.ins_camera = True
+        # else:
+        #     self.ext_camera = True
+        
+        # self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
+        if self.USFeedWindow and self.CameraFeedWindow:
             self.RecorderVideoWriter = self.hardware.videocap.create_videowriter()
             self.ext_recorder = False
-            self.hardware.start_recording(start_recorder=self.ext_recorder)
+            self.CameraVideoWriter = self.hardware.camera.create_videowriter()
+            self.ext_camera = False
+            self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
             self.ins_recorder = True
-
+            self.ins_camera = True
+        
+        elif self.USFeedWindow:
+            self.RecorderVideoWriter = self.hardware.videocap.create_videowriter()
+            self.ext_recorder = False
+            self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
+            self.ins_recorder = True
+        
+        elif self.CameraFeedWindow:
+            self.CameraVideoWriter = self.hardware.camera.create_videowriter()
+            self.ext_camera = False
+            self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
+            self.ins_camera = True
+        
         else:
+            self.ext_camera = True
             self.ext_recorder = True
-            self.hardware.start_recording(start_recorder=self.ext_recorder)
+            self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
 
     def IMU_stop_recording(self):
-        if self.RecorderVideoWriter:
+        if self.RecorderVideoWriter and self.CameraVideoWriter:
             self.ins_recorder = False
-            self.hardware.stop_recording(stop_recorder=self.ext_recorder)
+            self.ins_camera = False
+            self.hardware.stop_recording(stop_recorder=self.ext_recorder, stop_camera=self.ext_camera)
+            main_app.RecorderVideoWriter.release()
+            main_app.RecorderVideoWriter = None
+            main_app.CameraVideoWriter.release()
+            main_app.CameraVideoWriter = None
+            self._view.output_textEdit.append('Рекордер остановлен')
+            self._view.output_textEdit.append('Камера остановлена')
+        
+        elif self.RecorderVideoWriter:
+            self.ins_recorder = False
+            self.hardware.stop_recording(stop_recorder=self.ext_recorder, stop_camera=self.ext_camera)
             main_app.RecorderVideoWriter.release()
             main_app.RecorderVideoWriter = None
             self._view.output_textEdit.append('Рекордер остановлен')
         
+        elif self.CameraVideoWriter:
+            self.ins_camera = False
+            self.hardware.stop_recording(stop_recorder=self.ext_recorder, stop_camera=self.ext_camera)
+            main_app.CameraVideoWriter.release()
+            main_app.CameraVideoWriter = None
+            self._view.output_textEdit.append('Камера остановлена')
+        
         else:
-            self.hardware.stop_recording(stop_recorder=self.ext_recorder)
+            self.hardware.stop_recording(stop_recorder=self.ext_recorder, stop_camera=self.ext_camera)
+        
         self.ext_recorder = False
+        self.ext_camera = False
 
     def openDecipher(self):
         if self.DecipherWindow is None:
@@ -222,8 +274,8 @@ class CameraThread(QThread):
             ret, cv_img = cap.read()
             if ret:
                 self.change_pixmap_signal.emit(cv_img)
-                if main_app.ins_recorder:
-                    main_app.VideoWriter.write(cv_img)
+                if main_app.ins_camera:
+                    main_app.CameraVideoWriter.write(cv_img)
     
     def stop(self):
         """Sets run flag to False and waits for thread to finish"""
@@ -273,6 +325,7 @@ class CameraVideoFeed(QWidget):
             self.display_width, self.display_height  = [eval(i) for i in f.readlines()[9].strip('\n').split('x')]
 
         self.setWindowTitle("Камера для трекинга")
+        self.setFixedSize(self.display_width, self.display_height)
         self.image_label = QLabel(self)
         self.image_label.resize(self.display_width, self.display_height)
 
