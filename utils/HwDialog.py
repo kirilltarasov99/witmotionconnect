@@ -24,13 +24,13 @@ class HwDialog(object):
         
         address = lines[3].strip('\n')
         baud_rate = int(lines[5].strip('\n'))
-        connectedHW_type = lines[7].strip('\n')
+        self.connectedHW_type = lines[7].strip('\n')
         self.IMUmode = lines[9].strip('\n')
         self.savetype = lines[11].strip('\n')
 
         imu_types = {'WitMotion': WitMotionDialog, 'Single MPU': SingleMPUDialog, 'Double MPU': DoubleMPUDialog}
-        if connectedHW_type in imu_types:
-            self.HW_class = imu_types[connectedHW_type](QToutput=QToutput, savepath=data_path)
+        if self.connectedHW_type in imu_types:
+            self.HW_class = imu_types[self.connectedHW_type](QToutput=QToutput, savepath=data_path)
         if self.HW_class is not None:
             self.HW_class.connect(port=address, baud_rate=baud_rate)
 
@@ -109,9 +109,11 @@ class HwDialog(object):
 
         if self.videocap and start_recorder:
             self.videocap.start_recording()
+        
+        print(self.connectedHW_type)
 
-        if self.HW_class is not WitMotionDialog:
-            self.HW_class.start_recording(self.mode)
+        if self.connectedHW_type != 'WitMotion':
+            self.HW_class.start_recording(self.IMUmode)
         else:
             self.HW_class.start_recording()
 

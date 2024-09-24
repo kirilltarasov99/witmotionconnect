@@ -94,3 +94,17 @@ class Settings(object):
 
         with open(self.camera_params_path, 'w') as file:
             file.writelines(self.params_camera)
+
+        if self._view.IMU_use_checkBox.isChecked():
+            self.params_imu[1] = '1\n'
+        else:
+            self.params_imu[1] = '0\n'
+        
+        self.params_imu[3] = str(self._view.IMU_address_lineEdit.text() + '\n')
+        self.params_imu[5] = str(self._view.IMU_baud_rate_comboBox.currentText() + '\n')
+        self.params_imu[7] = str(self._view.IMU_type_comboBox.currentText() + '\n')
+        self.params_imu[9] = str(self._view.IMU_mode_comboBox.currentText() + '\n')
+        self.params_imu[11] = str(self._view.table_type_comboBox.currentText() + '\n')
+
+        with open(self.IMU_params_path, 'w') as file:
+            file.writelines(self.params_imu)

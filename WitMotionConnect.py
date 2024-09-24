@@ -101,12 +101,12 @@ class WitMotionConnect(object):
         if self.USFeedWindow:
             self.RecorderVideoWriter = self.hardware.videocap.create_videowriter()
             self.ext_recorder = False
-            self.hardware.start_recording(mode=self._view.IMU_mode_comboBox.currentText(), start_recorder=self.ext_recorder)
+            self.hardware.start_recording(start_recorder=self.ext_recorder)
             self.ins_recorder = True
 
         else:
             self.ext_recorder = True
-            self.hardware.start_recording(mode=self._view.IMU_mode_comboBox.currentText(), start_recorder=self.ext_recorder)
+            self.hardware.start_recording(start_recorder=self.ext_recorder)
 
     def IMU_stop_recording(self):
         if self.RecorderVideoWriter:
