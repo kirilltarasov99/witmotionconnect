@@ -25,8 +25,8 @@ class Settings(object):
         with open(camera_params_path, 'r') as file:
             self.params_camera = file.readlines()
 
-        self._view.Camera_address_lineEdit.setText(self.params_camera[3].strip('\n'))
-        self._view.Camera_type_comboBox.setCurrentText(self.params_camera[5].strip('\n'))
+        self._view.Camera_type_comboBox.setCurrentText(self.params_camera[3].strip('\n'))
+        self._view.Camera_address_lineEdit.setText(self.params_camera[5].strip('\n'))
         self._view.Camera_record_resolution_lineEdit.setText(self.params_camera[7].strip('\n'))
         self._view.Camera_FPS_lineEdit.setText(self.params_camera[9].strip('\n'))
         self._view.Camera_stream_resolution_lineEdit.setText(self.params_camera[11].strip('\n'))
@@ -88,8 +88,8 @@ class Settings(object):
         else:
             self.params_camera[1] = '0\n'
         
-        self.params_camera[3] = str(self._view.Camera_address_lineEdit.text() + '\n')
-        self.params_camera[5] = str(self._view.Camera_type_comboBox.currentText() + '\n')
+        self.params_camera[3] = str(self._view.Camera_type_comboBox.currentText() + '\n')
+        self.params_camera[5] = str(self._view.Camera_address_lineEdit.text() + '\n')
         self.params_camera[7] = str(self._view.Camera_record_resolution_lineEdit.text() + '\n')
         self.params_camera[9] = str(self._view.Camera_FPS_lineEdit.text() + '\n')
         self.params_camera[11] = str(self._view.Camera_stream_resolution_lineEdit.text() + '\n')
