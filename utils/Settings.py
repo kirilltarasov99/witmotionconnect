@@ -26,9 +26,10 @@ class Settings(object):
             self.params_camera = file.readlines()
 
         self._view.Camera_address_lineEdit.setText(self.params_camera[3].strip('\n'))
-        self._view.Camera_record_resolution_lineEdit.setText(self.params_camera[5].strip('\n'))
-        self._view.Camera_FPS_lineEdit.setText(self.params_camera[7].strip('\n'))
-        self._view.Camera_stream_resolution_lineEdit.setText(self.params_camera[9].strip('\n'))
+        self._view.Camera_type_comboBox.setCurrentText(self.params_camera[5].strip('\n'))
+        self._view.Camera_record_resolution_lineEdit.setText(self.params_camera[7].strip('\n'))
+        self._view.Camera_FPS_lineEdit.setText(self.params_camera[9].strip('\n'))
+        self._view.Camera_stream_resolution_lineEdit.setText(self.params_camera[11].strip('\n'))
 
         with open(IMU_params_path, 'r') as file:
             self.params_imu = file.readlines()
@@ -88,9 +89,10 @@ class Settings(object):
             self.params_camera[1] = '0\n'
         
         self.params_camera[3] = str(self._view.Camera_address_lineEdit.text() + '\n')
-        self.params_camera[5] = str(self._view.Camera_record_resolution_lineEdit.text() + '\n')
-        self.params_camera[7] = str(self._view.Camera_FPS_lineEdit.text() + '\n')
-        self.params_camera[9] = str(self._view.Camera_stream_resolution_lineEdit.text() + '\n')
+        self.params_camera[5] = str(self._view.Camera_type_comboBox.currentText() + '\n')
+        self.params_camera[7] = str(self._view.Camera_record_resolution_lineEdit.text() + '\n')
+        self.params_camera[9] = str(self._view.Camera_FPS_lineEdit.text() + '\n')
+        self.params_camera[11] = str(self._view.Camera_stream_resolution_lineEdit.text() + '\n')
 
         with open(self.camera_params_path, 'w') as file:
             file.writelines(self.params_camera)

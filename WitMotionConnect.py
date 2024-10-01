@@ -70,10 +70,10 @@ class WitMotionConnect(object):
         if not self.camera_params_path.is_file():
             self._view.output_textEdit.append('Создание дефолт параметров для камеры')
             if os.name == 'nt':
-                lines = ['use\n', '1\n', 'address\n', '0\n', 'res\n', '640x480\n', 'fps\n', '15\n',
+                lines = ['use\n', '1\n', 'type\n', 'Обычная\n', 'address\n', '0\n', 'res\n', '640x480\n', 'fps\n', '15\n',
                          'livefeed\n', '640x480\n']
             else:
-                lines = ['use\n', '1\n', 'address\n', '/dev/video0\n', 'res\n', '640x480\n', 'fps\n', '15\n',
+                lines = ['use\n', '1\n', 'type\n', 'Обычная\n', 'address\n', '/dev/video0\n', 'res\n', '640x480\n', 'fps\n', '15\n',
                          'livefeed\n',  '640x480\n']
             with open(self.camera_params_path,  'w') as file:
                 file.writelines(lines)

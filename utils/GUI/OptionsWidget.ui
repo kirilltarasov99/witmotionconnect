@@ -130,7 +130,7 @@
            <x>10</x>
            <y>30</y>
            <width>191</width>
-           <height>301</height>
+           <height>381</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -142,6 +142,33 @@
             <property name="text">
              <string>Использовать камеру</string>
             </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="camera_type_groupBox">
+            <property name="title">
+             <string>Тип камеры</string>
+            </property>
+            <widget class="QComboBox" name="camera_type_comboBox">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>30</y>
+               <width>170</width>
+               <height>30</height>
+              </rect>
+             </property>
+             <item>
+              <property name="text">
+               <string>Обычная</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Aravis</string>
+              </property>
+             </item>
+            </widget>
            </widget>
           </item>
           <item>
