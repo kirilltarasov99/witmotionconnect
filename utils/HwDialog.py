@@ -3,6 +3,7 @@ from utils.hardware.SingleMPU_Dialog import SingleMPUDialog
 from utils.hardware.DoubleMPU_Dialog import DoubleMPUDialog
 from utils.hardware.VideoCap import VideoCapture
 from utils.hardware.CameraCap import CameraCapture
+from utils.hardware.AravisCam import AravisCapture
 
 
 class HwDialog(object):
@@ -59,10 +60,18 @@ class HwDialog(object):
             lines = file.readlines()
         
         if lines[1].strip("\n") == '1':
-            self.camera = CameraCapture(QToutput=QToutput, savepath=data_path,
-                                       frameSize=lines[5].strip("\n").split('x'),
-                                       fps=int(lines[7].strip("\n")))
-            self.camera.connect(cam_address=lines[3].strip("\n"))
+            if lines[3].strip("\n") == 'Обычная':
+                self.camera = CameraCapture(QToutput=QToutput, savepath=data_path,
+                                        frameSize=lines[5].strip("\n").split('x'),
+                                        fps=int(lines[7].strip("\n")))
+                self.camera.connect(cam_address=lines[3].strip("\n"))
+            elif lines[3].strip("\n") == 'Aravis':
+                self.camera = AravisCapture(QToutput=QToutput, savepath=data_path,
+                                            frameSize=lines[7].strip("\n").split('x'),
+                                            fps=int(lines[9].strip("\n")))
+                self.camera.connect(cam_address=lines[5].strip("\n"))
+            else:
+                print('error')
             
     def MultipleConnect(self, QToutput, IMU_params_path, data_path, vcap_params_path, camera_params_path):
         """

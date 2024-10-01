@@ -1,5 +1,6 @@
 # Daheng Imaging-2BA200004094-FCG23081373
-from aravis import Camera as AravisCamera
+# might require export GI_TYPELIB_PATH=/usr/local/lib64/girepository-1.0 before using
+from .aravis import Camera as AravisCamera
 import cv2 as cv
 import os
 import numpy as np
@@ -10,6 +11,7 @@ from threading import Thread, Event
 
 class AravisCapture(object):
     def __init__(self, QToutput, savepath, frameSize, fps):
+        self.output = QToutput
         self.savepath = savepath
         self.cap = None
         self.recorder_thread = None
@@ -25,8 +27,8 @@ class AravisCapture(object):
         else:
             return cv.VideoWriter(str(PurePath(self.savepath, 'CameraVideo_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
                                   fourcc=cv.VideoWriter.fourcc(*'XVID'),
-                                  fps=self.cap.get(cv.CAP_PROP_FPS),
-                                  frameSize=[int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT))])
+                                  fps=15,
+                                  frameSize=[5496, 3672])
 
     def connect(self, cam_address):
         if os.name == 'nt':
@@ -36,7 +38,7 @@ class AravisCapture(object):
             self.cap = AravisCamera(cam_address)
             try:
                 self.output.append('Камера подключена')
-                self.output.append('Модель камеры: ', self.cap.get_model_name())
+                self.output.append('Модель камеры: '+self.cap.get_model_name())
             except Exception as e:
                 self.output.append(f'Ошибка при подключении к камере: {e}')
             
@@ -46,11 +48,8 @@ class AravisCapture(object):
                 break
 
             frame = self.cap.pop_frame()
-            if not frame:
-                print('Frame is None')
-                break
             
-            self.out.write(frame)
+            self.out.write(cv.cvtColor(frame, cv.COLOR_RGB2BGR))
 
     def start_recording(self):
         self.out = self.create_videowriter()

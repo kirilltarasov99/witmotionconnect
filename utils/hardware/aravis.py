@@ -240,9 +240,6 @@ class Camera(object):
         del self.cam
 
 
-
-
-
 def get_device_ids():
     Aravis.update_device_list()
     n = Aravis.get_n_devices()
@@ -272,38 +269,3 @@ def get_frame(cam):
     frame = cam.pop_frame()
     cam.stop_acquisition()
     return frame
-
-
-
-
-
-
-
-if __name__ == "__main__":
-    cam = Camera("Daheng Imaging-2BA200004094-FCG23081373")
-    # cam = Camera(None)
-    try:
-        #Aravis.enable_interface ("Fake")
-        #x, y, width, height = cam.get_region()
-        print("Camera model: ", cam.get_model_name())
-        print("Vendor Name: ", cam.get_vendor_name())
-        # print("Device id: ", cam.get_device_id())
-        #print("Image size: ", width, ",", height)
-        print("Sensor size: ", cam.get_sensor_size()) 
-        print("Exposure: ", cam.get_exposure_time())
-        print("Frame rate: ", cam.get_frame_rate())
-        print("Payload: ", cam.get_payload())
-        print("AcquisitionMode: ", cam.get_feature("AcquisitionMode"))
-        # print("Acquisition vals: ", cam.get_feature_vals("AcquisitionMode"))
-        #print("TriggerMode: ", cam.get_feature("TriggerMode"))
-        #print("Bandwidth: ", cam.get_feature("StreamBytesPerSecond"))
-        print("PixelFormat: ", cam.get_feature("PixelFormat"))
-        #print("ExposureAuto: ", cam.get_feature("ExposureAuto"))
-        # print("PacketSize: ", cam.get_feature("GevSCPSPacketSize"))
-
-
-        from IPython import embed
-        embed()
-    finally:
-        cam.shutdown()
-
