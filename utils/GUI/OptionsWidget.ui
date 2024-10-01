@@ -145,11 +145,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QGroupBox" name="camera_type_groupBox">
+           <widget class="QGroupBox" name="Camera_type_groupBox">
             <property name="title">
              <string>Тип камеры</string>
             </property>
-            <widget class="QComboBox" name="camera_type_comboBox">
+            <widget class="QComboBox" name="Camera_type_comboBox">
              <property name="geometry">
               <rect>
                <x>10</x>
