@@ -25,7 +25,7 @@ class WitMotionConnect(object):
         self.SettingsWindow = None
         self.USFeedWindow = None
         self.CameraFeedWindow = None
-        self.hardware = HwDialog()   
+        self.hardware = HwDialog(QTOutput=self._view.output_textEdit)   
         self._connectSignalsAndSlots()
 
         self.app_path = Path()
@@ -91,8 +91,7 @@ class WitMotionConnect(object):
                 file.writelines(lines)
 
     def request_IMU_connect(self):
-        self.hardware.MultipleConnect(QToutput=self._view.output_textEdit,
-                                      IMU_params_path=self.IMU_params_path,
+        self.hardware.MultipleConnect(IMU_params_path=self.IMU_params_path,
                                       data_path=main_app.data_path,
                                       vcap_params_path=self.vcap_params_path,
                                       camera_params_path=self.camera_params_path)
@@ -206,8 +205,7 @@ class WitMotionConnect(object):
 
     # debugging methods
     def debug_connectCamera(self):
-        self.hardware.connectCamera(QToutput=self._view.output_textEdit, data_path=self.data_path,
-                                    camera_params_path=self.camera_params_path)
+        self.hardware.connectCamera(data_path=self.data_path, camera_params_path=self.camera_params_path)
 
     def _connectSignalsAndSlots(self):
         self._view.IMU_connect_button.clicked.connect(lambda: self.request_IMU_connect())
