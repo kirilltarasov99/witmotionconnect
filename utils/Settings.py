@@ -63,6 +63,18 @@ class Settings(object):
         
         if self.use_imu:
             self._view.IMU_use_checkBox.setChecked(1)
+        
+        self._view.Camera_type_comboBox.currentIndexChanged.connect(self.currentIndexChanged)
+
+    def currentIndexChanged(self):
+        if self._view.Camera_type_comboBox.currentText() == "Aravis":
+            self._view.Camera_record_resolution_lineEdit.setEnabled(False)
+            self._view.Camera_FPS_lineEdit.setEnabled(False)
+            self._view.Camera_address_lineEdit.setText("Daheng Imaging-2BA200004094-FCG23081373")
+        else:
+            self._view.Camera_record_resolution_lineEdit.setEnabled(True)
+            self._view.Camera_FPS_lineEdit.setEnabled(True)
+            self._view.Camera_address_lineEdit.setText("/dev/video2")
 
     def save(self):
         """
