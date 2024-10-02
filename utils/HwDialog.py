@@ -68,9 +68,9 @@ class HwDialog(object):
         if lines[1].strip("\n") == '1':
             if lines[3].strip("\n") == 'Обычная':
                 self.camera = CameraCapture(QToutput=self.output, savepath=data_path,
-                                            frameSize=lines[5].strip("\n").split('x'),
-                                            fps=int(lines[7].strip("\n")))
-                self.camera.connect(cam_address=lines[3].strip("\n"))
+                                            frameSize=lines[7].strip("\n").split('x'),
+                                            fps=int(lines[9].strip("\n")))
+                self.camera.connect(cam_address=lines[5].strip("\n"))
             elif lines[3].strip("\n") == 'Aravis':
                 self.camera = AravisCapture(QToutput=self.output, savepath=data_path,
                                             frameSize=lines[7].strip("\n").split('x'),
