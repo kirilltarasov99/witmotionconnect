@@ -135,6 +135,8 @@ class HwDialog(object):
                 self.HW_class.start_recording(self.IMUmode)
             else:
                 self.HW_class.start_recording()
+        
+        self.output.append('Запись начата')
 
     def stop_recording(self, stop_recorder, stop_camera):
         """
@@ -154,3 +156,5 @@ class HwDialog(object):
 
         if self.connectedHW_type is not None:
             self.HW_class.stop_recording(self.savetype)
+        
+        self.output.append('Запись остановлена')
