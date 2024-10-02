@@ -27,8 +27,8 @@ class AravisCapture(object):
         else:
             return cv.VideoWriter(str(PurePath(self.savepath, 'CameraVideo_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
                                   fourcc=cv.VideoWriter.fourcc(*'XVID'),
-                                  fps=15,
-                                  frameSize=[5496, 3672])
+                                  fps=self.cap.get_frame_rate(),
+                                  frameSize=self.cap.get_sensor_size())#[5496, 3672])
 
     def connect(self, cam_address):
         if os.name == 'nt':
@@ -38,7 +38,9 @@ class AravisCapture(object):
             self.cap = AravisCamera(cam_address)
             try:
                 self.output.append('Камера подключена')
-                self.output.append('Модель камеры: '+self.cap.get_model_name())
+                self.output.append('Модель камеры: ' + self.cap.get_model_name())
+                self.output.append('Разрешение: ' + str(self.cap.get_sensor_size()))
+                self.output.append('FPS: ' + str(self.cap.get_frame_rate()))
             except Exception as e:
                 self.output.append(f'Ошибка при подключении к камере: {e}')
             
