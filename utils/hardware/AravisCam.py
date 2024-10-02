@@ -28,7 +28,7 @@ class AravisCapture(object):
             return cv.VideoWriter(str(PurePath(self.savepath, 'CameraVideo_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
                                   fourcc=cv.VideoWriter.fourcc(*'XVID'),
                                   fps=self.cap.get_frame_rate(),
-                                  frameSize=self.cap.get_sensor_size())#[5496, 3672])
+                                  frameSize=self.cap.get_sensor_size())
 
     def connect(self, cam_address):
         if os.name == 'nt':

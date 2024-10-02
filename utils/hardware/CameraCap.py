@@ -110,7 +110,6 @@ class CameraCapture(object):
         self.pause_event.set()
         self.recorder_thread.join()
         self.out.release()
-        self.output.append('Камера остановлена')
 
     def disconnect(self):
         """

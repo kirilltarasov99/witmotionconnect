@@ -8,6 +8,7 @@ from utils.HwDialog import HwDialog
 from utils.Decipher import Decipher
 from utils.Mag_calibration import MagCal
 from utils.Settings import Settings
+from utils.hardware.aravis import Camera as AravisCamera
 
 from PySide6.QtWidgets import QWidget, QApplication, QLabel, QFileDialog
 from PySide6.QtUiTools import QUiLoader
@@ -130,8 +131,6 @@ class WitMotionConnect(object):
             self.hardware.stop_recording(stop_recorder=self.ext_recorder, stop_camera=self.ext_camera)
             main_app.RecorderVideoWriter.release()
             main_app.RecorderVideoWriter = None
-            main_app.CameraVideoWriter.release()
-            main_app.CameraVideoWriter = None
             self._view.output_textEdit.append('Рекордер остановлен')
             self._view.output_textEdit.append('Камера остановлена')
         
@@ -145,8 +144,6 @@ class WitMotionConnect(object):
         elif self.CameraVideoWriter:
             self.ins_camera = False
             self.hardware.stop_recording(stop_recorder=self.ext_recorder, stop_camera=self.ext_camera)
-            main_app.CameraVideoWriter.release()
-            main_app.CameraVideoWriter = None
             self._view.output_textEdit.append('Камера остановлена')
         
         else:
@@ -249,15 +246,25 @@ class CameraThread(QThread):
     def __init__(self):
         super().__init__()
         self._run_flag = True
+        self.cap = main_app.hardware.camera.cap
     
     def run(self):
-        cap = main_app.hardware.camera.cap
-        while self._run_flag:
-            ret, cv_img = cap.read()
-            if ret:
+        if isinstance(self.cap, cv2.VideoCapture):
+            while self._run_flag:
+                ret, cv_img = self.cap.read()
+                if ret:
+                    self.change_pixmap_signal.emit(cv_img)
+                    if main_app.ins_camera:
+                        main_app.CameraVideoWriter.write(cv_img)
+        elif isinstance(self.cap, AravisCamera):
+            self.cap.start_acquisition_continuous()
+            while self._run_flag:
+                cv_img = cv2.cvtColor(self.cap.pop_frame(), cv2.COLOR_RGB2BGR)
                 self.change_pixmap_signal.emit(cv_img)
                 if main_app.ins_camera:
                     main_app.CameraVideoWriter.write(cv_img)
+        
+        main_app.CameraVideoWriter.release()
     
     def stop(self):
         """Sets run flag to False and waits for thread to finish"""
@@ -304,7 +311,7 @@ class CameraVideoFeed(QWidget):
     def __init__(self, parent = None):
         super().__init__(parent)
         with open(main_app.camera_params_path, 'r') as f:
-            self.display_width, self.display_height  = [eval(i) for i in f.readlines()[9].strip('\n').split('x')]
+            self.display_width, self.display_height  = [eval(i) for i in f.readlines()[11].strip('\n').split('x')]
 
         self.setWindowTitle("Камера для трекинга")
         self.setFixedSize(self.display_width, self.display_height)
