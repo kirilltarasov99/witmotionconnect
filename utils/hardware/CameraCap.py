@@ -89,6 +89,8 @@ class CameraCapture(object):
                 print('Ошибка в получении кадра. Проверьте камеру и начните сначала')
                 break
             self.out.write(frame)
+        
+        self.out.release()
 
     def start_recording(self):
         """
@@ -109,7 +111,6 @@ class CameraCapture(object):
 
         self.pause_event.set()
         self.recorder_thread.join()
-        self.out.release()
 
     def disconnect(self):
         """

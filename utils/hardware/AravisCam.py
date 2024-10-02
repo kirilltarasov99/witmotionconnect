@@ -53,6 +53,8 @@ class AravisCapture(object):
             
             self.out.write(cv.cvtColor(frame, cv.COLOR_RGB2BGR))
 
+        self.out.release()
+
     def start_recording(self):
         self.out = self.create_videowriter()
         self.cap.start_acquisition_continuous()
@@ -63,7 +65,6 @@ class AravisCapture(object):
     def stop_recording(self):
         self.pause_event.set()
         self.recorder_thread.join()
-        self.out.release()
     
     def disconnect(self):
         self.cap.shutdown()
