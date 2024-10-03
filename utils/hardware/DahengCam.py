@@ -31,20 +31,24 @@ class DahengCapture(object):
         else:
             return cv.VideoWriter(str(PurePath(self.savepath, cam_id + '_video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
                                   fourcc=cv.VideoWriter.fourcc(*'XVID'),
-                                  fps=19.6, #self.cap.get_frame_rate(),
-                                  frameSize=(5496, 3672)) #self.cap.get_sensor_size())
+                                  fps=19.6,
+                                  frameSize=(5496, 3672))
 
     def connect(self, cam_address):
         if os.name == 'nt':
             self.output.append('Данный тип камер не работает на Windows')
+            raise Exception("Данный тип камер не работает на Windows")
         
         else:
-            self.cap = self.device_manager.open_device_by_sn('FCG23081373')
+            self.cap = self.device_manager.open_device_by_sn(cam_address)
             try:
                 self.output.append('Камера подключена')
-                # self.output.append('Модель камеры: ' + self.cap.get_model_name())
-                # self.output.append('Разрешение: ' + str(self.cap.get_sensor_size()))
-                # self.output.append('FPS: ' + str(self.cap.get_frame_rate()))
+                if self.cap.DeviceModelName.is_implemented():
+                    self.output.append('Модель камеры: ' + self.cap.DeviceModelName.get())
+                
+                if self.cap.SensorWidth.is_implemented() and self.cap.SensorHeight.is_implemented():
+                    self.output.append('Разрешение: ' + str(self.cap.SensorWidth.get()) + 'x' + str(self.cap.SensorHeight.get()))
+
             except Exception as e:
                 self.output.append(f'Ошибка при подключении к камере: {e}')
             

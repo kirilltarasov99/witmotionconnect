@@ -80,6 +80,11 @@ class Settings(object):
             self._view.Camera_record_resolution_lineEdit.setEnabled(False)
             self._view.Camera_FPS_lineEdit.setEnabled(False)
             self._view.Camera_address_lineEdit.setText("Daheng Imaging-2BA200004094-FCG23081373")
+        elif self._view.Camera_type_comboBox.currentText() == "Daheng":
+            self._view.Camera_second_use_checkBox.setEnabled(True)
+            self._view.Camera_record_resolution_lineEdit.setEnabled(False)
+            self._view.Camera_FPS_lineEdit.setEnabled(False)
+            self._view.Camera_address_lineEdit.setText("FCG23081373")
         else:
             self._view.Camera_second_use_checkBox.setChecked(0)
             self._view.Camera_second_use_checkBox.setEnabled(False)
