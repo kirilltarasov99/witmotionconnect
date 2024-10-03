@@ -10,6 +10,7 @@ from utils.Decipher import Decipher
 from utils.Mag_calibration import MagCal
 from utils.Settings import Settings
 from utils.hardware.aravis import Camera as AravisCamera
+from gxipy.gxiapi import U3VDevice
 
 from PySide6.QtWidgets import QWidget, QApplication, QLabel, QFileDialog, QPushButton
 from PySide6.QtUiTools import QUiLoader
@@ -250,6 +251,7 @@ class CameraThread(QThread):
         self.cap = main_app.hardware.camera.cap
     
     def run(self):
+        print(type(self.cap))
         if isinstance(self.cap, cv2.VideoCapture):
             while self._run_flag:
                 ret, cv_img = self.cap.read()
@@ -257,6 +259,7 @@ class CameraThread(QThread):
                     self.change_pixmap_signal.emit(cv_img)
                     if main_app.ins_camera:
                         main_app.CameraVideoWriter.write(cv_img)
+
         elif isinstance(self.cap, AravisCamera):
             self.cap.start_acquisition_continuous()
             while self._run_flag:
@@ -264,6 +267,17 @@ class CameraThread(QThread):
                 self.change_pixmap_signal.emit(cv_img)
                 if main_app.ins_camera:
                     main_app.CameraVideoWriter.write(cv_img)
+        
+        elif isinstance(self.cap, U3VDevice):
+            self.cap.stream_on()
+            while self._run_flag:
+                raw_image = self.cap.data_stream[0].get_image()
+                numpy_image = raw_image.get_numpy_array()
+                cv_img = cv2.cvtColor(numpy_image, cv2.COLOR_RGB2BGR)
+                self.change_pixmap_signal.emit(cv_img)
+                if main_app.ins_camera:
+                    main_app.CameraVideoWriter.write(cv_img)
+
         if main_app.ins_camera:
             main_app.CameraVideoWriter.release()
     
