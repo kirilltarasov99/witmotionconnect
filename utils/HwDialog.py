@@ -4,6 +4,7 @@ from utils.hardware.DoubleMPU_Dialog import DoubleMPUDialog
 from utils.hardware.VideoCap import VideoCapture
 from utils.hardware.CameraCap import CameraCapture
 from utils.hardware.AravisCam import AravisCapture
+from utils.hardware.DahengCam import DahengCapture
 
 import threading
 
@@ -89,6 +90,23 @@ class HwDialog(object):
                                                  fps=int(lines[9].strip("\n")))
                     self.camera.connect(cam_address='Daheng Imaging-2BA200004094-FCG23081373')
                     self.camera2.connect(cam_address='Daheng Imaging-2BA200004095-FCG23081374')
+
+            elif lines[3].strip("\n") == 'Daheng':
+                if lines[13].strip("\n") == '0':
+                    self.camera = DahengCapture(QToutput=self.output, savepath=data_path,
+                                                frameSize=lines[7].strip("\n").split('x'),
+                                                fps=int(lines[9].strip("\n")))
+                    self.camera.connect(cam_address=lines[5].strip("\n"))
+                elif lines[13].strip("\n") == '1':
+                    raise NotImplementedError("Dual camera mode is not implemented for Daheng cameras.")
+                    # self.camera = AravisCapture(QToutput=self.output, savepath=data_path,
+                    #                             frameSize=lines[7].strip("\n").split('x'),
+                    #                             fps=int(lines[9].strip("\n")))
+                    # self.camera2 = AravisCapture(QToutput=self.output, savepath=data_path,
+                    #                              frameSize=lines[7].strip("\n").split('x'),
+                    #                              fps=int(lines[9].strip("\n")))
+                    # self.camera.connect(cam_address='Daheng Imaging-2BA200004094-FCG23081373')
+                    # self.camera2.connect(cam_address='Daheng Imaging-2BA200004095-FCG23081374')
                     
             else:
                 print('error')

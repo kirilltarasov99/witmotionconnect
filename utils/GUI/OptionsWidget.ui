@@ -165,6 +165,11 @@
              </item>
              <item>
               <property name="text">
+               <string>Daheng</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
                <string>Aravis</string>
               </property>
              </item>
