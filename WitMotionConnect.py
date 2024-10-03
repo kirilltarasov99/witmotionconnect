@@ -3,14 +3,15 @@ import cv2
 import numpy as np
 import os
 
-from pathlib import Path
+from datetime import datetime
+from pathlib import Path, PurePath
 from utils.HwDialog import HwDialog
 from utils.Decipher import Decipher
 from utils.Mag_calibration import MagCal
 from utils.Settings import Settings
 from utils.hardware.aravis import Camera as AravisCamera
 
-from PySide6.QtWidgets import QWidget, QApplication, QLabel, QFileDialog
+from PySide6.QtWidgets import QWidget, QApplication, QLabel, QFileDialog, QPushButton
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile, Slot, QThread, Signal, Qt
 from PySide6.QtGui import QPixmap, QImage
@@ -263,8 +264,8 @@ class CameraThread(QThread):
                 self.change_pixmap_signal.emit(cv_img)
                 if main_app.ins_camera:
                     main_app.CameraVideoWriter.write(cv_img)
-        
-        main_app.CameraVideoWriter.release()
+        if main_app.ins_camera:
+            main_app.CameraVideoWriter.release()
     
     def stop(self):
         """Sets run flag to False and waits for thread to finish"""
@@ -317,19 +318,31 @@ class CameraVideoFeed(QWidget):
         self.setFixedSize(self.display_width, self.display_height)
         self.image_label = QLabel(self)
         self.image_label.resize(self.display_width, self.display_height)
+        self.shot_pushButton = QPushButton("Сделать снимок", self)
+        
+        self._connectSignalsAndSlots()
+        self.cv_img = None
 
         self.thread = CameraThread()
         self.thread.change_pixmap_signal.connect(self.updateImage)
         self.thread.start()
 
+    def take_shot(self):
+        if self.cv_img is not None:
+            cv2.imwrite(str(PurePath(main_app.data_path, 'DCIM_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.jpg')), self.cv_img)
+
     def closeEvent(self, event):
         self.thread.stop()
         main_app.CameraFeedWindow = None
         event.accept()
+    
+    def _connectSignalsAndSlots(self):
+        self.shot_pushButton.clicked.connect(lambda: self.take_shot())
 
     @Slot(np.ndarray)
     def updateImage(self, cv_img):
         """Updates the image_label with a new opencv image"""
+        self.cv_img = cv_img
         qt_img = self.convert_cv_qt(cv_img)
         self.image_label.setPixmap(qt_img)
     
