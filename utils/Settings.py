@@ -24,7 +24,7 @@ class Settings(object):
 
         with open(camera_params_path, 'r') as file:
             self.params_camera = file.readlines()
-
+        
         self._view.Camera_type_comboBox.setCurrentText(self.params_camera[3].strip('\n'))
         self._view.Camera_address_lineEdit.setText(self.params_camera[5].strip('\n'))
         self._view.Camera_record_resolution_lineEdit.setText(self.params_camera[7].strip('\n'))
@@ -50,6 +50,11 @@ class Settings(object):
         else:
             self.use_camera = False
 
+        if self.params_camera[13].strip("\n") == '1':
+            self.use_second_camera = True
+        else:
+            self.use_second_camera = False
+
         if self.params_imu[1].strip("\n") == '1':
             self.use_imu = True
         else:
@@ -61,6 +66,9 @@ class Settings(object):
         if self.use_camera:
             self._view.Camera_use_checkBox.setChecked(1)
         
+        if self.use_second_camera:
+            self._view.Camera_second_use_checkBox.setChecked(1)
+        
         if self.use_imu:
             self._view.IMU_use_checkBox.setChecked(1)
         
@@ -68,10 +76,13 @@ class Settings(object):
 
     def currentIndexChanged(self):
         if self._view.Camera_type_comboBox.currentText() == "Aravis":
+            self._view.Camera_second_use_checkBox.setEnabled(True)
             self._view.Camera_record_resolution_lineEdit.setEnabled(False)
             self._view.Camera_FPS_lineEdit.setEnabled(False)
             self._view.Camera_address_lineEdit.setText("Daheng Imaging-2BA200004094-FCG23081373")
         else:
+            self._view.Camera_second_use_checkBox.setChecked(0)
+            self._view.Camera_second_use_checkBox.setEnabled(False)
             self._view.Camera_record_resolution_lineEdit.setEnabled(True)
             self._view.Camera_FPS_lineEdit.setEnabled(True)
             self._view.Camera_address_lineEdit.setText("/dev/video2")
@@ -105,6 +116,11 @@ class Settings(object):
         self.params_camera[7] = str(self._view.Camera_record_resolution_lineEdit.text() + '\n')
         self.params_camera[9] = str(self._view.Camera_FPS_lineEdit.text() + '\n')
         self.params_camera[11] = str(self._view.Camera_stream_resolution_lineEdit.text() + '\n')
+        
+        if self._view.Camera_second_use_checkBox.isChecked():
+            self.params_camera[13] = '1\n'
+        else:
+            self.params_camera[13] = '0\n'
 
         with open(self.camera_params_path, 'w') as file:
             file.writelines(self.params_camera)

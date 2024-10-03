@@ -76,7 +76,7 @@ class WitMotionConnect(object):
                          'livefeed\n', '640x480\n']
             else:
                 lines = ['use\n', '1\n', 'type\n', 'Обычная\n', 'address\n', '/dev/video0\n', 'res\n', '640x480\n', 'fps\n', '15\n',
-                         'livefeed\n',  '640x480\n']
+                         'livefeed\n',  '640x480\n', 'second\n', '0\n']
             with open(self.camera_params_path,  'w') as file:
                 file.writelines(lines)
         

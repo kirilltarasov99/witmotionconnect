@@ -18,14 +18,14 @@ class AravisCapture(object):
         self.pause_event = Event()
         self.out = cv.VideoWriter
 
-    def create_videowriter(self):
+    def create_videowriter(self, cam_id):
         if os.name == 'nt':
             return cv.VideoWriter(str(PurePath(self.savepath, 'CameraVideo_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
                                   fourcc=cv.VideoWriter.fourcc(*'mp4v'),
                                   fps=self.cap.get(cv.CAP_PROP_FPS),
                                   frameSize=[int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT))])
         else:
-            return cv.VideoWriter(str(PurePath(self.savepath, 'CameraVideo_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
+            return cv.VideoWriter(str(PurePath(self.savepath, cam_id + '_video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
                                   fourcc=cv.VideoWriter.fourcc(*'XVID'),
                                   fps=self.cap.get_frame_rate(),
                                   frameSize=self.cap.get_sensor_size())
@@ -55,8 +55,8 @@ class AravisCapture(object):
 
         self.out.release()
 
-    def start_recording(self):
-        self.out = self.create_videowriter()
+    def start_recording(self, cam_id):
+        self.out = self.create_videowriter(cam_id)
         self.cap.start_acquisition_continuous()
         self.pause_event.clear()
         self.recorder_thread = Thread(target=self.recorder)
@@ -65,6 +65,7 @@ class AravisCapture(object):
     def stop_recording(self):
         self.pause_event.set()
         self.recorder_thread.join()
+        self.cap.stop_acquisition()
     
     def disconnect(self):
         self.cap.shutdown()

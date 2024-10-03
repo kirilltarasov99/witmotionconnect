@@ -5,6 +5,8 @@ from utils.hardware.VideoCap import VideoCapture
 from utils.hardware.CameraCap import CameraCapture
 from utils.hardware.AravisCam import AravisCapture
 
+import threading
+
 
 class HwDialog(object):
     """
@@ -18,6 +20,7 @@ class HwDialog(object):
         self.HW_class = None
         self.videocap = None
         self.camera = None
+        self.camera2 = None
         self.output = QTOutput
     
     def connectIMU(self, IMU_params_path, data_path):
@@ -72,10 +75,21 @@ class HwDialog(object):
                                             fps=int(lines[9].strip("\n")))
                 self.camera.connect(cam_address=lines[5].strip("\n"))
             elif lines[3].strip("\n") == 'Aravis':
-                self.camera = AravisCapture(QToutput=self.output, savepath=data_path,
-                                            frameSize=lines[7].strip("\n").split('x'),
-                                            fps=int(lines[9].strip("\n")))
-                self.camera.connect(cam_address=lines[5].strip("\n"))
+                if lines[13].strip("\n") == '0':
+                    self.camera = AravisCapture(QToutput=self.output, savepath=data_path,
+                                                frameSize=lines[7].strip("\n").split('x'),
+                                                fps=int(lines[9].strip("\n")))
+                    self.camera.connect(cam_address=lines[5].strip("\n"))
+                elif lines[13].strip("\n") == '1':
+                    self.camera = AravisCapture(QToutput=self.output, savepath=data_path,
+                                                frameSize=lines[7].strip("\n").split('x'),
+                                                fps=int(lines[9].strip("\n")))
+                    self.camera2 = AravisCapture(QToutput=self.output, savepath=data_path,
+                                                 frameSize=lines[7].strip("\n").split('x'),
+                                                 fps=int(lines[9].strip("\n")))
+                    self.camera.connect(cam_address='Daheng Imaging-2BA200004094-FCG23081373')
+                    self.camera2.connect(cam_address='Daheng Imaging-2BA200004095-FCG23081374')
+                    
             else:
                 print('error')
             
@@ -112,7 +126,13 @@ class HwDialog(object):
         if self.camera:
             self.camera.disconnect()
         
+        if self.camera2:
+            self.camera2.disconnect()
+        
         self.output.append('Оборудование отключено')
+
+    def _start_recording_thread(self, camera, cam_id):
+        camera.start_recording(cam_id)
 
     def start_recording(self, start_recorder, start_camera):
         """
@@ -128,7 +148,10 @@ class HwDialog(object):
             self.videocap.start_recording()
 
         if self.camera and start_camera:
-            self.camera.start_recording()
+            threading.Thread(target=self._start_recording_thread, args=(self.camera, 'cam1')).start()
+        
+        if self.camera2 and start_camera:
+            threading.Thread(target=self._start_recording_thread, args=(self.camera2, 'cam2')).start()
 
         if self.connectedHW_type is not None:
             if self.connectedHW_type != 'WitMotion':
@@ -137,6 +160,9 @@ class HwDialog(object):
                 self.HW_class.start_recording()
         
         self.output.append('Запись начата')
+    
+    def _stop_recording_thread(self, camera):
+        camera.stop_recording()
 
     def stop_recording(self, stop_recorder, stop_camera):
         """
@@ -152,7 +178,10 @@ class HwDialog(object):
             self.videocap.stop_recording()
 
         if self.camera and stop_camera:
-            self.camera.stop_recording()
+            threading.Thread(target=self._stop_recording_thread, args=(self.camera,)).start()
+        
+        if self.camera2 and stop_camera:
+            threading.Thread(target=self._stop_recording_thread, args=(self.camera2,)).start()
 
         if self.connectedHW_type is not None:
             self.HW_class.stop_recording(self.savetype)

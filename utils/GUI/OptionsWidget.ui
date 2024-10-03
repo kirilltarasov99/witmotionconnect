@@ -129,8 +129,8 @@
           <rect>
            <x>10</x>
            <y>30</y>
-           <width>191</width>
-           <height>381</height>
+           <width>215</width>
+           <height>401</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -237,6 +237,13 @@
               </rect>
              </property>
             </widget>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="Camera_second_use_checkBox">
+            <property name="text">
+             <string>Вторая камера</string>
+            </property>
            </widget>
           </item>
          </layout>
