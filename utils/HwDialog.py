@@ -98,15 +98,14 @@ class HwDialog(object):
                                                 fps=int(lines[9].strip("\n")))
                     self.camera.connect(cam_address=lines[5].strip("\n"))
                 elif lines[13].strip("\n") == '1':
-                    raise NotImplementedError("Dual camera mode is not implemented for Daheng cameras.")
-                    # self.camera = AravisCapture(QToutput=self.output, savepath=data_path,
-                    #                             frameSize=lines[7].strip("\n").split('x'),
-                    #                             fps=int(lines[9].strip("\n")))
-                    # self.camera2 = AravisCapture(QToutput=self.output, savepath=data_path,
-                    #                              frameSize=lines[7].strip("\n").split('x'),
-                    #                              fps=int(lines[9].strip("\n")))
-                    # self.camera.connect(cam_address='Daheng Imaging-2BA200004094-FCG23081373')
-                    # self.camera2.connect(cam_address='Daheng Imaging-2BA200004095-FCG23081374')
+                    self.camera = DahengCapture(QToutput=self.output, savepath=data_path,
+                                                frameSize=lines[7].strip("\n").split('x'),
+                                                fps=int(lines[9].strip("\n")))
+                    self.camera2 = DahengCapture(QToutput=self.output, savepath=data_path,
+                                                 frameSize=lines[7].strip("\n").split('x'),
+                                                 fps=int(lines[9].strip("\n")))
+                    self.camera.connect(cam_address='FCG23081373')
+                    self.camera2.connect(cam_address='FCG23081374')
                     
             else:
                 print('error')

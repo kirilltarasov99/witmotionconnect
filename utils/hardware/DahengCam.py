@@ -20,7 +20,6 @@ class DahengCapture(object):
         dev_num, self.dev_info_list = self.device_manager.update_device_list()
         if dev_num == 0:
             raise Exception("No Daheng camera found!")
-        print(self.dev_info_list)
     
     def create_videowriter(self, cam_id):
         if os.name == 'nt':

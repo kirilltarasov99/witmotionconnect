@@ -72,6 +72,7 @@ class Settings(object):
         if self.use_imu:
             self._view.IMU_use_checkBox.setChecked(1)
         
+        self.currentIndexChanged()
         self._view.Camera_type_comboBox.currentIndexChanged.connect(self.currentIndexChanged)
 
     def currentIndexChanged(self):
