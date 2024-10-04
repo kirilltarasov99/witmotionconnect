@@ -204,7 +204,7 @@ class WitMotionConnect(object):
             self.CameraFeedWindow = CameraVideoFeed(cam)
             self.CameraFeedWindow.show()
 
-        if feed is 2 and self.Camera2FeedWindow is None:
+        elif feed is 2 and self.Camera2FeedWindow is None:
             self.Camera2FeedWindow = CameraVideoFeed(cam)
             self.Camera2FeedWindow.show()
 
