@@ -200,11 +200,11 @@ class WitMotionConnect(object):
             self._view.output_textEdit.append('Нельзя открыть трансляцию во время активной записи')
             return
         
-        if feed is 1 and self.CameraFeedWindow is None:
+        if feed == 1 and self.CameraFeedWindow is None:
             self.CameraFeedWindow = CameraVideoFeed(cam)
             self.CameraFeedWindow.show()
 
-        elif feed is 2 and self.Camera2FeedWindow is None:
+        elif feed == 2 and self.Camera2FeedWindow is None:
             self.Camera2FeedWindow = CameraVideoFeed(cam)
             self.Camera2FeedWindow.show()
 
@@ -255,7 +255,7 @@ class CameraThread(QThread):
     def __init__(self, camera):
         super().__init__()
         self._run_flag = True
-        self.cap = camera#main_app.hardware.camera.cap
+        self.cap = camera
     
     def run(self):
         if isinstance(self.cap, cv2.VideoCapture):
