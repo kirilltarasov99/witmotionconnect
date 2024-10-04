@@ -92,8 +92,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <rect>
           <x>10</x>
           <y>30</y>
-          <width>171</width>
-          <height>251</height>
+          <width>174</width>
+          <height>276</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="IMU_control_verticalLayout">
@@ -156,6 +156,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
           <widget class="QPushButton" name="CameraFeed_button">
            <property name="text">
             <string>Трансляция с камеры</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="Camera2Feed_button">
+           <property name="text">
+            <string>Трансляция с камеры 2</string>
            </property>
           </widget>
          </item>

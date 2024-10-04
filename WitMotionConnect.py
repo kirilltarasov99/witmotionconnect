@@ -29,6 +29,7 @@ class WitMotionConnect(object):
         self.SettingsWindow = None
         self.USFeedWindow = None
         self.CameraFeedWindow = None
+        self.Camera2FeedWindow = None
         self.hardware = HwDialog(QTOutput=self._view.output_textEdit)   
         self._connectSignalsAndSlots()
 
@@ -194,14 +195,18 @@ class WitMotionConnect(object):
             self.USFeedWindow = USVideoFeed()
         self.USFeedWindow.show()
     
-    def openCameraFeed(self):
+    def openCameraFeed(self, cam, feed):
         if self.ext_camera:
             self._view.output_textEdit.append('Нельзя открыть трансляцию во время активной записи')
             return
         
-        if self.CameraFeedWindow is None:
-            self.CameraFeedWindow = CameraVideoFeed()
-        self.CameraFeedWindow.show()
+        if feed is 1 and self.CameraFeedWindow is None:
+            self.CameraFeedWindow = CameraVideoFeed(cam)
+            self.CameraFeedWindow.show()
+
+        if feed is 2 and self.Camera2FeedWindow is None:
+            self.Camera2FeedWindow = CameraVideoFeed(cam)
+            self.Camera2FeedWindow.show()
 
     # debugging methods
     def debug_connectCamera(self):
@@ -216,8 +221,9 @@ class WitMotionConnect(object):
         self._view.magCal_action.triggered.connect(lambda: self.openMagCal())
         self._view.settings_action.triggered.connect(lambda: self.openSettings())
         self._view.USVideoFeed_button.clicked.connect(lambda: self.openUSFeed())
-        self._view.CameraFeed_button.clicked.connect(lambda: self.openCameraFeed())
-        # debug     
+        self._view.CameraFeed_button.clicked.connect(lambda: self.openCameraFeed(self.hardware.camera.cap, 1))
+        self._view.Camera2Feed_button.clicked.connect(lambda: self.openCameraFeed(self.hardware.camera2.cap, 2))
+        # debug
         self._view.debug_cameraconnect_action.triggered.connect(lambda: self.debug_connectCamera())
 
 
@@ -246,13 +252,12 @@ class USVideoThread(QThread):
 class CameraThread(QThread):
     change_pixmap_signal = Signal(np.ndarray)
 
-    def __init__(self):
+    def __init__(self, camera):
         super().__init__()
         self._run_flag = True
-        self.cap = main_app.hardware.camera.cap
+        self.cap = camera#main_app.hardware.camera.cap
     
     def run(self):
-        print(type(self.cap))
         if isinstance(self.cap, cv2.VideoCapture):
             while self._run_flag:
                 ret, cv_img = self.cap.read()
@@ -340,7 +345,7 @@ class USVideoFeed(QWidget):
     
 
 class CameraVideoFeed(QWidget):
-    def __init__(self, parent = None):
+    def __init__(self, camera, parent = None):
         super().__init__(parent)
         with open(main_app.camera_params_path, 'r') as f:
             self.display_width, self.display_height  = [eval(i) for i in f.readlines()[11].strip('\n').split('x')]
@@ -358,7 +363,7 @@ class CameraVideoFeed(QWidget):
         self._connectSignalsAndSlots()
         self.cv_img = None
 
-        self.thread = CameraThread()
+        self.thread = CameraThread(camera)
         self.thread.change_pixmap_signal.connect(self.updateImage)
         self.thread.start()
 
