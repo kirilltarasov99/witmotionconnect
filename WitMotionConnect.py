@@ -2,6 +2,7 @@ import sys
 import cv2
 import numpy as np
 import os
+import time
 
 from datetime import datetime
 from pathlib import Path, PurePath
@@ -10,12 +11,12 @@ from utils.Decipher import Decipher
 from utils.Mag_calibration import MagCal
 from utils.Settings import Settings
 from utils.hardware.aravis import Camera as AravisCamera
-from gxipy.gxiapi import U3VDevice
+import gxipy.gxiapi as gxiapi
 
-from PySide6.QtWidgets import QWidget, QApplication, QLabel, QFileDialog, QPushButton
+from PySide6.QtWidgets import QWidget, QApplication, QLabel, QFileDialog, QMenuBar
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile, Slot, QThread, Signal, Qt
-from PySide6.QtGui import QPixmap, QImage
+from PySide6.QtGui import QPixmap, QImage, QAction
 
 loader = QUiLoader()
 
@@ -268,15 +269,31 @@ class CameraThread(QThread):
                 if main_app.ins_camera:
                     main_app.CameraVideoWriter.write(cv_img)
         
-        elif isinstance(self.cap, U3VDevice):
+        elif isinstance(self.cap, gxiapi.U3VDevice):
             self.cap.stream_on()
             while self._run_flag:
                 raw_image = self.cap.data_stream[0].get_image()
-                numpy_image = raw_image.get_numpy_array()
-                cv_img = cv2.cvtColor(numpy_image, cv2.COLOR_RGB2BGR)
-                self.change_pixmap_signal.emit(cv_img)
-                if main_app.ins_camera:
-                    main_app.CameraVideoWriter.write(cv_img)
+                if raw_image is not None:
+                    numpy_image = raw_image.get_numpy_array()
+                    cv_img = cv2.cvtColor(numpy_image, cv2.COLOR_RGB2BGR)
+                    self.change_pixmap_signal.emit(cv_img)
+                    if main_app.ins_camera:
+                        main_app.CameraVideoWriter.write(cv_img)
+                
+                else:
+                    print('Reconnecting')
+                    main_app.hardware.disconnect_camera()
+                    while True:
+                        try:
+                            self.cap = main_app.debug_connectCamera()
+                        except gxiapi.OffLine:
+                            time.sleep(1)
+                        else:
+                            self.cap = main_app.hardware.camera.cap
+                            self.cap.stream_on()
+                            break
+
+                
 
         if main_app.ins_camera:
             main_app.CameraVideoWriter.release()
@@ -332,7 +349,11 @@ class CameraVideoFeed(QWidget):
         self.setFixedSize(self.display_width, self.display_height)
         self.image_label = QLabel(self)
         self.image_label.resize(self.display_width, self.display_height)
-        self.shot_pushButton = QPushButton("Сделать снимок", self)
+        self.menu = QMenuBar(self)
+        self.shot_action = QAction(text='Сделать снимок', parent=self.menu)
+        self.exposure_action = QAction(text='Настроить экспозицию', parent=self.menu)
+        self.menu.addAction(self.shot_action)
+        self.menu.addAction(self.exposure_action)
         
         self._connectSignalsAndSlots()
         self.cv_img = None
@@ -344,6 +365,9 @@ class CameraVideoFeed(QWidget):
     def take_shot(self):
         if self.cv_img is not None:
             cv2.imwrite(str(PurePath(main_app.data_path, 'DCIM_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.jpg')), self.cv_img)
+        
+    def set_exposure(self):
+        main_app.hardware.camera.cap.ExposureAuto.set(2)
 
     def closeEvent(self, event):
         self.thread.stop()
@@ -351,7 +375,8 @@ class CameraVideoFeed(QWidget):
         event.accept()
     
     def _connectSignalsAndSlots(self):
-        self.shot_pushButton.clicked.connect(lambda: self.take_shot())
+        self.shot_action.triggered.connect(lambda: self.take_shot())
+        self.exposure_action.triggered.connect(lambda: self.set_exposure())
 
     @Slot(np.ndarray)
     def updateImage(self, cv_img):

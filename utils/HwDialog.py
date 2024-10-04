@@ -128,6 +128,13 @@ class HwDialog(object):
         self.connectVideoCap(data_path=data_path, vcap_params_path=vcap_params_path)
         self.connectCamera(data_path=data_path, camera_params_path=camera_params_path)
 
+    def disconnect_camera(self):
+        if self.camera:
+            self.camera.disconnect()
+        
+        if self.camera2:
+            self.camera2.disconnect()
+
     def disconnect(self):
         """
                     :NOTE:

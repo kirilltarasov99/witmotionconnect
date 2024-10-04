@@ -39,7 +39,8 @@ class DahengCapture(object):
             raise Exception("Данный тип камер не работает на Windows")
         
         else:
-            self.cap = self.device_manager.open_device_by_sn(cam_address)
+            self.address = cam_address
+            self.cap = self.device_manager.open_device_by_sn(self.address)
             try:
                 self.output.append('Камера подключена')
                 if self.cap.DeviceModelName.is_implemented():
