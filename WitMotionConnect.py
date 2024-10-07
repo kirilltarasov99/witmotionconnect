@@ -273,17 +273,14 @@ class CameraThread(QThread):
                 self.change_pixmap_signal.emit(cv_img)
                 if main_app.ins_camera:
                     main_app.CameraVideoWriter.write(cv_img)
-        
+
         elif isinstance(self.cap, gxiapi.U3VDevice):
             self.cap.stream_on()
             while self._run_flag:
                 raw_image = self.cap.data_stream[0].get_image()
                 if raw_image is not None:
                     numpy_image = raw_image.get_numpy_array()
-                    cv_img = cv2.cvtColor(numpy_image, cv2.COLOR_RGB2BGR)
-                    self.change_pixmap_signal.emit(cv_img)
-                    if main_app.ins_camera:
-                        main_app.CameraVideoWriter.write(cv_img)
+                    self.change_pixmap_signal.emit(numpy_image)
                 
                 else:
                     print('Reconnecting')
@@ -297,9 +294,7 @@ class CameraThread(QThread):
                             self.cap = main_app.hardware.camera.cap
                             self.cap.stream_on()
                             break
-
-                
-
+            
         if main_app.ins_camera:
             main_app.CameraVideoWriter.release()
     
@@ -365,6 +360,7 @@ class CameraVideoFeed(QWidget):
 
         self.thread = CameraThread(camera)
         self.thread.change_pixmap_signal.connect(self.updateImage)
+        self.thread.change_pixmap_signal.connect(self.write_frame)
         self.thread.start()
 
     def take_shot(self):
@@ -389,6 +385,11 @@ class CameraVideoFeed(QWidget):
         self.cv_img = cv_img
         qt_img = self.convert_cv_qt(cv_img)
         self.image_label.setPixmap(qt_img)
+    
+    def write_frame(self):
+        if main_app.ins_camera:
+            cv_img = cv2.cvtColor(self.cv_img, cv2.COLOR_RGB2BGR)
+            main_app.CameraVideoWriter.write(cv_img)
     
     def convert_cv_qt(self, cv_img):
         """Convert from an opencv image to QPixmap"""
