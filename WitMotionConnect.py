@@ -105,7 +105,7 @@ class WitMotionConnect(object):
         if self.USFeedWindow and self.CameraFeedWindow:
             self.RecorderVideoWriter = self.hardware.videocap.create_videowriter()
             self.ext_recorder = False
-            self.CameraVideoWriter = self.hardware.camera.create_videowriter()
+            self.CameraVideoWriter = self.hardware.camera.create_videowriter('cam1')
             self.ext_camera = False
             self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
             self.ins_recorder = True
@@ -118,7 +118,7 @@ class WitMotionConnect(object):
             self.ins_recorder = True
         
         elif self.CameraFeedWindow:
-            self.CameraVideoWriter = self.hardware.camera.create_videowriter()
+            self.CameraVideoWriter = self.hardware.camera.create_videowriter('cam1')
             self.ext_camera = False
             self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
             self.ins_camera = True
