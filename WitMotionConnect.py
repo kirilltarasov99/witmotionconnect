@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import os
 import time
+import threading
 
 from datetime import datetime
 from pathlib import Path, PurePath
@@ -48,6 +49,7 @@ class WitMotionConnect(object):
         self.CameraVideoWriter = None
         self.ext_camera = False
         self.ins_camera = False
+        self.rec_started = False
 
         if not self.data_path.is_dir():
             self.data_path.mkdir()
@@ -110,6 +112,7 @@ class WitMotionConnect(object):
             self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
             self.ins_recorder = True
             self.ins_camera = True
+            self.rec_started = True
         
         elif self.USFeedWindow:
             self.RecorderVideoWriter = self.hardware.videocap.create_videowriter()
@@ -122,6 +125,7 @@ class WitMotionConnect(object):
             self.ext_camera = False
             self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
             self.ins_camera = True
+            self.rec_started = True
         
         else:
             self.ext_camera = True
@@ -132,6 +136,7 @@ class WitMotionConnect(object):
         if self.RecorderVideoWriter and self.CameraVideoWriter:
             self.ins_recorder = False
             self.ins_camera = False
+            self.rec_started = False
             self.hardware.stop_recording(stop_recorder=self.ext_recorder, stop_camera=self.ext_camera)
             main_app.RecorderVideoWriter.release()
             main_app.RecorderVideoWriter = None
@@ -147,6 +152,7 @@ class WitMotionConnect(object):
         
         elif self.CameraVideoWriter:
             self.ins_camera = False
+            self.rec_started = False
             self.hardware.stop_recording(stop_recorder=self.ext_recorder, stop_camera=self.ext_camera)
             self._view.output_textEdit.append('Камера остановлена')
         
@@ -221,8 +227,8 @@ class WitMotionConnect(object):
         self._view.magCal_action.triggered.connect(lambda: self.openMagCal())
         self._view.settings_action.triggered.connect(lambda: self.openSettings())
         self._view.USVideoFeed_button.clicked.connect(lambda: self.openUSFeed())
-        self._view.CameraFeed_button.clicked.connect(lambda: self.openCameraFeed(self.hardware.camera.cap, 1))
-        self._view.Camera2Feed_button.clicked.connect(lambda: self.openCameraFeed(self.hardware.camera2.cap, 2))
+        self._view.CameraFeed_button.clicked.connect(lambda: self.openCameraFeed(self.hardware.camera, 1))
+        self._view.Camera2Feed_button.clicked.connect(lambda: self.openCameraFeed(self.hardware.camera2, 2))
         # debug
         self._view.debug_cameraconnect_action.triggered.connect(lambda: self.debug_connectCamera())
 
@@ -251,6 +257,7 @@ class USVideoThread(QThread):
 
 class CameraThread(QThread):
     change_pixmap_signal = Signal(np.ndarray)
+    record_frame_signal = Signal(datetime, np.ndarray)
 
     def __init__(self, camera):
         super().__init__()
@@ -279,8 +286,11 @@ class CameraThread(QThread):
             while self._run_flag:
                 raw_image = self.cap.data_stream[0].get_image()
                 if raw_image is not None:
+                    timestamp = datetime.now()
                     numpy_image = raw_image.get_numpy_array()
                     self.change_pixmap_signal.emit(numpy_image)
+                    if main_app.ins_camera:
+                        self.record_frame_signal.emit(timestamp, numpy_image)
                 
                 else:
                     print('Reconnecting')
@@ -295,7 +305,7 @@ class CameraThread(QThread):
                             self.cap.stream_on()
                             break
             
-        if main_app.ins_camera:
+        if main_app.ins_camera and not isinstance(self.cap, gxiapi.U3VDevice):
             main_app.CameraVideoWriter.release()
     
     def stop(self):
@@ -357,10 +367,11 @@ class CameraVideoFeed(QWidget):
         
         self._connectSignalsAndSlots()
         self.cv_img = None
+        self.camera = camera
 
-        self.thread = CameraThread(camera)
+        self.thread = CameraThread(camera.cap)
         self.thread.change_pixmap_signal.connect(self.updateImage)
-        self.thread.change_pixmap_signal.connect(self.write_frame)
+        self.thread.record_frame_signal.connect(self.write_frame)
         self.thread.start()
 
     def take_shot(self):
@@ -386,10 +397,15 @@ class CameraVideoFeed(QWidget):
         qt_img = self.convert_cv_qt(cv_img)
         self.image_label.setPixmap(qt_img)
     
-    def write_frame(self):
+    def write_frame(self, timestamp, frame):
         if main_app.ins_camera:
-            cv_img = cv2.cvtColor(self.cv_img, cv2.COLOR_RGB2BGR)
-            main_app.CameraVideoWriter.write(cv_img)
+            if main_app.rec_started:
+                self.start_time = datetime.now().strftime('%Y%m%d_%H%M%S')
+                main_app.rec_started = False
+
+            # cv_img = cv2.cvtColor(self.cv_img, cv2.COLOR_RGB2BGR)
+            # main_app.CameraVideoWriter.write(cv_img)
+            self.camera.record_frame(self.start_time, timestamp, frame)
     
     def convert_cv_qt(self, cv_img):
         """Convert from an opencv image to QPixmap"""

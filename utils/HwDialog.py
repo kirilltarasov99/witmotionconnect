@@ -104,8 +104,8 @@ class HwDialog(object):
                     self.camera2 = DahengCapture(QToutput=self.output, savepath=data_path,
                                                  frameSize=lines[7].strip("\n").split('x'),
                                                  fps=int(lines[9].strip("\n")))
-                    self.camera.connect(cam_address='FCG23081373')
-                    self.camera2.connect(cam_address='FCG23081374')
+                    self.camera.connect(cam_address='FCG23081373', cam_id='cam1')
+                    self.camera2.connect(cam_address='FCG23081374', cam_id='cam2')
                     
             else:
                 print('error')
