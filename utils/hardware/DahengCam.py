@@ -1,9 +1,7 @@
 import gxipy as gx
 import cv2 as cv
 import os
-import numpy as np
 import threading
-import time
 
 from pathlib import Path, PurePath
 from datetime import datetime
@@ -80,10 +78,6 @@ class DahengCapture(object):
                 timestamp = datetime.now()
                 numpy_image = raw_image.get_numpy_array()
                 threading.Thread(target=self.record_frame, args=(start_time, timestamp, numpy_image, )).start()
-                # self.out.write(cv.cvtColor(numpy_image, cv.COLOR_RGB2BGR))
-
-        # self.out.release()
-        # np.savez(str(PurePath(self.savepath, self.cam_id + '_camdata_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.npz')), **dict(zip(self.time_list, self.frame_list)))
 
     def start_recording(self, cam_id):
         self.out = self.create_videowriter(cam_id)
