@@ -37,7 +37,7 @@ class WitMotionConnect(object):
         self.USFeedWindow = None
         self.CameraFeedWindow = None
         self.Camera2FeedWindow = None
-        self.hardware = HwDialog(QTOutput=self._view.output_textEdit)   
+        self.hardware = HwDialog(QTOutput=self._view.output_textEdit)
         self._connectSignalsAndSlots()
 
         self.app_path = Path()
@@ -421,8 +421,6 @@ class CameraVideoFeed(QWidget):
                 self.start_time = datetime.now().strftime('%Y%m%d_%H%M%S')
                 main_app.rec_started = False
 
-            # cv_img = cv2.cvtColor(self.cv_img, cv2.COLOR_RGB2BGR)
-            # main_app.CameraVideoWriter.write(cv_img)
             self.camera.record_frame(self.start_time, timestamp, frame)
     
     def convert_cv_qt(self, cv_img):
