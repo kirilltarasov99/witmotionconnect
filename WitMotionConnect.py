@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import os
 import time
-import threading
+import gxipy.gxiapi as gxiapi
 
 from datetime import datetime
 from pathlib import Path, PurePath
@@ -12,7 +12,6 @@ from utils.Decipher import Decipher
 from utils.Mag_calibration import MagCal
 from utils.Settings import Settings, CameraSettings, CameraSettings_updateValuesThread
 from utils.hardware.aravis import Camera as AravisCamera
-import gxipy.gxiapi as gxiapi
 
 from PySide6.QtWidgets import QWidget, QApplication, QLabel, QFileDialog, QMenuBar
 from PySide6.QtUiTools import QUiLoader
@@ -21,6 +20,13 @@ from PySide6.QtGui import QPixmap, QImage, QAction
 
 loader = QUiLoader()
 
+def loadUiWidget(ui_filename, parent=None):
+    ui_file = QFile(ui_filename)
+    ui_file.open(QFile.ReadOnly)
+    ui = loader.load(ui_file)
+    ui_file.close()
+    
+    return ui
 
 class WitMotionConnect(object):
     def __init__(self, view):
@@ -164,30 +170,21 @@ class WitMotionConnect(object):
 
     def openDecipher(self):
         if self.DecipherWindow is None:
-            decipher_ui_file = QFile('utils/GUI/DecipherWidget.ui')
-            decipher_ui_file.open(QFile.ReadOnly)
-            self.DecipherWindow = loader.load(decipher_ui_file)
-            decipher_ui_file.close()
+            self.DecipherWindow = loadUiWidget('utils/GUI/DecipherWidget.ui')
             DecipherAppClass(view=self.DecipherWindow)
             self.DecipherWindow.show()
             self.DecipherWindow = None
 
     def openMagCal(self):
         if self.MagCalWindow is None:
-            magcal_ui_file = QFile('utils/GUI/magCalWidget.ui')
-            magcal_ui_file.open(QFile.ReadOnly)
-            self.MagCalWindow = loader.load(magcal_ui_file)
-            magcal_ui_file.close()
+            self.MagCalWindow = loadUiWidget('utils/GUI/magCalWidget.ui')
             MagCalWidgetClass(view=self.MagCalWindow)
             self.MagCalWindow.show()
             self.MagCalWindow = None
 
     def openSettings(self):
         if self.SettingsWindow is None:
-            settings_ui_file = QFile('utils/GUI/OptionsWidget.ui')
-            settings_ui_file.open(QFile.ReadOnly)
-            self.SettingsWindow = loader.load(settings_ui_file)
-            settings_ui_file.close()
+            self.SettingsWindow = loadUiWidget('utils/GUI/OptionsWidget.ui')
             SettingsWidgetClass(view=self.SettingsWindow)
             self.SettingsWindow.show()
             self.SettingsWindow = None
@@ -363,11 +360,7 @@ class CameraSettingsWidget(QWidget):
     def _connectSignalsAndSlots(self):
         self._view.expo_auto_pushButton.clicked.connect(lambda: self.camsettings_obj.set_expo_auto())
         self._view.set_expo_level_pushButton.clicked.connect(lambda: self.camsettings_obj.set_expo_manual())
-    
-    def closeEvent(self, event):
-        self.thread.stop()
-        main_app.CameraSettingsWindow = None
-        event.accept()
+        self._view.closeWidget_pushButton.clicked.connect(lambda: self.camsettings_obj.close_widget(self.thread))
 
 
 class CameraVideoFeed(QWidget):
@@ -402,12 +395,10 @@ class CameraVideoFeed(QWidget):
         
     def open_cam_settings(self):
         if self.CameraSettingsWindow is None:
-                camsettings_ui_file = QFile('utils/GUI/cam_settings.ui')
-                camsettings_ui_file.open(QFile.ReadOnly)
-                self.CameraSettingsWindow = loader.load(camsettings_ui_file)
-                camsettings_ui_file.close()
+                self.CameraSettingsWindow = loadUiWidget('utils/GUI/cam_settings.ui')
                 CameraSettingsWidget(view=self.CameraSettingsWindow, camera=self.camera)
                 self.CameraSettingsWindow.show()
+                self.CameraSettingsWindow = None
 
     def closeEvent(self, event):
         self.thread.stop()
@@ -506,10 +497,7 @@ class DecipherAppClass(object):
 
 if __name__ == "__main__":
     WitMotionConnectApp = QApplication(sys.argv)
-    main_ui_file = QFile('utils/GUI/app.ui')
-    main_ui_file.open(QFile.ReadOnly)
-    WitMotionConnectWindow = loader.load(main_ui_file)
-    main_ui_file.close()
+    WitMotionConnectWindow = loadUiWidget('utils/GUI/app.ui')
     main_app = WitMotionConnect(view=WitMotionConnectWindow)
     WitMotionConnectWindow.show()
     sys.exit(WitMotionConnectApp.exec())

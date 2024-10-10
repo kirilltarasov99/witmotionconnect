@@ -173,6 +173,10 @@ class CameraSettings(object):
         except ValueError:
             print("Значение не int")
 
+    def close_widget(self, thread):
+        thread.stop()
+        self._view.close()
+
 
 class CameraSettings_updateValuesThread(QThread):
     new_expo_level = Signal(int)
