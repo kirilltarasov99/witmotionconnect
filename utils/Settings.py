@@ -1,3 +1,9 @@
+import time
+import threading
+
+from PySide6.QtCore import QThread, Signal
+
+
 class Settings(object):
     """
                 :NOTE:
@@ -144,3 +150,42 @@ class Settings(object):
 
         with open(self.IMU_params_path, 'w') as file:
             file.writelines(self.params_imu)
+
+
+class CameraSettings(object):
+    def __init__(self, view, camera):
+        self._view = view
+        self.camera = camera
+    
+    def updateExpoLevel(self, expo_time):
+        self._view.current_expo_level_label.setText(str(expo_time))
+
+    def set_expo_auto(self):
+        self.camera.cap.ExposureAuto.set(2)
+
+    def set_expo_manual(self):
+        try:
+            value = int(self._view.set_expo_level_lineEdit.text())
+            self.camera.cap.ExposureTime.set(value)
+        except ValueError:
+            print("Значение не int")
+
+
+class CameraSettings_updateExpoThread(QThread):
+    new_expo_level = Signal(int)
+
+    def __init__(self, camera):
+        super().__init__()
+        self.camera = camera
+        self._run_flag = True
+
+    def run(self):
+        while self._run_flag:
+            expo_level = self.camera.ExposureTime.get()
+            self.new_expo_level.emit(expo_level)
+            time.sleep(1)
+    
+    def stop(self):
+        """Sets run flag to False and waits for thread to finish"""
+        self._run_flag = False
+        self.wait()

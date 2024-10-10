@@ -10,7 +10,7 @@ from pathlib import Path, PurePath
 from utils.HwDialog import HwDialog
 from utils.Decipher import Decipher
 from utils.Mag_calibration import MagCal
-from utils.Settings import Settings
+from utils.Settings import Settings, CameraSettings, CameraSettings_updateExpoThread
 from utils.hardware.aravis import Camera as AravisCamera
 import gxipy.gxiapi as gxiapi
 
@@ -349,21 +349,41 @@ class USVideoFeed(QWidget):
         return QPixmap.fromImage(p)
     
 
+class CameraSettingsWidget(object):
+    def __init__(self, view, camera):
+        self._view = view
+        self.camsettings_obj = CameraSettings(view, camera)
+        self.thread = CameraSettings_updateExpoThread(camera=camera.cap)
+        self.thread.new_expo_level.connect(self.camsettings_obj.updateExpoLevel)
+        self.thread.start()
+        self._connectSignalsAndSlots()
+
+    def _connectSignalsAndSlots(self):
+        self._view.expo_auto_pushButton.clicked.connect(lambda: self.camsettings_obj.set_expo_auto())
+        self._view.set_expo_level_pushButton.clicked.connect(lambda: self.camsettings_obj.set_expo_manual())
+    
+    def closeEvent(self, event):
+        self.thread.stop()
+        main_app.CameraSettingsWindow = None
+        event.accept()
+
+
 class CameraVideoFeed(QWidget):
-    def __init__(self, camera, parent = None):
+    def __init__(self, camera, parent=None):
         super().__init__(parent)
         with open(main_app.camera_params_path, 'r') as f:
             self.display_width, self.display_height  = [eval(i) for i in f.readlines()[11].strip('\n').split('x')]
 
+        self.CameraSettingsWindow = None
         self.setWindowTitle("Камера для трекинга")
         self.setFixedSize(self.display_width, self.display_height)
         self.image_label = QLabel(self)
         self.image_label.resize(self.display_width, self.display_height)
         self.menu = QMenuBar(self)
         self.shot_action = QAction(text='Сделать снимок', parent=self.menu)
-        self.exposure_action = QAction(text='Настроить экспозицию', parent=self.menu)
+        self.camera_settings_action = QAction(text='Настроить экспозицию', parent=self.menu)
         self.menu.addAction(self.shot_action)
-        self.menu.addAction(self.exposure_action)
+        self.menu.addAction(self.camera_settings_action)
         
         self._connectSignalsAndSlots()
         self.cv_img = None
@@ -378,8 +398,16 @@ class CameraVideoFeed(QWidget):
         if self.cv_img is not None:
             cv2.imwrite(str(PurePath(main_app.data_path, 'DCIM_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.jpg')), self.cv_img)
         
-    def set_exposure(self):
-        main_app.hardware.camera.cap.ExposureAuto.set(2)
+    def open_cam_settings(self):
+        # raise NotImplementedError("open_cam_settings not implemented")
+        if self.CameraSettingsWindow is None:
+                camsettings_ui_file = QFile('utils/GUI/cam_settings.ui')
+                camsettings_ui_file.open(QFile.ReadOnly)
+                self.CameraSettingsWindow = loader.load(camsettings_ui_file)
+                camsettings_ui_file.close()
+                CameraSettingsWidget(view=self.CameraSettingsWindow, camera=self.camera)
+                self.CameraSettingsWindow.show()
+                self.CameraSettingsWindow = None
 
     def closeEvent(self, event):
         self.thread.stop()
@@ -388,7 +416,7 @@ class CameraVideoFeed(QWidget):
     
     def _connectSignalsAndSlots(self):
         self.shot_action.triggered.connect(lambda: self.take_shot())
-        self.exposure_action.triggered.connect(lambda: self.set_exposure())
+        self.camera_settings_action.triggered.connect(lambda: self.open_cam_settings())
 
     @Slot(np.ndarray)
     def updateImage(self, cv_img):
