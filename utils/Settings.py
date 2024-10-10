@@ -160,6 +160,9 @@ class CameraSettings(object):
     def updateExpoLevel(self, expo_time):
         self._view.current_expo_level_label.setText(str(expo_time))
 
+    def updateFPS(self, FPS_rate):
+        self._view.FPS_label.setText(str(FPS_rate))
+
     def set_expo_auto(self):
         self.camera.cap.ExposureAuto.set(2)
 
@@ -171,8 +174,9 @@ class CameraSettings(object):
             print("Значение не int")
 
 
-class CameraSettings_updateExpoThread(QThread):
+class CameraSettings_updateValuesThread(QThread):
     new_expo_level = Signal(int)
+    new_framerate = Signal(float)
 
     def __init__(self, camera):
         super().__init__()
@@ -183,6 +187,8 @@ class CameraSettings_updateExpoThread(QThread):
         while self._run_flag:
             expo_level = self.camera.ExposureTime.get()
             self.new_expo_level.emit(expo_level)
+            FPS_rate = self.camera.CurrentAcquisitionFrameRate.get()
+            self.new_framerate.emit(FPS_rate)
             time.sleep(1)
     
     def stop(self):

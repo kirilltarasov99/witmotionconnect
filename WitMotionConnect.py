@@ -10,7 +10,7 @@ from pathlib import Path, PurePath
 from utils.HwDialog import HwDialog
 from utils.Decipher import Decipher
 from utils.Mag_calibration import MagCal
-from utils.Settings import Settings, CameraSettings, CameraSettings_updateExpoThread
+from utils.Settings import Settings, CameraSettings, CameraSettings_updateValuesThread
 from utils.hardware.aravis import Camera as AravisCamera
 import gxipy.gxiapi as gxiapi
 
@@ -349,12 +349,14 @@ class USVideoFeed(QWidget):
         return QPixmap.fromImage(p)
     
 
-class CameraSettingsWidget(object):
-    def __init__(self, view, camera):
+class CameraSettingsWidget(QWidget):
+    def __init__(self, view, camera, parent=None):
+        super().__init__(parent)
         self._view = view
         self.camsettings_obj = CameraSettings(view, camera)
-        self.thread = CameraSettings_updateExpoThread(camera=camera.cap)
+        self.thread = CameraSettings_updateValuesThread(camera=camera.cap)
         self.thread.new_expo_level.connect(self.camsettings_obj.updateExpoLevel)
+        self.thread.new_framerate.connect(self.camsettings_obj.updateFPS)
         self.thread.start()
         self._connectSignalsAndSlots()
 
@@ -399,7 +401,6 @@ class CameraVideoFeed(QWidget):
             cv2.imwrite(str(PurePath(main_app.data_path, 'DCIM_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.jpg')), self.cv_img)
         
     def open_cam_settings(self):
-        # raise NotImplementedError("open_cam_settings not implemented")
         if self.CameraSettingsWindow is None:
                 camsettings_ui_file = QFile('utils/GUI/cam_settings.ui')
                 camsettings_ui_file.open(QFile.ReadOnly)
@@ -407,7 +408,6 @@ class CameraVideoFeed(QWidget):
                 camsettings_ui_file.close()
                 CameraSettingsWidget(view=self.CameraSettingsWindow, camera=self.camera)
                 self.CameraSettingsWindow.show()
-                self.CameraSettingsWindow = None
 
     def closeEvent(self, event):
         self.thread.stop()
