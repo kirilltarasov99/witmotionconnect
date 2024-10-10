@@ -346,9 +346,8 @@ class USVideoFeed(QWidget):
         return QPixmap.fromImage(p)
     
 
-class CameraSettingsWidget(QWidget):
-    def __init__(self, view, camera, parent=None):
-        super().__init__(parent)
+class CameraSettingsWidget(object):
+    def __init__(self, view, camera):
         self._view = view
         self.camsettings_obj = CameraSettings(view, camera)
         self.thread = CameraSettings_updateValuesThread(camera=camera.cap)
