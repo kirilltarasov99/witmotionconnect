@@ -38,12 +38,12 @@ class VideoCapture(object):
         """
 
         if os.name == 'nt':
-            return cv.VideoWriter(str(PurePath(self.savepath, 'USVideo_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
+            return cv.VideoWriter(str(PurePath(self.savepath, 'USVideo_' + datetime.now().strftime('%Y%m%d_%H%M%S.%f') + '.avi')),
                                   fourcc=cv.VideoWriter.fourcc(*'mp4v'),
                                   fps=self.cap.get(cv.CAP_PROP_FPS),
                                   frameSize=[int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT))])
         else:
-            return cv.VideoWriter(str(PurePath(self.savepath, 'USVideo_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
+            return cv.VideoWriter(str(PurePath(self.savepath, 'USVideo_' + datetime.now().strftime('%Y%m%d_%H%M%S.%f') + '.avi')),
                                   fourcc=cv.VideoWriter.fourcc(*'XVID'),
                                   fps=self.cap.get(cv.CAP_PROP_FPS),
                                   frameSize=[int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT))])
