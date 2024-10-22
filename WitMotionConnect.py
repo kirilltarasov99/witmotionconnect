@@ -11,7 +11,7 @@ from utils.HwDialog import HwDialog
 from utils.Decipher import Decipher
 from utils.Mag_calibration import MagCal
 from utils.Settings import Settings, CameraSettings, CameraSettings_updateValuesThread
-from utils.hardware.aravis import Camera as AravisCamera
+# from utils.hardware.aravis import Camera as AravisCamera
 
 from PySide6.QtWidgets import QWidget, QApplication, QLabel, QFileDialog, QMenuBar
 from PySide6.QtUiTools import QUiLoader
@@ -270,13 +270,13 @@ class CameraThread(QThread):
                     if main_app.ins_camera:
                         main_app.CameraVideoWriter.write(cv_img)
 
-        elif isinstance(self.cap, AravisCamera):
-            self.cap.start_acquisition_continuous()
-            while self._run_flag:
-                cv_img = cv2.cvtColor(self.cap.pop_frame(), cv2.COLOR_RGB2BGR)
-                self.change_pixmap_signal.emit(cv_img)
-                if main_app.ins_camera:
-                    main_app.CameraVideoWriter.write(cv_img)
+        # elif isinstance(self.cap, AravisCamera):
+        #     self.cap.start_acquisition_continuous()
+        #     while self._run_flag:
+        #         cv_img = cv2.cvtColor(self.cap.pop_frame(), cv2.COLOR_RGB2BGR)
+        #         self.change_pixmap_signal.emit(cv_img)
+        #         if main_app.ins_camera:
+        #             main_app.CameraVideoWriter.write(cv_img)
 
         elif isinstance(self.cap, gxiapi.U3VDevice):
             self.cap.stream_on()

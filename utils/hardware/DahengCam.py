@@ -26,17 +26,7 @@ class DahengCapture(object):
             raise Exception("No Daheng camera found!")
     
     def create_videowriter(self, cam_id):
-        if os.name == 'nt':
-            return cv.VideoWriter(str(PurePath(self.savepath, 'CameraVideo_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
-                                  fourcc=cv.VideoWriter.fourcc(*'mp4v'),
-                                  fps=self.cap.get(cv.CAP_PROP_FPS),
-                                  frameSize=[int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT))])
-        else:
             return True
-            # return cv.VideoWriter(str(PurePath(self.savepath, cam_id + '_video_' + datetime.now().strftime('%Y%m%d_%H%M%S') + '.avi')),
-            #                       fourcc=cv.VideoWriter.fourcc(*'XVID'),
-            #                       fps=19.6,
-            #                       frameSize=(5496, 3672))
 
     def connect(self, cam_address, cam_id='cam1'):
         if os.name == 'nt':
