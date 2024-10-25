@@ -2,6 +2,7 @@ import os
 if os.name == 'nt':
     os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
 import cv2 as cv
+import numpy as np
 from pathlib import PurePath
 from datetime import datetime
 from threading import Thread, Event
@@ -23,6 +24,7 @@ class VideoCapture(object):
         self.cap = cv.VideoCapture
         self.output = QToutput
         self.savepath = savepath
+        self.timestamps = []
 
         self.fps = int(fps)
         self.frameSize = [eval(i) for i in frameSize]
@@ -43,7 +45,9 @@ class VideoCapture(object):
                                   fps=self.cap.get(cv.CAP_PROP_FPS),
                                   frameSize=[int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT))])
         else:
-            return cv.VideoWriter(str(PurePath(self.savepath, 'USVideo_' + datetime.now().strftime('%Y%m%d_%H%M%S.%f') + '.avi')),
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S.%f')[:-3]
+            self.savename = str(PurePath(self.savepath, 'USVideo_timestamps' + timestamp + '.npz'))
+            return cv.VideoWriter(str(PurePath(self.savepath, 'USVideo_' + timestamp + '.avi')),
                                   fourcc=cv.VideoWriter.fourcc(*'XVID'),
                                   fps=self.cap.get(cv.CAP_PROP_FPS),
                                   frameSize=[int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT))])
@@ -89,6 +93,7 @@ class VideoCapture(object):
                 print('Ошибка в получении кадра. Проверьте рекордер и начните сначала')
                 break
             self.out.write(frame)
+            self.timestamps.append(datetime.now().strftime('%Y%m%d_%H%M%S.%f')[:-3])
 
     def start_recording(self):
         """
@@ -96,6 +101,7 @@ class VideoCapture(object):
                         Starts recording data.
         """
 
+        self.timestamps = []
         self.out = self.create_videowriter()
         self.pause_event.clear()
         self.recorder_thread = Thread(target=self.recorder)
@@ -110,6 +116,7 @@ class VideoCapture(object):
         self.pause_event.set()
         self.recorder_thread.join()
         self.out.release()
+        np.savez(self.savename, timestamps=self.timestamps)
         self.output.append('Рекордер остановлен')
 
     def disconnect(self):
