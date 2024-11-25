@@ -56,7 +56,10 @@ class WitMotionConnect(object):
         self.ext_camera = False
         self.ins_camera = False
         self.rec_started = False
+        self.create_default_params()
 
+
+    def create_default_params(self):
         if not self.data_path.is_dir():
             self.data_path.mkdir()
 
