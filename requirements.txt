@@ -5,3 +5,4 @@ numpy>=1.24.4
 tables>=3.9.2
 PySide6>=6.6.1
 opencv-python>=4.9.0
+iai-gxipy
