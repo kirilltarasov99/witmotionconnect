@@ -19,7 +19,6 @@ class DahengCapture(object):
         self.frame_list2 = []
         self.time_list2 = []
         self.pause_event = Event()
-        self.out = cv.VideoWriter
         self.device_manager = gx.DeviceManager()
         dev_num, self.dev_info_list = self.device_manager.update_device_list()
         if dev_num == 0:
@@ -70,7 +69,6 @@ class DahengCapture(object):
                 threading.Thread(target=self.record_frame, args=(start_time, timestamp, numpy_image, )).start()
 
     def start_recording(self, cam_id):
-        self.out = self.create_videowriter(cam_id)
         self.cam_id = cam_id
         self.cap.stream_on()
         self.pause_event.clear()

@@ -318,7 +318,7 @@ class CameraThread(QThread):
                         try:
                             self.cap = main_app.debug_connectCamera()
                         except gxiapi.OffLine:
-                            time.sleep(1)
+                            time.sleep(0.5)
                         else:
                             self.cap = main_app.hardware.camera.cap
                             self.cap.stream_on()
@@ -326,6 +326,9 @@ class CameraThread(QThread):
             
         if main_app.ins_camera and not isinstance(self.cap, gxiapi.U3VDevice):
             main_app.CameraVideoWriter.release()
+        
+        if isinstance(self.cap, gxiapi.U3VDevice):
+            self.cap.stream_off()
     
     def stop(self):
         """Sets run flag to False and waits for thread to finish"""
