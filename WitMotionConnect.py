@@ -13,7 +13,7 @@ from utils.Mag_calibration import MagCal
 from utils.Settings import Settings, CameraSettings, CameraSettings_updateValuesThread
 # from utils.hardware.aravis import Camera as AravisCamera
 
-from PySide6.QtWidgets import QWidget, QApplication, QLabel, QFileDialog, QMenuBar
+from PySide6.QtWidgets import QWidget, QApplication, QLabel, QFileDialog, QMenuBar, QMessageBox
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile, Slot, QThread, Signal, Qt
 from PySide6.QtGui import QPixmap, QImage, QAction
@@ -56,6 +56,8 @@ class WitMotionConnect(object):
         self.ext_camera = False
         self.ins_camera = False
         self.rec_started = False
+        self.rec_active = False
+
         self.create_default_params()
 
 
@@ -107,12 +109,26 @@ class WitMotionConnect(object):
                 file.writelines(lines)
 
     def request_IMU_connect(self):
+        if self.rec_active:
+            QMessageBox.warning(self._view, "Warning", "Работает запись", QMessageBox.StandardButton.Ok)
+            return
         self.hardware.MultipleConnect(IMU_params_path=self.IMU_params_path,
                                       data_path=main_app.data_path,
                                       vcap_params_path=self.vcap_params_path,
                                       camera_params_path=self.camera_params_path)
+        
+    def request_IMU_disconnect(self):
+        if self.rec_active:
+            QMessageBox.warning(self._view, "Warning", "Работает запись", QMessageBox.StandardButton.Ok)
+            return
+        
+        self.hardware.disconnect()
 
     def IMU_start_recording(self):
+        if self.rec_active:
+            QMessageBox.warning(self._view, "Warning", "Запись уже запущена.", QMessageBox.StandardButton.Ok)
+            return
+
         if self.USFeedWindow and self.CameraFeedWindow:
             self.RecorderVideoWriter = self.hardware.videocap.create_videowriter()
             self.ext_recorder = False
@@ -140,6 +156,8 @@ class WitMotionConnect(object):
             self.ext_camera = True
             self.ext_recorder = True
             self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
+        
+        self.rec_active = True
 
     def IMU_stop_recording(self):
         if self.RecorderVideoWriter and self.CameraVideoWriter:
@@ -170,6 +188,7 @@ class WitMotionConnect(object):
         
         self.ext_recorder = False
         self.ext_camera = False
+        self.rec_active = False
 
     def openDecipher(self):
         if self.DecipherWindow is None:
@@ -194,7 +213,7 @@ class WitMotionConnect(object):
 
     def openUSFeed(self):
         if self.ext_recorder:
-            self._view.output_textEdit.append('Нельзя открыть трансляцию во время активной записи')
+            QMessageBox.warning(self._view, "Warning", "Нельзя открыть трансляцию во время активной записи!", QMessageBox.StandardButton.Ok)
             return
 
         if self.USFeedWindow is None:
@@ -203,7 +222,7 @@ class WitMotionConnect(object):
     
     def openCameraFeed(self, cam, feed):
         if self.ext_camera:
-            self._view.output_textEdit.append('Нельзя открыть трансляцию во время активной записи')
+            QMessageBox.warning(self._view, "Warning", "Нельзя открыть трансляцию во время активной записи!", QMessageBox.StandardButton.Ok)
             return
         
         if feed == 1 and self.CameraFeedWindow is None:
@@ -220,7 +239,7 @@ class WitMotionConnect(object):
 
     def _connectSignalsAndSlots(self):
         self._view.IMU_connect_button.clicked.connect(lambda: self.request_IMU_connect())
-        self._view.IMU_disconnect_button.clicked.connect(self.hardware.disconnect)
+        self._view.IMU_disconnect_button.clicked.connect(lambda: self.request_IMU_disconnect())
         self._view.IMU_recording_start_button.clicked.connect(lambda: self.IMU_start_recording())
         self._view.IMU_recording_stop_button.clicked.connect(lambda: self.IMU_stop_recording())
         self._view.decipher_action.triggered.connect(lambda: self.openDecipher())
