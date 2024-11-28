@@ -137,6 +137,8 @@ class WitMotionConnect(object):
             self.CameraVideoWriter = self.hardware.camera.create_videowriter('cam1')
             self.ext_camera = False
             self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
+            self.ins_recorder_thread = threading.Thread(target=main_app.hardware.videocap.record_frame, 
+                                                        args=(self.USFeedWindow.thread.record_queue,), daemon=True).start()
             self.ins_recorder = True
             self.ins_camera = True
             self.rec_started = True
@@ -145,7 +147,7 @@ class WitMotionConnect(object):
             self.ext_recorder = False
             self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
             self.ins_recorder_thread = threading.Thread(target=main_app.hardware.videocap.record_frame, 
-                                                         args=(self.USFeedWindow.thread.record_queue,), daemon=True).start()
+                                                        args=(self.USFeedWindow.thread.record_queue,), daemon=True).start()
             self.ins_recorder = True
         
         elif self.CameraFeedWindow:
@@ -168,6 +170,12 @@ class WitMotionConnect(object):
             self.ins_recorder = False
             self.ins_camera = False
             self.rec_started = False
+            if self.USFeedWindow:
+                self.USFeedWindow.thread.record_queue.join()
+            else:
+                QMessageBox.warning(self._view, "Warning", 
+                                    "Окно трансляции было закрыто в процессе записи.\nЗапись является не полной!", 
+                                    QMessageBox.StandardButton.Ok)
             self.hardware.stop_recording(stop_recorder=self.ext_recorder, stop_camera=self.ext_camera)
             self.hardware.videocap.out.release()
             main_app.RecorderVideoWriter = None
