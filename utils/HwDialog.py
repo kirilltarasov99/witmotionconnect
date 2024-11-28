@@ -168,8 +168,8 @@ class HwDialog(object):
                         start_recorder (bool): whether to start recorder or not; if not, use recorder in main app
         """
 
-        if self.videocap and start_recorder:
-            self.videocap.start_recording()
+        if self.videocap:
+            self.videocap.start_recording(start_recorder)
 
         if self.camera and start_camera:
             threading.Thread(target=self._start_recording_thread, args=(self.camera, 'cam1')).start()
@@ -198,8 +198,8 @@ class HwDialog(object):
                         stop_recorder (bool): whether to stop recorder or not; if not, use recorder in main app
         """
 
-        if self.videocap and stop_recorder:
-            self.videocap.stop_recording()
+        if self.videocap:
+            self.videocap.stop_recording(stop_recorder)
 
         if self.camera and stop_camera:
             threading.Thread(target=self._stop_recording_thread, args=(self.camera,)).start()

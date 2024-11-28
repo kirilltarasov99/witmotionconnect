@@ -5,6 +5,7 @@ import os
 import time
 import gxipy.gxiapi as gxiapi
 import threading
+import queue
 
 from datetime import datetime
 from pathlib import Path, PurePath
@@ -52,6 +53,7 @@ class WitMotionConnect(object):
         self.RecorderVideoWriter = None
         self.ext_recorder = False
         self.ins_recorder = False
+        self.ins_recorder_thread = None
 
         self.CameraVideoWriter = None
         self.ext_camera = False
@@ -131,7 +133,6 @@ class WitMotionConnect(object):
             return
 
         if self.USFeedWindow and self.CameraFeedWindow:
-            self.RecorderVideoWriter = self.hardware.videocap.create_videowriter()
             self.ext_recorder = False
             self.CameraVideoWriter = self.hardware.camera.create_videowriter('cam1')
             self.ext_camera = False
@@ -141,9 +142,10 @@ class WitMotionConnect(object):
             self.rec_started = True
         
         elif self.USFeedWindow:
-            self.RecorderVideoWriter = self.hardware.videocap.create_videowriter()
             self.ext_recorder = False
             self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
+            self.ins_recorder_thread = threading.Thread(target=main_app.hardware.videocap.record_frame, 
+                                                         args=(self.USFeedWindow.thread.record_queue,), daemon=True).start()
             self.ins_recorder = True
         
         elif self.CameraFeedWindow:
@@ -162,24 +164,28 @@ class WitMotionConnect(object):
         self.rec_active = True
 
     def IMU_stop_recording(self):
-        if self.RecorderVideoWriter and self.CameraVideoWriter:
+        if self.ins_recorder and self.ins_camera:
             self.ins_recorder = False
             self.ins_camera = False
             self.rec_started = False
             self.hardware.stop_recording(stop_recorder=self.ext_recorder, stop_camera=self.ext_camera)
-            main_app.RecorderVideoWriter.release()
+            self.hardware.videocap.out.release()
             main_app.RecorderVideoWriter = None
-            self._view.output_textEdit.append('Рекордер остановлен')
             self._view.output_textEdit.append('Камера остановлена')
         
-        elif self.RecorderVideoWriter:
+        elif self.ins_recorder:
             self.ins_recorder = False
+            if self.USFeedWindow:
+                self.USFeedWindow.thread.record_queue.join()
+            else:
+                QMessageBox.warning(self._view, "Warning", 
+                                    "Окно трансляции было закрыто в процессе записи.\nЗапись является не полной!", 
+                                    QMessageBox.StandardButton.Ok)
             self.hardware.stop_recording(stop_recorder=self.ext_recorder, stop_camera=self.ext_camera)
-            main_app.RecorderVideoWriter.release()
+            self.hardware.videocap.out.release()
             main_app.RecorderVideoWriter = None
-            self._view.output_textEdit.append('Рекордер остановлен')
         
-        elif self.CameraVideoWriter:
+        elif self.ins_camera:
             self.ins_camera = False
             self.rec_started = False
             self.hardware.stop_recording(stop_recorder=self.ext_recorder, stop_camera=self.ext_camera)
@@ -219,7 +225,7 @@ class WitMotionConnect(object):
             return
 
         if self.USFeedWindow is None:
-            self.USFeedWindow = USVideoFeed()
+            self.USFeedWindow = USVideoFeed(self.hardware.videocap)
         self.USFeedWindow.show()
     
     def openCameraFeed(self, cam, feed):
@@ -260,15 +266,18 @@ class USVideoThread(QThread):
     def __init__(self):
         super().__init__()
         self._run_flag = True
+        self.record_queue = queue.Queue()
 
     def run(self):
-        cap = main_app.hardware.videocap.cap
+        n = 1
         while self._run_flag:
-            ret, cv_img = cap.read()
+            ret, cv_img = main_app.hardware.videocap.cap.read()
             if ret:
                 self.change_pixmap_signal.emit(cv_img)
                 if main_app.ins_recorder:
-                    main_app.RecorderVideoWriter.write(cv_img)
+                    timestamp = datetime.now()
+                    self.record_queue.put((cv_img, timestamp, n))
+                    n += 1
 
     def stop(self):
         """Sets run flag to False and waits for thread to finish"""
@@ -339,7 +348,7 @@ class CameraThread(QThread):
 
 
 class USVideoFeed(QWidget):
-    def __init__(self):
+    def __init__(self, recorder):
         super().__init__()
         with open(main_app.vcap_params_path, 'r') as file:
             self.display_width, self.display_height = [eval(i) for i in file.readlines()[9].strip('\n').split('x')]
@@ -347,6 +356,7 @@ class USVideoFeed(QWidget):
         self.setFixedSize(self.display_width, self.display_height)
         self.image_label = QLabel(self)
         self.image_label.resize(self.display_width, self.display_height)
+        self.recorder = recorder
 
         self.thread = USVideoThread()
         self.thread.change_pixmap_signal.connect(self.update_image)

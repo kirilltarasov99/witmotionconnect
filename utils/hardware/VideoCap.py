@@ -5,7 +5,8 @@ import cv2 as cv
 import numpy as np
 from pathlib import PurePath
 from datetime import datetime
-from threading import Thread, Event
+import threading
+import queue
 
 
 class VideoCapture(object):
@@ -30,7 +31,8 @@ class VideoCapture(object):
         self.frameSize = [eval(i) for i in frameSize]
 
         self.recorder_thread = None
-        self.pause_event = Event()
+        self.pause_event = threading.Event()
+        self.threadlock = threading.Lock()
         self.out = cv.VideoWriter
     
     def create_videowriter(self):
@@ -47,7 +49,7 @@ class VideoCapture(object):
         else:
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S.%f')[:-3]
             self.savename = str(PurePath(self.savepath, 'USVideo_timestamps' + timestamp + '.npz'))
-            return cv.VideoWriter(str(PurePath(self.savepath, 'USVideo_' + timestamp + '.avi')),
+            self.out = cv.VideoWriter(str(PurePath(self.savepath, 'USVideo_' + timestamp + '.avi')),
                                   fourcc=cv.VideoWriter.fourcc(*'XVID'),
                                   fps=self.cap.get(cv.CAP_PROP_FPS),
                                   frameSize=[int(self.cap.get(cv.CAP_PROP_FRAME_WIDTH)), int(self.cap.get(cv.CAP_PROP_FRAME_HEIGHT))])
@@ -78,12 +80,21 @@ class VideoCapture(object):
         else:
             self.output.append('Проблема при подключении рекордера')
 
+    def record_frame(self, queue):
+        while True:
+            frame, timestamp, n = queue.get()
+            self.out.write(frame)
+            self.timestamps.append(timestamp)
+            queue.task_done()
+
     def recorder(self):
         """
                     :NOTE:
                         Records frames from capture card into a video file.
         """
-
+        n = 1
+        record_queue = queue.Queue()
+        threading.Thread(target=self.record_frame, args=(record_queue,), daemon=True).start()
         while self.cap.isOpened():
             if self.pause_event.is_set():
                 break
@@ -92,29 +103,35 @@ class VideoCapture(object):
             if not ret:
                 print('Ошибка в получении кадра. Проверьте рекордер и начните сначала')
                 break
-            self.out.write(frame)
-            self.timestamps.append(datetime.now().strftime('%Y%m%d_%H%M%S.%f')[:-3])
+            # self.out.write(frame)
+            # self.timestamps.append(datetime.now().strftime('%Y%m%d_%H%M%S.%f')[:-3])
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S.%f')[:-3]
+            record_queue.put((frame, timestamp, n))
+            n += 1
+        record_queue.join()
 
-    def start_recording(self):
+    def start_recording(self, start_recorder):
         """
                     :NOTE:
                         Starts recording data.
         """
 
         self.timestamps = []
-        self.out = self.create_videowriter()
-        self.pause_event.clear()
-        self.recorder_thread = Thread(target=self.recorder)
-        self.recorder_thread.start()
+        self.create_videowriter()
+        if start_recorder:
+            self.pause_event.clear()
+            self.recorder_thread = threading.Thread(target=self.recorder)
+            self.recorder_thread.start()
 
-    def stop_recording(self):
+    def stop_recording(self, stop_recorder):
         """
                     :NOTE:
                         Stops recording data.
         """
 
-        self.pause_event.set()
-        self.recorder_thread.join()
+        if stop_recorder:
+            self.pause_event.set()
+            self.recorder_thread.join()
         self.out.release()
         np.savez(self.savename, timestamps=self.timestamps)
         self.output.append('Рекордер остановлен')
