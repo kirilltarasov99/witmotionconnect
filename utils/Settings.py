@@ -1,5 +1,4 @@
 import time
-import threading
 
 from PySide6.QtCore import QThread, Signal
 
@@ -91,7 +90,7 @@ class Settings(object):
             self._view.Camera_second_use_checkBox.setEnabled(True)
             self._view.Camera_record_resolution_lineEdit.setEnabled(False)
             self._view.Camera_FPS_lineEdit.setEnabled(False)
-            self._view.Camera_address_lineEdit.setText("FCG23081373")
+            # self._view.Camera_address_lineEdit.setText("FCG23081373")
         else:
             self._view.Camera_second_use_checkBox.setChecked(0)
             self._view.Camera_second_use_checkBox.setEnabled(False)
