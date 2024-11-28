@@ -5,7 +5,6 @@ import threading
 
 from pathlib import Path, PurePath
 from datetime import datetime
-from threading import Thread, Event
 
 
 class DahengCapture(object):
@@ -14,11 +13,7 @@ class DahengCapture(object):
         self.savepath = savepath
         self.cap = None
         self.recorder_thread = None
-        self.frame_list1 = []
-        self.time_list1 = []
-        self.frame_list2 = []
-        self.time_list2 = []
-        self.pause_event = Event()
+        self.pause_event = threading.Event()
         self.device_manager = gx.DeviceManager()
         dev_num, self.dev_info_list = self.device_manager.update_device_list()
         if dev_num == 0:
@@ -72,7 +67,7 @@ class DahengCapture(object):
         self.cam_id = cam_id
         self.cap.stream_on()
         self.pause_event.clear()
-        self.recorder_thread = Thread(target=self.recorder)
+        self.recorder_thread = threading.Thread(target=self.recorder)
         self.recorder_thread.start()
 
     def stop_recording(self):
