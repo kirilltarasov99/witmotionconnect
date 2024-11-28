@@ -4,6 +4,7 @@ import numpy as np
 import os
 import time
 import gxipy.gxiapi as gxiapi
+import threading
 
 from datetime import datetime
 from pathlib import Path, PurePath
@@ -446,7 +447,7 @@ class CameraVideoFeed(QWidget):
                 self.start_time = datetime.now().strftime('%Y%m%d_%H%M%S')
                 main_app.rec_started = False
 
-            self.camera.record_frame(self.start_time, timestamp, frame)
+            threading.Thread(target=self.camera.record_frame, args=(self.start_time, timestamp, frame, )).start()
     
     def convert_cv_qt(self, cv_img):
         h, w = cv_img.shape
