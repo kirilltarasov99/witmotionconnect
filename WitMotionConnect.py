@@ -158,7 +158,7 @@ class WitMotionConnect(object):
             self.rec_started = True
         
         elif self.USFeedWindow:
-            self.ext_recorder = Falsestart_reco
+            self.ext_recorder = False
             self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
             self.ins_recorder_thread = threading.Thread(target=main_app.hardware.videocap.record_frame, 
                                                         args=(self.USFeedWindow.thread.record_queue,), daemon=True).start()
