@@ -277,15 +277,13 @@ class USVideoThread(QThread):
         self.record_queue = queue.Queue()
 
     def run(self):
-        n = 1
         while self._run_flag:
             ret, cv_img = main_app.hardware.videocap.cap.read()
             if ret:
                 self.change_pixmap_signal.emit(cv_img)
                 if main_app.ins_recorder:
                     timestamp = datetime.now()
-                    self.record_queue.put((cv_img, timestamp, n))
-                    n += 1
+                    self.record_queue.put((cv_img, timestamp))
 
     def stop(self):
         """Sets run flag to False and waits for thread to finish"""

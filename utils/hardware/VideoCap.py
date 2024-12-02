@@ -82,7 +82,7 @@ class VideoCapture(object):
 
     def record_frame(self, queue):
         while True:
-            frame, timestamp, n = queue.get()
+            frame, timestamp = queue.get()
             self.out.write(frame)
             self.timestamps.append(timestamp)
             queue.task_done()
@@ -92,7 +92,6 @@ class VideoCapture(object):
                     :NOTE:
                         Records frames from capture card into a video file.
         """
-        n = 1
         record_queue = queue.Queue()
         threading.Thread(target=self.record_frame, args=(record_queue,), daemon=True).start()
         while self.cap.isOpened():
@@ -103,11 +102,8 @@ class VideoCapture(object):
             if not ret:
                 print('Ошибка в получении кадра. Проверьте рекордер и начните сначала')
                 break
-            # self.out.write(frame)
-            # self.timestamps.append(datetime.now().strftime('%Y%m%d_%H%M%S.%f')[:-3])
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S.%f')[:-3]
-            record_queue.put((frame, timestamp, n))
-            n += 1
+            record_queue.put((frame, timestamp))
         record_queue.join()
 
     def start_recording(self, start_recorder):
