@@ -171,8 +171,10 @@ class HwDialog(object):
         if self.videocap:
             self.videocap.start_recording(start_recorder)
 
-        if self.camera:
+        if self.camera and isinstance(self.camera, DahengCapture):
             threading.Thread(target=self._start_recording_thread, args=(self.camera, 'cam1', start_camera)).start()
+        elif self.camera:
+            self.camera.start_recording()
         
         if self.camera2:
             threading.Thread(target=self._start_recording_thread, args=(self.camera2, 'cam2', start_camera)).start()
@@ -201,8 +203,10 @@ class HwDialog(object):
         if self.videocap:
             self.videocap.stop_recording(stop_recorder)
 
-        if self.camera and stop_camera:
+        if self.camera and stop_camera and isinstance(self.camera, DahengCapture):
             threading.Thread(target=self._stop_recording_thread, args=(self.camera,)).start()
+        elif self.camera:
+            self.camera.stop_recording()
         
         if self.camera2 and stop_camera:
             threading.Thread(target=self._stop_recording_thread, args=(self.camera2,)).start()

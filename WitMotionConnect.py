@@ -132,7 +132,7 @@ class WitMotionConnect(object):
             QMessageBox.warning(self._view, "Warning", "Запись уже запущена.", QMessageBox.StandardButton.Ok)
             return
 
-        if self.CameraFeedWindow:
+        if self.CameraFeedWindow and isinstance(self.hardware.camera.cap, gxiapi.U3VDevice):
             start_time = datetime.now().strftime('%Y%m%d_%H%M%S')
             data_path = Path(PurePath(self.hardware.camera.savepath, self.hardware.camera.cam_id + 'video' + start_time))
             if not data_path.is_dir():
@@ -145,19 +145,20 @@ class WitMotionConnect(object):
             self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
             self.ins_recorder_thread = threading.Thread(target=main_app.hardware.videocap.record_frame, 
                                                         args=(self.USFeedWindow.thread.record_queue,), daemon=True).start()
-            num_workers = 4
-            self.ins_camera_thread = [threading.Thread(target=main_app.hardware.camera.record_frame, 
-                                                      args=(self.CameraFeedWindow.thread.record_queue, data_path,), 
-                                                      daemon=True) for _ in range(num_workers)]
-            for w in self.ins_camera_thread:
-                w.start()
+            if isinstance(self.hardware.camera.cap, gxiapi.U3VDevice):
+                num_workers = 4
+                self.ins_camera_thread = [threading.Thread(target=main_app.hardware.camera.record_frame, 
+                                                        args=(self.CameraFeedWindow.thread.record_queue, data_path,), 
+                                                        daemon=True) for _ in range(num_workers)]
+                for w in self.ins_camera_thread:
+                    w.start()
             
             self.ins_recorder = True
             self.ins_camera = True
             self.rec_started = True
         
         elif self.USFeedWindow:
-            self.ext_recorder = False
+            self.ext_recorder = Falsestart_reco
             self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
             self.ins_recorder_thread = threading.Thread(target=main_app.hardware.videocap.record_frame, 
                                                         args=(self.USFeedWindow.thread.record_queue,), daemon=True).start()
@@ -168,12 +169,13 @@ class WitMotionConnect(object):
             self.ext_camera = False
             self.ext_recorder = True
             self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
-            num_workers = 4
-            self.ins_camera_thread = [threading.Thread(target=main_app.hardware.camera.record_frame, 
-                                                      args=(self.CameraFeedWindow.thread.record_queue, data_path,), 
-                                                      daemon=True) for _ in range(num_workers)]
-            for w in self.ins_camera_thread:
-                w.start()
+            if isinstance(self.hardware.camera.cap, gxiapi.U3VDevice):
+                num_workers = 4
+                self.ins_camera_thread = [threading.Thread(target=main_app.hardware.camera.record_frame, 
+                                                        args=(self.CameraFeedWindow.thread.record_queue, data_path,), 
+                                                        daemon=True) for _ in range(num_workers)]
+                for w in self.ins_camera_thread:
+                    w.start()
             self.ins_camera = True
             self.rec_started = True
         
@@ -198,8 +200,9 @@ class WitMotionConnect(object):
                                     QMessageBox.StandardButton.Ok)
             
             if self.CameraFeedWindow:
-                self.CameraFeedWindow.thread.record_queue.join()
-                self.CameraFeedWindow.thread.record_queue.shutdown()
+                if isinstance(self.hardware.camera.cap, gxiapi.U3VDevice):
+                    self.CameraFeedWindow.thread.record_queue.join()
+                    self.CameraFeedWindow.thread.record_queue.shutdown()
             else:
                 QMessageBox.warning(self._view, "Warning", 
                                     "Окно трансляции было закрыто в процессе записи.\nЗапись является не полной!", 
@@ -226,8 +229,9 @@ class WitMotionConnect(object):
             self.ins_camera = False
             self.rec_started = False
             if self.CameraFeedWindow:
-                self.CameraFeedWindow.thread.record_queue.join()
-                self.CameraFeedWindow.thread.record_queue.shutdown()
+                if isinstance(self.hardware.camera.cap, gxiapi.U3VDevice):
+                    self.CameraFeedWindow.thread.record_queue.join()
+                    self.CameraFeedWindow.thread.record_queue.shutdown()
             else:
                 QMessageBox.warning(self._view, "Warning", 
                                     "Окно трансляции было закрыто в процессе записи.\nЗапись является не полной!", 
@@ -495,9 +499,15 @@ class CameraVideoFeed(QWidget):
         self.image_label.setPixmap(qt_img)
     
     def convert_cv_qt(self, cv_img):
-        h, w = cv_img.shape
-        bytes_per_line = 1 * w
-        convert_to_Qt_format = QImage(cv_img.data, w, h, bytes_per_line, QImage.Format.Format_Grayscale8)
+        if isinstance(main_app.hardware.camera.cap, gxiapi.U3VDevice):
+            h, w = cv_img.shape
+            bytes_per_line = 1 * w
+            convert_to_Qt_format = QImage(cv_img.data, w, h, bytes_per_line, QImage.Format.Format_Grayscale8)
+        else:
+            rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+            h, w, ch = rgb_image.shape
+            bytes_per_line = ch * w
+            convert_to_Qt_format = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
         p = convert_to_Qt_format.scaled(self.display_width, self.display_height, Qt.AspectRatioMode.KeepAspectRatio)
         return QPixmap.fromImage(p)
 

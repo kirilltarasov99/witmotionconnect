@@ -31,7 +31,7 @@ class CameraCapture(object):
         self.pause_event = Event()
         self.out = cv.VideoWriter
     
-    def create_videowriter(self):
+    def create_videowriter(self, cam_id=None):
         """
                     :NOTE:
                         Creates VideoWriter.
