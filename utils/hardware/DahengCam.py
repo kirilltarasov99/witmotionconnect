@@ -2,6 +2,7 @@ import gxipy as gx
 import cv2 as cv
 import os
 import threading
+import queue
 
 from pathlib import Path, PurePath
 from datetime import datetime
@@ -41,16 +42,29 @@ class DahengCapture(object):
 
             except Exception as e:
                 self.output.append(f'Ошибка при подключении к камере: {e}')
-            
-    def record_frame(self, start_time, timestamp, image):
+        
+    def record_frame(self, queue, data_path):
+        while True:
+            try:
+                frame, timestamp = queue.get()
+            except:
+                break
+            cv.imwrite(str(PurePath(data_path, 'frame' + timestamp.strftime('%Y%m%d_%H%M%S.%f')[:-3] + '.png')), frame)
+            queue.task_done()
+
+    def recorder(self):
+        record_queue = queue.Queue()
+        num_workers = 4
+        start_time = datetime.now().strftime('%Y%m%d_%H%M%S')
         data_path = Path(PurePath(self.savepath, self.cam_id + 'video' + start_time))
         if not data_path.is_dir():
             data_path.mkdir()
-        cv.imwrite(str(PurePath(data_path, 'frame' + timestamp.strftime('%Y%m%d_%H%M%S.%f')[:-3] + '.png')), image)
-
-    def recorder(self):
-        start_time = datetime.now().strftime('%Y%m%d_%H%M%S')
+        workers = [threading.Thread(target=self.record_frame, args=(record_queue, data_path, )) for _ in range(num_workers)]
+        for w in workers:
+            w.start()
+        # threading.Thread(target=self.record_frame, args=(record_queue, )).start()
         while True:
+
             if self.pause_event.is_set():
                 break
 
@@ -61,14 +75,17 @@ class DahengCapture(object):
             else:
                 timestamp = datetime.now()
                 numpy_image = raw_image.get_numpy_array()
-                threading.Thread(target=self.record_frame, args=(start_time, timestamp, numpy_image, )).start()
+                record_queue.put((numpy_image, timestamp))
+        record_queue.join()
+        record_queue.shutdown()
 
-    def start_recording(self, cam_id):
+    def start_recording(self, cam_id, start_camera):
         self.cam_id = cam_id
         self.cap.stream_on()
-        self.pause_event.clear()
-        self.recorder_thread = threading.Thread(target=self.recorder)
-        self.recorder_thread.start()
+        if start_camera:
+            self.pause_event.clear()
+            self.recorder_thread = threading.Thread(target=self.recorder)
+            self.recorder_thread.start()
 
     def stop_recording(self):
         self.pause_event.set()

@@ -155,8 +155,8 @@ class HwDialog(object):
         
         self.output.append('Оборудование отключено')
 
-    def _start_recording_thread(self, camera, cam_id):
-        camera.start_recording(cam_id)
+    def _start_recording_thread(self, camera, cam_id, start_camera):
+        camera.start_recording(cam_id, start_camera)
 
     def start_recording(self, start_recorder, start_camera):
         """
@@ -171,11 +171,11 @@ class HwDialog(object):
         if self.videocap:
             self.videocap.start_recording(start_recorder)
 
-        if self.camera and start_camera:
-            threading.Thread(target=self._start_recording_thread, args=(self.camera, 'cam1')).start()
+        if self.camera:
+            threading.Thread(target=self._start_recording_thread, args=(self.camera, 'cam1', start_camera)).start()
         
-        if self.camera2 and start_camera:
-            threading.Thread(target=self._start_recording_thread, args=(self.camera2, 'cam2')).start()
+        if self.camera2:
+            threading.Thread(target=self._start_recording_thread, args=(self.camera2, 'cam2', start_camera)).start()
 
         if self.connectedHW_type is not None:
             if self.connectedHW_type != 'WitMotion':

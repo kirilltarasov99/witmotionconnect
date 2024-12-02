@@ -132,6 +132,12 @@ class WitMotionConnect(object):
             QMessageBox.warning(self._view, "Warning", "Запись уже запущена.", QMessageBox.StandardButton.Ok)
             return
 
+        if self.CameraFeedWindow:
+            start_time = datetime.now().strftime('%Y%m%d_%H%M%S')
+            data_path = Path(PurePath(self.hardware.camera.savepath, self.hardware.camera.cam_id + 'video' + start_time))
+            if not data_path.is_dir():
+                data_path.mkdir()
+
         if self.USFeedWindow and self.CameraFeedWindow:
             self.ext_recorder = False
             self.CameraVideoWriter = self.hardware.camera.create_videowriter('cam1')
@@ -139,6 +145,13 @@ class WitMotionConnect(object):
             self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
             self.ins_recorder_thread = threading.Thread(target=main_app.hardware.videocap.record_frame, 
                                                         args=(self.USFeedWindow.thread.record_queue,), daemon=True).start()
+            num_workers = 4
+            self.ins_camera_thread = [threading.Thread(target=main_app.hardware.camera.record_frame, 
+                                                      args=(self.CameraFeedWindow.thread.record_queue, data_path,), 
+                                                      daemon=True) for _ in range(num_workers)]
+            for w in self.ins_camera_thread:
+                w.start()
+            
             self.ins_recorder = True
             self.ins_camera = True
             self.rec_started = True
@@ -155,6 +168,12 @@ class WitMotionConnect(object):
             self.ext_camera = False
             self.ext_recorder = True
             self.hardware.start_recording(start_recorder=self.ext_recorder, start_camera=self.ext_camera)
+            num_workers = 4
+            self.ins_camera_thread = [threading.Thread(target=main_app.hardware.camera.record_frame, 
+                                                      args=(self.CameraFeedWindow.thread.record_queue, data_path,), 
+                                                      daemon=True) for _ in range(num_workers)]
+            for w in self.ins_camera_thread:
+                w.start()
             self.ins_camera = True
             self.rec_started = True
         
@@ -172,6 +191,15 @@ class WitMotionConnect(object):
             self.rec_started = False
             if self.USFeedWindow:
                 self.USFeedWindow.thread.record_queue.join()
+                self.USFeedWindow.thread.record_queue.shutdown()
+            else:
+                QMessageBox.warning(self._view, "Warning", 
+                                    "Окно трансляции было закрыто в процессе записи.\nЗапись является не полной!", 
+                                    QMessageBox.StandardButton.Ok)
+            
+            if self.CameraFeedWindow:
+                self.CameraFeedWindow.thread.record_queue.join()
+                self.CameraFeedWindow.thread.record_queue.shutdown()
             else:
                 QMessageBox.warning(self._view, "Warning", 
                                     "Окно трансляции было закрыто в процессе записи.\nЗапись является не полной!", 
@@ -185,6 +213,7 @@ class WitMotionConnect(object):
             self.ins_recorder = False
             if self.USFeedWindow:
                 self.USFeedWindow.thread.record_queue.join()
+                self.USFeedWindow.thread.record_queue.shutdown()
             else:
                 QMessageBox.warning(self._view, "Warning", 
                                     "Окно трансляции было закрыто в процессе записи.\nЗапись является не полной!", 
@@ -196,6 +225,13 @@ class WitMotionConnect(object):
         elif self.ins_camera:
             self.ins_camera = False
             self.rec_started = False
+            if self.CameraFeedWindow:
+                self.CameraFeedWindow.thread.record_queue.join()
+                self.CameraFeedWindow.thread.record_queue.shutdown()
+            else:
+                QMessageBox.warning(self._view, "Warning", 
+                                    "Окно трансляции было закрыто в процессе записи.\nЗапись является не полной!", 
+                                    QMessageBox.StandardButton.Ok)
             self.hardware.stop_recording(stop_recorder=self.ext_recorder, stop_camera=self.ext_camera)
             self._view.output_textEdit.append('Камера остановлена')
         
@@ -299,6 +335,7 @@ class CameraThread(QThread):
         super().__init__()
         self._run_flag = True
         self.cap = camera
+        self.record_queue = queue.Queue()
     
     def run(self):
         if isinstance(self.cap, cv2.VideoCapture):
@@ -326,7 +363,7 @@ class CameraThread(QThread):
                     numpy_image = raw_image.get_numpy_array()
                     self.change_pixmap_signal.emit(numpy_image)
                     if main_app.ins_camera:
-                        self.record_frame_signal.emit(timestamp, numpy_image)
+                        self.record_queue.put((numpy_image, timestamp))
                 
                 else:
                     print('Reconnecting')
@@ -428,7 +465,6 @@ class CameraVideoFeed(QWidget):
 
         self.thread = CameraThread(camera.cap)
         self.thread.change_pixmap_signal.connect(self.updateImage)
-        self.thread.record_frame_signal.connect(self.write_frame)
         self.thread.start()
 
     def take_shot(self):
@@ -457,14 +493,6 @@ class CameraVideoFeed(QWidget):
         self.cv_img = cv_img
         qt_img = self.convert_cv_qt(cv_img)
         self.image_label.setPixmap(qt_img)
-    
-    def write_frame(self, timestamp, frame):
-        if main_app.ins_camera:
-            if main_app.rec_started:
-                self.start_time = datetime.now().strftime('%Y%m%d_%H%M%S')
-                main_app.rec_started = False
-
-            threading.Thread(target=self.camera.record_frame, args=(self.start_time, timestamp, frame, )).start()
     
     def convert_cv_qt(self, cv_img):
         h, w = cv_img.shape
@@ -534,6 +562,12 @@ class DecipherAppClass(object):
 
 
 if __name__ == "__main__":
+    def get_active_threads():
+        while True:
+            for thread in threading.enumerate():
+                print(thread.name)
+
+    # threading.Thread(target=get_active_threads).start()
     WitMotionConnectApp = QApplication(sys.argv)
     WitMotionConnectWindow = loadUiWidget('utils/GUI/app.ui')
     main_app = WitMotionConnect(view=WitMotionConnectWindow)
