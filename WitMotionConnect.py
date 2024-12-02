@@ -562,12 +562,6 @@ class DecipherAppClass(object):
 
 
 if __name__ == "__main__":
-    def get_active_threads():
-        while True:
-            for thread in threading.enumerate():
-                print(thread.name)
-
-    # threading.Thread(target=get_active_threads).start()
     WitMotionConnectApp = QApplication(sys.argv)
     WitMotionConnectWindow = loadUiWidget('utils/GUI/app.ui')
     main_app = WitMotionConnect(view=WitMotionConnectWindow)
