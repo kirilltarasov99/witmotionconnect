@@ -60,7 +60,9 @@ class CameraCapture(object):
         if os.name == 'nt':
             self.cap = cv.VideoCapture(int(cam_address), cv.CAP_DSHOW)
         else:
-            self.cap = cv.VideoCapture(cam_address)
+            self.cap = cv.VideoCapture(cam_address, cv.CAP_V4L2)
+            
+        self.cap.set(cv.CAP_PROP_FOURCC, cv.VideoWriter_fourcc(*"MJPG"))
         self.cap.set(cv.CAP_PROP_FRAME_WIDTH, self.frameSize[0])
         self.cap.set(cv.CAP_PROP_FRAME_HEIGHT, self.frameSize[1])
         self.cap.set(cv.CAP_PROP_FPS, self.fps)

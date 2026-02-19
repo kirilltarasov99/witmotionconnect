@@ -18,7 +18,7 @@ from utils.Settings import Settings, CameraSettings, CameraSettings_updateValues
 from PySide6.QtWidgets import QWidget, QApplication, QLabel, QFileDialog, QMenuBar, QMessageBox
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtCore import QFile, Slot, QThread, Signal, Qt
-from PySide6.QtGui import QPixmap, QImage, QAction
+from PySide6.QtGui import QPixmap, QImage, QAction, QShortcut, QKeySequence
 
 loader = QUiLoader()
 
@@ -60,6 +60,11 @@ class WitMotionConnect(object):
         self.ins_camera = False
         self.rec_started = False
         self.rec_active = False
+
+        self.shortcut_start = QShortcut(QKeySequence('F9'), self._view)
+        self.shortcut_start.activated.connect(self.IMU_start_recording)
+        self.shortcut_stop = QShortcut(QKeySequence('F10'), self._view)
+        self.shortcut_stop.activated.connect(self.IMU_stop_recording)
 
         self.create_default_params()
 
@@ -119,6 +124,7 @@ class WitMotionConnect(object):
                                       data_path=main_app.data_path,
                                       vcap_params_path=self.vcap_params_path,
                                       camera_params_path=self.camera_params_path)
+        print(type(self.hardware.camera.cap))
         
     def request_IMU_disconnect(self):
         if self.rec_active:

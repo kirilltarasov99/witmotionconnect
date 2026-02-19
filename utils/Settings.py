@@ -1,4 +1,6 @@
 import time
+import gxipy.gxiapi as gxiapi
+import cv2
 
 from PySide6.QtCore import QThread, Signal
 
@@ -163,12 +165,23 @@ class CameraSettings(object):
         self._view.FPS_label.setText(str(FPS_rate))
 
     def set_expo_auto(self):
-        self.camera.cap.ExposureAuto.set(2)
+        if isinstance(self.camera.cap, gxiapi.U3VDevice):
+            self.camera.cap.ExposureAuto.set(2)
+        elif isinstance(self.camera.cap, cv2.VideoCapture):
+            auto_exp = self.camera.cap.get(cv2.CAP_PROP_AUTO_EXPOSURE)
+            if auto_exp == 3.0:
+                self.camera.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 1.0)
+            else:
+                self.camera.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 3.0)
 
     def set_expo_manual(self):
         try:
             value = int(self._view.set_expo_level_lineEdit.text())
-            self.camera.cap.ExposureTime.set(value)
+            if isinstance(self.camera.cap, gxiapi.U3VDevice):
+                self.camera.cap.ExposureTime.set(value)
+            elif isinstance(self.camera.cap, cv2.VideoCapture):
+                print("y")
+                self.camera.cap.set(cv2.CAP_PROP_EXPOSURE, value)
         except ValueError:
             print("Значение не int")
 
@@ -188,11 +201,23 @@ class CameraSettings_updateValuesThread(QThread):
 
     def run(self):
         while self._run_flag:
-            expo_level = self.camera.ExposureTime.get()
-            self.new_expo_level.emit(expo_level)
-            FPS_rate = self.camera.CurrentAcquisitionFrameRate.get()
-            self.new_framerate.emit(FPS_rate)
-            time.sleep(1)
+            if isinstance(self.camera, gxiapi.U3VDevice):
+                expo_level = self.camera.ExposureTime.get()
+                self.new_expo_level.emit(expo_level)
+                FPS_rate = self.camera.CurrentAcquisitionFrameRate.get()
+                self.new_framerate.emit(FPS_rate)
+                time.sleep(1)
+            elif isinstance(self.camera, cv2.VideoCapture):
+                auto_exp = self.camera.get(cv2.CAP_PROP_AUTO_EXPOSURE)
+                if auto_exp == 3.0:
+                    self.new_expo_level.emit(0)
+                else:
+                    expo_level = self.camera.get(cv2.CAP_PROP_EXPOSURE)
+                    self.new_expo_level.emit(expo_level)
+                FPS_rate = self.camera.get(cv2.CAP_PROP_FPS)
+                self.new_framerate.emit(FPS_rate)
+                time.sleep(1)
+                
     
     def stop(self):
         """Sets run flag to False and waits for thread to finish"""
